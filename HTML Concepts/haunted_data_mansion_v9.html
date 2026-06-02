@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haunted Data Mansion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:'Cinzel',serif;color:#eee;cursor:none}
+#c{display:block;width:100vw;height:100vh}
+
+/* ── LOADING ─────────────────────────────────── */
+#loading{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 60%,#1a0510 0%,#000 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:900;transition:opacity .5s}
+.ld-crest{font-size:52px;margin-bottom:22px;animation:ldPulse 2s ease-in-out infinite;filter:drop-shadow(0 0 18px #8b6914)}
+.ld-title{font-family:'Cinzel Decorative';font-size:clamp(18px,3.5vw,46px);color:#c8a84b;
+  letter-spacing:6px;text-shadow:0 0 30px #8b6914,0 0 60px #5a3d0a;margin-bottom:8px}
+.ld-rule{width:280px;height:1px;background:linear-gradient(90deg,transparent,#8b6914,transparent);margin:16px auto}
+.ld-sub{color:#6a3d9e;font-size:12px;letter-spacing:8px;margin-bottom:50px;opacity:.7;text-align:center;transition:all .4s}
+.ld-bar-bg{width:340px;height:2px;background:rgba(139,105,20,.18)}
+.ld-bar{height:100%;width:0%;background:linear-gradient(90deg,#5a2a08,#c8a84b,#5a2a08);transition:width .12s}
+.ld-msg{color:rgba(200,168,75,.4);font-size:10px;letter-spacing:4px;margin-top:18px;min-height:16px;text-align:center}
+@keyframes ldPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+
+/* ── INSTRUCTIONS ────────────────────────────── */
+#instructions{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 40%,#140820 0%,#000 100%);z-index:850;overflow-y:auto;padding:20px}
+.ins-card{width:min(720px,95vw);border:1px solid rgba(139,105,20,.5);background:rgba(10,4,22,.92);
+  padding:32px 36px;position:relative}
+.ins-card::before,.ins-card::after{content:'';position:absolute;width:18px;height:18px;border-color:#8b6914;border-style:solid}
+.ins-card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.ins-card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.ins-header{font-family:'Cinzel Decorative';font-size:clamp(14px,2.8vw,28px);color:#c8a84b;
+  text-align:center;letter-spacing:4px;margin-bottom:6px;text-shadow:0 0 20px #8b6914}
+.ins-sub{color:rgba(155,89,182,.7);font-size:11px;letter-spacing:6px;text-align:center;margin-bottom:22px}
+.ins-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(139,105,20,.55),transparent);margin:16px 0}
+.ins-section{margin-bottom:18px}
+.ins-section-title{color:#9b59b6;font-size:10px;letter-spacing:6px;margin-bottom:12px;opacity:.8}
+.ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ins-key{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.key-badge{font-family:'Cinzel';font-size:10px;color:#c8a84b;border:1px solid rgba(139,105,20,.6);
+  padding:4px 8px;background:rgba(139,105,20,.1);white-space:nowrap;min-width:65px;text-align:center;letter-spacing:1px}
+.key-desc{color:#d4c5e8;font-size:11px;letter-spacing:1px}
+.ins-lore{color:rgba(200,168,75,.5);font-size:11px;line-height:1.9;text-align:center;font-style:italic;margin:18px 0}
+.ins-threats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:18px}
+.threat-card{border:1px solid rgba(255,255,255,.06);padding:8px 10px;background:rgba(0,0,0,.3)}
+.threat-icon{font-size:18px;margin-bottom:3px}
+.threat-name{color:#c8a84b;font-size:9px;letter-spacing:2px;margin-bottom:2px}
+.threat-desc{color:rgba(200,190,220,.55);font-size:9px;line-height:1.5}
+.ins-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.tool-card{border:1px solid rgba(0,200,150,.2);padding:8px 10px;background:rgba(0,100,80,.12)}
+.tool-icon{font-size:16px;margin-bottom:3px}
+.tool-name{color:#44ffcc;font-size:9px;letter-spacing:2px;margin-bottom:2px}
+.tool-desc{color:rgba(180,240,220,.55);font-size:9px;line-height:1.5}
+.ins-btn{display:block;width:100%;font-family:'Cinzel';font-size:13px;color:#c8a84b;
+  border:1px solid #8b6914;padding:14px;background:rgba(139,105,20,.14);cursor:pointer;
+  letter-spacing:6px;text-transform:uppercase;transition:all .3s;margin-top:8px;text-align:center}
+.ins-btn:hover{background:rgba(139,105,20,.38);box-shadow:0 0 20px rgba(200,168,75,.2)}
+.ins-count{color:rgba(155,89,182,.4);font-size:10px;letter-spacing:4px;text-align:center;margin-top:14px}
+
+/* ── DIFFICULTY SELECTOR ───────────────────── */
+.diff-row{display:flex;gap:10px;justify-content:center;margin:14px 0}
+.diff-btn{font-family:'Cinzel';font-size:10px;padding:10px 18px;border:1px solid rgba(139,105,20,.45);
+  background:rgba(139,105,20,.1);color:#c8a84b;cursor:pointer;letter-spacing:3px;transition:all .3s;flex:1;text-align:center}
+.diff-btn:hover{background:rgba(139,105,20,.3)}
+.diff-btn.selected{background:rgba(139,105,20,.4);border-color:#c8a84b;box-shadow:0 0 12px rgba(200,168,75,.2)}
+.diff-label{color:rgba(155,89,182,.5);font-size:8px;letter-spacing:3px;text-align:center;margin-bottom:4px}
+.diff-detail{color:rgba(200,190,220,.4);font-size:8px;margin-top:4px}
+
+/* ── HUD ─────────────────────────────────────── */
+#hud{position:fixed;inset:0;pointer-events:none;display:none}
+#hp-wrap{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px}
+#hp-label{font-size:9px;letter-spacing:5px;color:rgba(200,168,75,.5)}
+#hp-bg{width:260px;height:10px;background:rgba(0,0,0,.7);border:1px solid rgba(90,48,16,.7);overflow:hidden}
+#hp-fill{height:100%;width:100%;background:linear-gradient(90deg,#6b0000,#ee2020,#ff6600);transition:width .3s}
+#score{position:absolute;top:20px;right:24px;color:#c8a84b;font-family:'Cinzel Decorative';font-size:12px;
+  text-shadow:0 0 8px #8b6914;letter-spacing:1px;opacity:.85}
+#level-display{position:absolute;top:42px;right:24px;color:rgba(155,89,182,.6);font-size:10px;letter-spacing:2px}
+#zone-name{position:absolute;top:20px;left:24px;color:rgba(155,89,182,.7);font-size:11px;
+  letter-spacing:3px;transition:opacity .8s}
+#tool-display{position:absolute;bottom:90px;right:24px;display:flex;flex-direction:column;gap:6px;pointer-events:all}
+.tool-hud-item{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 9px;
+  border:1px solid rgba(68,255,204,.25);background:rgba(0,80,60,.3);transition:all .3s;user-select:none}
+.tool-hud-item.active{border-color:rgba(68,255,204,.8);background:rgba(0,150,110,.4);
+  box-shadow:0 0 12px rgba(68,255,204,.3)}
+.tool-hud-item.on-cooldown{opacity:.4}
+.tool-icon-hud{font-size:16px}
+.tool-name-hud{font-size:8px;letter-spacing:2px;color:#44ffcc}
+.tool-key{font-size:7px;color:rgba(68,255,204,.5);letter-spacing:1px}
+#ctrl-hint{position:absolute;bottom:22px;right:24px;color:rgba(155,89,182,.38);font-size:8px;
+  letter-spacing:2px;text-align:right;line-height:2.1}
+#xhair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.55}
+#xhair::before,#xhair::after{content:'';position:absolute;background:rgba(255,220,120,.7)}
+#xhair::before{width:1px;height:18px;left:8.5px;top:0}#xhair::after{width:18px;height:1px;left:0;top:8.5px}
+#vignette{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.9) 100%);
+  pointer-events:none;z-index:1}
+
+/* ── COMPASS ──────────────────────────────────── */
+#compass{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  font-size:11px;color:#c8a84b;letter-spacing:3px;opacity:.7;pointer-events:none;z-index:10;
+  text-shadow:0 0 8px #8b6914}
+
+/* ── KNOWLEDGE FLASH ──────────────────────────── */
+#knowledge-flash{position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Cinzel Decorative';font-size:clamp(14px,2.2vw,22px);color:#44ffcc;
+  letter-spacing:4px;text-align:center;pointer-events:none;opacity:0;
+  text-shadow:0 0 30px #44ffcc,0 0 60px #00aa88;transition:opacity .4s;z-index:25;white-space:nowrap}
+
+/* ── FLOATING TIP ─────────────────────────────── */
+#float-tip{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);
+  font-size:12px;color:#ffcc44;letter-spacing:2px;text-align:center;pointer-events:none;opacity:0;
+  text-shadow:0 0 15px #ffaa00;transition:opacity .5s;z-index:24;max-width:500px}
+
+/* ── NARRATOR ───────────────────────────────── */
+#narrator{position:fixed;bottom:140px;left:50%;transform:translateX(-50%);
+  width:min(560px,92vw);display:flex;align-items:flex-start;gap:14px;
+  background:linear-gradient(160deg,rgba(20,8,35,.96),rgba(8,4,18,.98));
+  border:1px solid rgba(139,105,20,.45);padding:16px 18px;z-index:60;
+  pointer-events:none;opacity:0;transition:opacity .6s;
+  box-shadow:0 0 40px rgba(100,30,80,.3)}
+#narrator-icon{font-size:32px;filter:drop-shadow(0 0 8px rgba(200,168,75,.6));flex-shrink:0;
+  animation:narratorFloat 3s ease-in-out infinite}
+@keyframes narratorFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#narrator-body{display:flex;flex-direction:column;gap:4px}
+#narrator-name{font-family:'Cinzel Decorative';font-size:9px;color:#c8a84b;letter-spacing:4px}
+#narrator-text{color:#d4c5e8;font-size:12px;line-height:1.8;letter-spacing:.5px}
+#narrator.visible{opacity:1}
+
+/* ── VPN LANTERN EFFECT ─────────────────────── */
+#vpn-shield{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;z-index:3;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,100,80,.18) 70%,rgba(0,60,50,.4) 100%);
+  border:3px solid rgba(68,255,204,0);box-shadow:inset 0 0 60px rgba(0,200,150,.1)}
+#vpn-shield.active{opacity:1;border-color:rgba(68,255,204,.15)}
+#vpn-text{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:10px;letter-spacing:4px;color:rgba(68,255,204,.6);pointer-events:none;
+  opacity:0;transition:opacity .3s;z-index:4}
+#vpn-text.active{opacity:1}
+
+/* ── AD BLOCKER SHIELD ─────────────────────── */
+#adblocker-overlay{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;z-index:3}
+#adblocker-overlay.active{opacity:1}
+.ad-block-bar{position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,transparent,rgba(255,180,0,.8),transparent);animation:scanBar 1.2s linear infinite}
+@keyframes scanBar{from{transform:translateY(0)}to{transform:translateY(100vh)}}
+
+/* ── PASSWORD SHIELD EFFECT ───────────────── */
+#password-overlay{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;z-index:3;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,80,200,.12) 70%,rgba(0,40,120,.3) 100%);
+  border:3px solid rgba(100,180,255,0)}
+#password-overlay.active{opacity:1;border-color:rgba(100,180,255,.2)}
+
+/* ── BACKUP KEY EFFECT ────────────────────── */
+#backup-overlay{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;z-index:3;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,200,100,.1) 70%,rgba(0,120,60,.25) 100%);
+  border:3px solid rgba(100,255,150,0)}
+#backup-overlay.active{opacity:1;border-color:rgba(100,255,150,.2)}
+
+/* ── ZONE FLASH ─────────────────────────────── */
+#zone-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Cinzel Decorative';font-size:clamp(14px,2.5vw,26px);color:#c8a84b;
+  letter-spacing:6px;text-align:center;pointer-events:none;opacity:0;
+  text-shadow:0 0 30px #8b6914;transition:opacity .6s;z-index:20;white-space:nowrap}
+#zone-hint{position:fixed;top:56%;left:50%;transform:translate(-50%,-50%);
+  font-size:11px;color:rgba(200,168,75,.6);letter-spacing:2px;text-align:center;pointer-events:none;opacity:0;
+  transition:opacity .6s;z-index:20;font-style:italic;max-width:500px}
+
+/* ── POPUP ──────────────────────────────────── */
+#popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);
+  background:linear-gradient(160deg,#130920,#080414);border:1px solid rgba(139,105,20,.55);
+  padding:32px 28px;z-index:600;display:none;max-height:90vh;overflow-y:auto;
+  box-shadow:0 0 80px rgba(100,30,80,.4),inset 0 0 40px rgba(0,0,0,.6)}
+.popup-corner{position:absolute;width:14px;height:14px;border-color:#8b6914;border-style:solid}
+.popup-corner.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.popup-corner.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.popup-corner.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.popup-corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+#popup-icon{font-size:44px;text-align:center;margin-bottom:10px;display:block;
+  filter:drop-shadow(0 0 14px rgba(255,200,0,.6))}
+#popup-title{font-family:'Cinzel Decorative';font-size:16px;color:#c8a84b;text-align:center;
+  margin-bottom:14px;text-shadow:0 0 12px #8b6914;letter-spacing:2px}
+#popup-body{color:#d4c5e8;font-size:12px;line-height:1.85;text-align:center;margin-bottom:14px;opacity:.9}
+#popup-tip{background:rgba(68,255,204,.08);border-left:2px solid rgba(68,255,204,.5);
+  padding:10px 14px;color:#44ffcc;font-size:11px;line-height:1.7;margin-bottom:18px;opacity:.85}
+#popup-lore{background:rgba(139,105,20,.1);border-left:2px solid rgba(139,105,20,.4);
+  padding:8px 12px;color:rgba(200,168,75,.7);font-size:10px;line-height:1.7;margin-bottom:12px;font-style:italic}
+#popup-close{display:block;width:100%;font-family:'Cinzel';font-size:11px;color:#c8a84b;
+  border:1px solid rgba(139,105,20,.5);padding:10px;background:rgba(139,105,20,.14);cursor:pointer;
+  letter-spacing:5px;transition:all .25s;pointer-events:all}
+#popup-close:hover{background:rgba(139,105,20,.4)}
+
+/* ── QUIZ ──────────────────────────────────── */
+#quiz{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(500px,92vw);
+  background:linear-gradient(160deg,#0a1420,#040810);border:1px solid rgba(68,255,204,.4);
+  padding:28px 24px;z-index:620;display:none;max-height:85vh;overflow-y:auto;
+  box-shadow:0 0 60px rgba(0,100,80,.3),inset 0 0 30px rgba(0,0,0,.5)}
+#quiz-header{font-family:'Cinzel Decorative';font-size:14px;color:#44ffcc;text-align:center;
+  margin-bottom:6px;letter-spacing:3px;text-shadow:0 0 12px #00aa88}
+#quiz-progress{color:rgba(68,255,204,.5);font-size:9px;letter-spacing:4px;text-align:center;margin-bottom:16px}
+#quiz-question{color:#d4c5e8;font-size:13px;line-height:1.8;text-align:center;margin-bottom:18px}
+.quiz-option{display:block;width:100%;font-family:'Cinzel';font-size:11px;color:#eee;
+  border:1px solid rgba(68,255,204,.3);padding:10px 14px;background:rgba(0,80,60,.15);cursor:pointer;
+  letter-spacing:2px;transition:all .25s;margin-bottom:8px;text-align:left;pointer-events:all}
+.quiz-option:hover{background:rgba(0,120,90,.3);border-color:rgba(68,255,204,.6)}
+.quiz-option.correct{background:rgba(0,180,80,.4);border-color:#44ff88;color:#fff}
+.quiz-option.wrong{background:rgba(180,0,0,.4);border-color:#ff4444;color:#ff8888}
+#quiz-feedback{color:#44ffcc;font-size:13px;text-align:center;margin-top:12px;min-height:24px;
+  letter-spacing:2px;font-weight:bold}
+
+/* ── DAMAGE / EFFECTS ───────────────────────── */
+#dmg{position:fixed;inset:0;background:rgba(200,0,0,.28);pointer-events:none;opacity:0;transition:opacity .07s;z-index:50}
+#trans{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:700}
+
+/* ── VHS GLITCH ──────────────────────────────── */
+#vhs-glitch{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2;mix-blend-mode:screen}
+#vhs-glitch.active{opacity:1}
+.vhs-line{position:absolute;left:0;right:0;height:2px;background:rgba(0,255,100,.06);animation:vhsDrift 3s linear infinite}
+.vhs-line:nth-child(2){animation-delay:.8s;background:rgba(255,0,100,.04);height:1px}
+.vhs-line:nth-child(3){animation-delay:1.6s;background:rgba(0,100,255,.05)}
+@keyframes vhsDrift{0%{top:-2px}100%{top:100vh}}
+#scanlines{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.03;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,1) 2px,rgba(0,0,0,1) 4px)}
+#chromab{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:2;transition:opacity .3s;
+  background:rgba(255,0,100,.03);transform:translateX(2px)}
+#chromab.active{opacity:1}
+
+/* ── TOOL / APPROACH HINT ──────────────────── */
+#approach-hint{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);
+  color:rgba(200,168,75,.75);font-size:11px;letter-spacing:4px;pointer-events:none;opacity:0;
+  transition:opacity .5s;text-shadow:0 0 10px #8b6914;z-index:10}
+#tool-flash{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Cinzel';font-size:clamp(12px,2vw,20px);letter-spacing:4px;
+  pointer-events:none;opacity:0;text-align:center;z-index:25;transition:opacity .3s}
+
+/* ── PAUSE MENU ─────────────────────────────── */
+#pause-menu{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.88);z-index:750;backdrop-filter:blur(4px)}
+#pause-title{font-family:'Cinzel Decorative';font-size:clamp(18px,3vw,32px);color:#c8a84b;
+  letter-spacing:6px;margin-bottom:8px;text-shadow:0 0 20px #8b6914}
+#pause-sub{color:rgba(155,89,182,.5);font-size:10px;letter-spacing:5px;margin-bottom:32px}
+.pause-btn{display:block;width:260px;font-family:'Cinzel';font-size:12px;color:#c8a84b;
+  border:1px solid rgba(139,105,20,.5);padding:12px;background:rgba(139,105,20,.12);cursor:pointer;
+  letter-spacing:4px;text-align:center;transition:all .3s;margin-bottom:10px}
+.pause-btn:hover{background:rgba(139,105,20,.35);box-shadow:0 0 16px rgba(200,168,75,.15)}
+#journal-content{width:min(520px,90vw);max-height:50vh;overflow-y:auto;margin-top:18px;display:none;
+  border:1px solid rgba(139,105,20,.3);padding:18px;background:rgba(10,4,22,.9)}
+.journal-entry{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(139,105,20,.15)}
+.journal-icon{font-size:18px;margin-bottom:2px}
+.journal-title{font-family:'Cinzel';font-size:11px;color:#c8a84b;letter-spacing:2px;margin-bottom:4px}
+.journal-text{color:rgba(200,190,220,.7);font-size:10px;line-height:1.7}
+
+/* ── END SCREEN ─────────────────────────────── */
+#end{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.92);z-index:800;overflow-y:auto;padding:30px}
+.end-title{font-family:'Cinzel Decorative';font-size:clamp(28px,5vw,66px);margin-bottom:22px;
+  text-shadow:0 0 40px currentColor;animation:tPulse 3s ease-in-out infinite}
+.end-win{color:#c8a84b}.end-lose{color:#aa1800}
+.end-msg{color:#d4c5e8;font-size:14px;margin-bottom:48px;text-align:center;max-width:520px;line-height:1.9;opacity:.85}
+.end-btn{font-family:'Cinzel';font-size:14px;color:#c8a84b;border:1px solid #8b6914;
+  padding:13px 48px;background:rgba(139,105,20,.14);cursor:pointer;letter-spacing:5px;transition:all .3s}
+.end-btn:hover{background:rgba(139,105,20,.45)}
+@keyframes tPulse{0%,100%{text-shadow:0 0 20px currentColor}50%{text-shadow:0 0 60px currentColor,0 0 120px currentColor}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="ld-crest" id="ld-crest">👁️</div>
+  <div class="ld-title" id="ld-title">HAUNTED DATA MANSION</div>
+  <div class="ld-rule"></div>
+  <div class="ld-sub" id="ld-sub">A DIGITAL PRIVACY EXPERIENCE</div>
+  <div class="ld-bar-bg"><div class="ld-bar" id="ld-bar"></div></div>
+  <div class="ld-msg" id="ld-msg">AWAKENING THE SPIRITS...</div>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions" style="display:none">
+  <div class="ins-card">
+    <div class="ins-header">WELCOME, YOUNG INVESTIGATOR</div>
+    <div class="ins-sub">THIS MANSION IS HAUNTED BY DIGITAL PREDATORS</div>
+    <div class="ins-divider"></div>
+    <div class="ins-section">
+      <div class="ins-section-title">— YOUR CONTROLS —</div>
+      <div class="ins-grid">
+        <div>
+          <div class="ins-key"><span class="key-badge">W A S D</span><span class="key-desc">Move through the mansion</span></div>
+          <div class="ins-key"><span class="key-badge">← → ARROWS</span><span class="key-desc">Look left and right</span></div>
+          <div class="ins-key"><span class="key-badge">↑ ↓ ARROWS</span><span class="key-desc">Look up and down</span></div>
+        </div>
+        <div>
+          <div class="ins-key"><span class="key-badge">E</span><span class="key-desc">VPN Lantern — defeats the Tracker</span></div>
+          <div class="ins-key"><span class="key-badge">F</span><span class="key-desc">Password Shield — defeats the Specter</span></div>
+          <div class="ins-key"><span class="key-badge">Q</span><span class="key-desc">Ad-Blocker — defeats the Gargoyle</span></div>
+          <div class="ins-key"><span class="key-badge">R</span><span class="key-desc">Backup Key — defeats the Poltergeist</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ins-divider"></div>
+    <div class="ins-section">
+      <div class="ins-section-title">— YOUR PRIVACY TOOLS —</div>
+      <div class="ins-tools">
+        <div class="tool-card"><div class="tool-icon">🏮</div><div class="tool-name">VPN LANTERN  [E]</div><div class="tool-desc">Cloaks your signal. Defeats the Phantom Tracker. 8 sec cooldown.</div></div>
+        <div class="tool-card"><div class="tool-icon">🔐</div><div class="tool-name">PASSWORD SHIELD  [F]</div><div class="tool-desc">Strong-password energy. Defeats the Phishing Specter. 10 sec cooldown.</div></div>
+        <div class="tool-card"><div class="tool-icon">🛡️</div><div class="tool-name">AD-BLOCKER SHIELD  [Q]</div><div class="tool-desc">Blocks ads and defeats the Data Broker Gargoyle. 6 sec cooldown.</div></div>
+        <div class="tool-card"><div class="tool-icon">💾</div><div class="tool-name">BACKUP KEY  [R]</div><div class="tool-desc">Safe backup pulse. Defeats the Ransomware Poltergeist. 12 sec cooldown.</div></div>
+      </div>
+    </div>
+    <div class="ins-divider"></div>
+    <div class="ins-section">
+      <div class="ins-section-title">— THE MANSION'S DARK ENTITIES —</div>
+      <div class="ins-threats">
+        <div class="threat-card"><div class="threat-icon">👁️</div><div class="threat-name">PHANTOM TRACKER</div><div class="threat-desc">Follows your every move. Defeat with VPN Lantern [E].</div></div>
+        <div class="threat-card"><div class="threat-icon">🎭</div><div class="threat-name">PHISHING SPECTER</div><div class="threat-desc">Creates fake login screens. Defeat with Password Shield [F].</div></div>
+        <div class="threat-card"><div class="threat-icon">🗿</div><div class="threat-name">DATA BROKER GARGOYLE</div><div class="threat-desc">Shoots targeted ads. Defeat with Ad-Blocker [Q].</div></div>
+        <div class="threat-card"><div class="threat-icon">💀</div><div class="threat-name">RANSOMWARE POLTERGEIST</div><div class="threat-desc">Encrypts your vision. Defeat with Backup Key [R].</div></div>
+      </div>
+    </div>
+    <div class="ins-lore">
+      "Five haunted floors await you. Each holds a forbidden privacy secret.<br>
+      Learn the dark arts. Defeat the ghosts. Answer the quizzes.<br>
+      Reach the Attic and escape through the Final Door."
+    </div>
+    <div class="ins-divider"></div>
+    <div class="ins-section">
+      <div class="ins-section-title">— CHOOSE YOUR DIFFICULTY —</div>
+      <div class="diff-label">PICK THE CHALLENGE THAT FITS YOU</div>
+      <div class="diff-row">
+        <div class="diff-btn selected" id="diff-explorer" onclick="setDifficulty('explorer')">🕯️ EXPLORER<br><span class="diff-detail">Slower ghosts · More health · Longer tools</span></div>
+        <div class="diff-btn" id="diff-investigator" onclick="setDifficulty('investigator')">🔍 INVESTIGATOR<br><span class="diff-detail">Standard challenge · Balanced gameplay</span></div>
+      </div>
+    </div>
+    <button class="ins-btn" id="ins-btn">ENTER THE MANSION</button>
+    <div class="ins-count">5 LEVELS · 4 PRIVACY SECRETS · 1 FINAL ESCAPE</div>
+  </div>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="hp-wrap"><div id="hp-label">SOUL ENERGY</div><div id="hp-bg"><div id="hp-fill"></div></div></div>
+  <div id="score"></div>
+  <div id="level-display"></div>
+  <div id="zone-name"></div>
+  <div id="compass">▲ OBJECTIVE</div>
+  <div id="tool-display">
+    <div class="tool-hud-item" id="vpn-btn" onclick="activateTool('vpn')" title="VPN Lantern [E]"><span class="tool-icon-hud">🏮</span><div><div class="tool-name-hud">VPN LANTERN</div><div class="tool-key">[E]</div></div></div>
+    <div class="tool-hud-item" id="password-btn" onclick="activateTool('password')" title="Password Shield [F]"><span class="tool-icon-hud">🔐</span><div><div class="tool-name-hud">PASSWORD</div><div class="tool-key">[F]</div></div></div>
+    <div class="tool-hud-item" id="shield-btn" onclick="activateTool('shield')" title="Ad-Blocker [Q]"><span class="tool-icon-hud">🛡️</span><div><div class="tool-name-hud">AD-BLOCKER</div><div class="tool-key">[Q]</div></div></div>
+    <div class="tool-hud-item" id="backup-btn" onclick="activateTool('backup')" title="Backup Key [R]"><span class="tool-icon-hud">💾</span><div><div class="tool-name-hud">BACKUP KEY</div><div class="tool-key">[R]</div></div></div>
+  </div>
+  <div id="ctrl-hint">W A S D · MOVE<br>ARROWS · LOOK<br>E · VPN  F · PASSWORD<br>Q · AD-BLOCK  R · BACKUP<br>ESC · PAUSE</div>
+  <div id="xhair"></div>
+</div>
+<div id="vignette"></div>
+<div id="zone-flash"></div>
+<div id="zone-hint"></div>
+<div id="approach-hint"></div>
+<div id="tool-flash"></div>
+<div id="knowledge-flash"></div>
+<div id="float-tip"></div>
+
+<!-- NARRATOR -->
+<div id="narrator">
+  <div id="narrator-icon">🕯️</div>
+  <div id="narrator-body"><div id="narrator-name">THE KEEPER</div><div id="narrator-text"></div></div>
+</div>
+
+<!-- PAUSE MENU -->
+<div id="pause-menu">
+  <div id="pause-title">PAUSED</div>
+  <div id="pause-sub">THE MANSION WAITS...</div>
+  <button class="pause-btn" id="resume-btn">RESUME</button>
+  <button class="pause-btn" id="journal-btn">KNOWLEDGE JOURNAL</button>
+  <button class="pause-btn" onclick="location.reload()">RESTART</button>
+  <div id="journal-content"></div>
+</div>
+
+<!-- VHS/Glitch effects -->
+<div id="vhs-glitch"><div class="vhs-line"></div><div class="vhs-line"></div><div class="vhs-line"></div></div>
+<div id="scanlines"></div>
+<div id="chromab"></div>
+
+<!-- Tool overlays -->
+<div id="vpn-shield"><div id="vpn-text">▸ VPN ACTIVE — PHANTOM TRACKER BLINDED ◂</div></div>
+<div id="adblocker-overlay"></div>
+<div id="password-overlay"></div>
+<div id="backup-overlay"></div>
+
+<div id="popup">
+  <div class="popup-corner tl"></div><div class="popup-corner tr"></div>
+  <div class="popup-corner bl"></div><div class="popup-corner br"></div>
+  <span id="popup-icon">⚠️</span>
+  <div id="popup-title">WARNING</div>
+  <div id="popup-lore"></div>
+  <div id="popup-body"></div>
+  <div id="popup-tip"></div>
+  <button id="popup-close">KNOWLEDGE ABSORBED · TAKE THE QUIZ</button>
+</div>
+
+<div id="quiz">
+  <div id="quiz-header">KNOWLEDGE CHECK</div>
+  <div id="quiz-progress">QUESTION 1 / 2</div>
+  <div id="quiz-question"></div>
+  <div id="quiz-options"></div>
+  <div id="quiz-feedback"></div>
+</div>
+
+<div id="dmg"></div>
+<div id="trans"></div>
+<div id="end">
+  <div class="end-title" id="end-title">ESCAPED</div>
+  <div class="end-msg" id="end-msg"></div>
+  <button class="end-btn" onclick="location.reload()">RETURN TO THE MANSION</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  HAUNTED DATA MANSION  v8 — Level-Based Architecture
+//  5 distinct levels, each with unique maze, enemies, atmosphere
+//  Full disposal between levels for optimal memory usage
+// ═══════════════════════════════════════════════════════════════
+
+const CELL=3.2, WH=4.4, PH=1.72;
+const LOOK_SPD=0.038;
+
+// ── DIFFICULTY ───────────────────────────────────────────────
+const DIFFICULTIES={
+  explorer:{pspeed:0.095,espeed:0.016,startHP:100,pickupHP:45,enemyDmgMult:0.7,toolDurMult:1.5,cooldownMult:.7,respawnTime:20,counterRange:4,label:'Explorer'},
+  investigator:{pspeed:0.095,espeed:0.022,startHP:100,pickupHP:35,enemyDmgMult:1,toolDurMult:1,cooldownMult:1,respawnTime:15,counterRange:3,label:'Investigator'}
+};
+let currentDifficulty='explorer';
+function getDiff(){return DIFFICULTIES[currentDifficulty];}
+function setDifficulty(d){currentDifficulty=d;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('diff-'+d).classList.add('selected');}
+
+// ═══════════════════════════════════════════════════════════════
+//  MAZE DATA — 5 levels
+// ═══════════════════════════════════════════════════════════════
+const MAZE_FOYER=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,1,1,0,0,0,1,1,1,1,1,1,1,0,1,1],
+[1,0,1,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,0,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,1],
+[1,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,1],
+[1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,0,0,8,0,1,1,0,1,0,1,0,1,0,1,1],
+[1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,1],
+[1,0,1,0,1,0,0,0,0,0,0,0,0,1,1,0,1,0,0,1,1,1,1,0,1,0,1,0,1,1],
+[1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,1,1],
+[1,0,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,1],
+[1,0,0,0,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,0,0,0,1,0,1,1],
+[1,0,0,0,1,0,0,0,1,0,0,0,1,8,1,0,0,0,0,0,0,0,0,0,0,0,8,0,1,1],
+[1,1,0,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,1,0,0,0,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1],
+[1,0,0,8,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,2,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1],
+[1,0,0,8,1,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,1],
+[1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,1],
+[1,0,0,0,1,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,1,1,1],
+[1,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,1,1],
+[1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,9,0,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MAZE_LIBRARY=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,1,1,1,1,0,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1],
+[1,0,1,0,1,0,1,0,1,0,0,3,1,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1,1,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1],
+[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,1,0,0,0,0,0,1,1,0,0,1,0,1,0,1,0,1,1,1,0,0,0,0,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1],
+[1,0,1,0,1,0,1,0,1,1,0,0,1,1,1,0,1,1,1,0,1,0,0,0,1,0,1,1,1,1,1,1],
+[1,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,1,0,1,1,1,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,1,1,1,1,0,1,1],
+[1,0,1,0,0,0,1,0,1,0,0,0,0,0,8,0,0,0,0,0,1,0,0,0,1,0,0,8,0,0,1,1],
+[1,0,1,0,1,0,1,0,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,0,1,1],
+[1,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,8,0,1,0,1,0,1,1],
+[1,1,1,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,0,0,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,1],
+[1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,1,1],
+[1,0,1,1,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,1,1,1,0,0,1,0,1,0,1,1,1,1],
+[1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1],
+[1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,9,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MAZE_GRAVEYARD=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,9,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,0,0,0,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1],
+[1,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,8,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,4,1,0,0,0,0,0,0,0,1,0,0,0,1,1],
+[1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,1,1,0,0,0,0,0,0,1,1,0,1,0,1,1],
+[1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1,1],
+[1,0,1,0,1,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,0,0,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,0,1,0,1,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,0,0,0,0,0,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,1],
+[1,1,1,8,0,0,0,0,0,8,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MAZE_BALLROOM=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1],
+[1,0,0,0,0,0,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,0,0,1,8,1,0,1,1,1,0,8,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,1,1],
+[1,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,1],
+[1,1,1,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1],
+[1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,0,0,0,1,0,1,0,1,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1],
+[1,0,1,1,1,0,1,1,1,0,0,0,1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,1,1],
+[1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1],
+[1,0,1,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,1],
+[1,0,1,1,1,1,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,1,1,0,1,0,1,0,1,1],
+[1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1],
+[1,1,1,0,1,0,1,1,1,1,0,0,1,1,1,8,1,1,0,0,1,1,1,0,1,1,1,1,1,1],
+[1,0,0,0,1,0,0,0,0,8,0,0,1,0,0,0,0,0,0,0,5,0,1,0,0,0,0,0,1,1],
+[1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,0,1,0,1,1,1,1,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,1],
+[1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,9,0,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MAZE_ATTIC=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,1,1,0,1,0,1,1,1,0,0,0,9,0,1,0,1,1,1,1,1,0,1,1],
+[1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1],
+[1,0,1,1,0,0,0,0,1,0,1,0,0,1,1,1,0,0,0,0,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,1],
+[1,0,1,1,1,1,1,0,1,1,1,0,0,0,1,0,1,0,1,1,1,0,1,1],
+[1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,1],
+[1,0,1,0,1,0,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,1,0,1,0,0,0,0,0,8,0,0,0,1,0,0,0,1,0,1,1],
+[1,0,1,1,1,0,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,1,1],
+[1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,1],
+[1,0,1,0,0,0,8,0,1,1,1,0,0,0,1,1,0,8,0,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1],
+[1,0,1,1,0,0,0,0,1,0,1,0,0,1,1,0,0,0,0,0,1,1,1,1],
+[1,0,0,0,0,0,0,0,1,0,1,0,0,8,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,0,1,1],
+[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1],
+[1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  LEVEL CONFIGURATION
+// ═══════════════════════════════════════════════════════════════
+const LEVELS=[
+  {id:0,name:'THE GRAND FOYER',maze:MAZE_FOYER,portalType:2,enemyType:'phantom',
+   fogColor:0x0a0408,fogDensity:.035,clearColor:0x04020a,ambientColor:0x281418,ambientI:.1,
+   loadIcon:'👁️',loadTitle:'THE GRAND FOYER',
+   loadMsgs:['LIGHTING THE CURSED CANDELABRAS...','HANGING THE WATCHING PORTRAITS...','POLISHING THE PHANTOM\'S EYE...','THE FOYER MATERIALIZES...'],
+   hint:'The entrance hall. Your VPN Lantern [E] can blind the Phantom Tracker.',
+   startCol:2,startRow:2,outdoor:false},
+  {id:1,name:'THE HAUNTED LIBRARY',maze:MAZE_LIBRARY,portalType:3,enemyType:'phishing',
+   fogColor:0x080a06,fogDensity:.045,clearColor:0x040604,ambientColor:0x1a1408,ambientI:.06,
+   loadIcon:'🎭',loadTitle:'THE HAUNTED LIBRARY',
+   loadMsgs:['SHELVING THE FORBIDDEN TOMES...','AWAKENING THE PHISHING SPECTER...','SETTING THE READING ROOM TRAPS...','KNOWLEDGE AWAITS THE BRAVE...'],
+   hint:'Narrow book-lined corridors. Use your Password Shield [F] against the Phishing Specter.',
+   startCol:3,startRow:2,outdoor:false},
+  {id:2,name:'THE DATA GRAVEYARD',maze:MAZE_GRAVEYARD,portalType:4,enemyType:'gargoyle',
+   fogColor:0x081018,fogDensity:.025,clearColor:0x040810,ambientColor:0x0c1824,ambientI:.14,
+   loadIcon:'🗿',loadTitle:'THE DATA GRAVEYARD',
+   loadMsgs:['UNEARTHING THE BURIED DATA...','WAKING THE STONE GARGOYLES...','THE MOON RISES OVER THE GRAVES...','YOUR INFORMATION RESTS HERE...'],
+   hint:'An outdoor cemetery of buried data. The Ad-Blocker [Q] defeats the Gargoyles.',
+   startCol:4,startRow:25,outdoor:true},
+  {id:3,name:'THE SHADOW BALLROOM',maze:MAZE_BALLROOM,portalType:5,enemyType:'ransomware',
+   fogColor:0x0a0408,fogDensity:.038,clearColor:0x060208,ambientColor:0x140410,ambientI:.07,
+   loadIcon:'💀',loadTitle:'THE SHADOW BALLROOM',
+   loadMsgs:['DIMMING THE CHANDELIERS...','THE POLTERGEIST BEGINS TO DANCE...','ENCRYPTING THE DANCE FLOOR...','THE MUSIC HAS STOPPED...'],
+   hint:'The music has stopped, but danger dances on. Only your Backup Key [R] ends the chaos.',
+   startCol:3,startRow:2,outdoor:false},
+  {id:4,name:'THE HAUNTED ATTIC',maze:MAZE_ATTIC,portalType:null,enemyType:'mixed',
+   fogColor:0x06020f,fogDensity:.05,clearColor:0x02000a,ambientColor:0x0a0414,ambientI:.05,
+   loadIcon:'🔮',loadTitle:'THE HAUNTED ATTIC',
+   loadMsgs:['CLIMBING THE FINAL STAIRCASE...','ALL GHOSTS CONVERGE...','THE FINAL DOOR AWAITS...','PROVE YOUR KNOWLEDGE...'],
+   hint:'The final challenge. ALL enemy types roam here. Find the Final Door to escape!',
+   startCol:3,startRow:21,outdoor:false}
+];
+
+// ── EDUCATIONAL DATA ─────────────────────────────────────────
+const PORTALS_DATA={
+  2:{icon:'👁️',title:'THE PHANTOM TRACKER\'S CURSE',color:0x8800cc,emissive:0xaa00ff,lc:'#aa44ff',
+    lore:'"It sees through walls, through time, through every click you have ever made..."',
+    body:'Tracking cookies are like invisible spies hiding in your web browser. Every time you visit a website, they follow you and write down what you do — what games you play, what you search for, even what you almost bought. Companies called data brokers collect all this information and sell it to advertisers who use it to show you ads. That means strangers know a LOT about you, even though you never told them anything!',
+    tip:'🏮 DEFENSE: VPN LANTERN — A VPN is like an invisibility cloak for the internet. It hides where you are and scrambles what you do online so trackers can\'t follow you. You should also ask a parent or teacher to turn on privacy settings in your browser.'},
+  3:{icon:'🎭',title:'THE PHISHING SPECTER\'S ILLUSION',color:0x0044ff,emissive:0x0066ff,lc:'#4488ff',
+    lore:'"It wears a thousand faces — your school, your favorite game, even your best friend\'s name..."',
+    body:'Phishing is when a bad person makes a FAKE website or email that looks exactly like a real one. Imagine someone built a perfect copy of your school\'s login page — if you type your password there, the bad guys steal it! Phishing emails often try to scare you, like saying "Your account will be DELETED in 24 hours!" They want you to panic and click without thinking.',
+    tip:'🔐 DEFENSE: PASSWORD SHIELD — Before you type any password, always check the web address at the top of the screen. Real websites have a little padlock 🔒 and start with "https." If you get a scary email, DON\'T click any links. Instead, go to the real website yourself by typing the address. If something feels urgent and scary, it\'s probably a trick!'},
+  4:{icon:'🗿',title:'THE DATA BROKER GARGOYLE\'S HOARD',color:0x884400,emissive:0xdd6600,lc:'#ffaa44',
+    lore:'"Stone on the outside, hungry on the inside — it sells your secrets while you sleep..."',
+    body:'Data brokers are companies that sneak around collecting information about you — your name, your age, what school you go to, what apps you use, and where you hang out online. Then they package all this info together and SELL it to anyone who wants to pay for it. You never said they could do this, and most people don\'t even know it\'s happening!',
+    tip:'🛡️ DEFENSE: AD-BLOCKER — An ad blocker is a tool you add to your web browser that stops sneaky ads and blocks the hidden trackers that spy on what you do online. You can also check the privacy settings on your apps and turn on "Do Not Track." Always ask a trusted adult before downloading new apps.'},
+  5:{icon:'💀',title:'THE RANSOMWARE POLTERGEIST\'S TRAP',color:0xcc0000,emissive:0xff2200,lc:'#ff4444',
+    lore:'"It locks what you love most and demands a terrible price for its return..."',
+    body:'Ransomware is one of the scariest things on the internet. It sneaks onto your device through fake downloads or email attachments and then LOCKS all your files — your photos, your homework, your saved games, everything! Then it shows a message demanding money to unlock them. Even if you pay, there\'s no promise you\'ll get your stuff back.',
+    tip:'💾 DEFENSE: BACKUP KEY — Only download apps from official stores like the App Store or Google Play. Never open files attached to emails from strangers. The best protection? Back up your important files regularly to a safe place (like a thumb drive or cloud storage). That way, if ransomware locks your files, you already have copies! Also, always keep your device updated — updates fix the secret holes that ransomware sneaks through.'},
+};
+
+const QUIZ_DATA={
+  2:[
+    {q:'What do tracking cookies do?',opts:['Speed up your browser','Follow you across websites to learn your habits','Protect your passwords'],correct:1,
+      explain:'Tracking cookies are like invisible spies — they follow you from website to website and keep notes on everything you do.'},
+    {q:'What does a VPN do to protect you?',opts:['Blocks all ads on every website','Hides your location and scrambles your activity','Makes your internet faster'],correct:1,
+      explain:'A VPN hides where you are and scrambles your internet activity so trackers can\'t follow you.'}
+  ],
+  3:[
+    {q:'How can you tell if a website might be a phishing scam?',opts:['It has colorful pictures','The web address looks slightly wrong or misspelled','It loads slowly'],correct:1,
+      explain:'Phishing sites copy real websites but usually mess up the web address — like "g00gle.com" instead of "google.com."'},
+    {q:'What should you do if an email says "Your account will be deleted in 24 hours"?',opts:['Click the link immediately','Forward it to all your friends','Don\'t click — go to the real website yourself'],correct:2,
+      explain:'Scary, urgent emails are almost always tricks! Go to the real website by typing the address yourself.'}
+  ],
+  4:[
+    {q:'What do data brokers do with your information?',opts:['Keep it safely locked away','Sell it to advertisers without your permission','Delete it after 30 days'],correct:1,
+      explain:'Data brokers collect your personal information and sell it to anyone who\'ll pay — that\'s why privacy settings matter!'},
+    {q:'Which tool helps block tracking scripts and targeted ads?',opts:['A VPN','An ad blocker browser extension','A stronger Wi-Fi password'],correct:1,
+      explain:'An ad blocker stops ads from loading AND blocks the hidden tracking scripts that spy on you.'}
+  ],
+  5:[
+    {q:'How does ransomware typically get onto your device?',opts:['Through official app store updates','Through fake downloads or suspicious email attachments','By using strong passwords'],correct:1,
+      explain:'Ransomware sneaks in through fake downloads and suspicious email attachments. Always download from trusted sources!'},
+    {q:'What is the BEST protection against ransomware?',opts:['Paying the ransom quickly','Never using the internet','Backing up your files regularly to a safe place'],correct:2,
+      explain:'If you back up your files regularly, ransomware can\'t hold them hostage — you already have safe copies!'}
+  ]
+};
+
+const COUNTER_MAP={phantom:'vpn',phishing:'password',gargoyle:'shield',ransomware:'backup'};
+const COUNTER_FLASH={phantom:'VPN ACTIVATED — Tracker lost your signal!',phishing:'PASSWORD SHIELD — Specter\'s illusions shattered!',gargoyle:'AD-BLOCKER — Gargoyle\'s ads destroyed!',ransomware:'BACKUP RESTORED — Poltergeist\'s encryption broken!'};
+const COUNTER_TIPS={phantom:'A VPN hides your real location from trackers online.',phishing:'Always check the URL — real sites use HTTPS.',gargoyle:'Ad blockers stop companies from tracking your browsing.',ransomware:'Regular backups mean ransomware can\'t hold you hostage.'};
+
+const NARRATOR_LINES={
+  0:['Welcome to my mansion, young one. I am the Keeper — once a guardian of data, now a spirit bound to these halls.','The Phantom Tracker haunts this foyer. It sees everything... unless you use your VPN Lantern. Press E when you\'re close!'],
+  1:['The Haunted Library. Knowledge lives here, but so does deception. The Phishing Specter disguises itself as something safe.','If something looks too urgent or too scary, it\'s probably a trick. Your Password Shield [F] will reveal its true form.'],
+  2:['The Data Graveyard... where personal information comes to die — or to be sold. The Gargoyle watches from above.','Your Ad-Blocker [Q] will stop its attacks. In the real world, ad blockers do the same thing for your browser!'],
+  3:['The Shadow Ballroom. The Ransomware Poltergeist dances here, locking away everything it touches.','Only your Backup Key [R] can stop it. Keeping backups of your files means no one can hold them hostage.'],
+  4:['The final challenge. Everything you\'ve learned has led to this moment. Use ALL your tools wisely.','Find the Final Door. If you\'ve collected all four seals, it will open. Good luck!']
+};
+
+const EPITAPHS=['HERE LIES\nYOUR BROWSING\nHISTORY','FORGOTTEN\nPASSWORD\nRIP','MY DATA\nSOLD WITHOUT\nPERMISSION','DELETED\nFOREVER\nOR WAS IT?','LAST SEEN\nONLINE\n10 YRS AGO','COOKIES\nTRACKED\nTO THE GRAVE'];
+
+// ── GLOBALS ──────────────────────────────────────────────────
+let scene,camera,renderer,clock;
+let currentLevel=0,playerHP=100,secrets=0,knowledgeScore=0;
+let gameActive=false,popupOpen=false,quizOpen=false,transitioning=false,gamePaused=false;
+let enemies=[],portals=[],pickups=[],candles=[],adProjectiles=[];
+let levelGroup=null,ambientLight=null,dirLight=null;
+let exitWX=null,exitWZ=null;
+let yaw=0,pitch=0;
+let finalDoorMesh=null,finalDoorUnlocked=false;
+let narratorTimer=0,lastAdaptiveHintHP=100;
+let narratorShownLevels=new Set();
+const keys={};
+const visitedPortals=new Set();
+
+const tools={
+  vpn:{active:false,timer:0,cooldown:0,duration:3,cooldownTime:8,btnId:'vpn-btn'},
+  password:{active:false,timer:0,cooldown:0,duration:2,cooldownTime:10,btnId:'password-btn'},
+  shield:{active:false,timer:0,cooldown:0,duration:3,cooldownTime:6,btnId:'shield-btn'},
+  backup:{active:false,timer:0,cooldown:0,duration:2,cooldownTime:12,btnId:'backup-btn'},
+};
+
+// ── DOM REFS ─────────────────────────────────────────────────
+const C=document.getElementById('c');
+const hudEl=document.getElementById('hud'),dmgEl=document.getElementById('dmg');
+const transEl=document.getElementById('trans'),endEl=document.getElementById('end');
+const hpFill=document.getElementById('hp-fill'),scoreEl=document.getElementById('score');
+const levelDisplayEl=document.getElementById('level-display');
+const zoneNameEl=document.getElementById('zone-name'),hintEl=document.getElementById('approach-hint');
+const ldBar=document.getElementById('ld-bar'),ldMsg=document.getElementById('ld-msg');
+const ldScrn=document.getElementById('loading'),insEl=document.getElementById('instructions');
+const ldCrest=document.getElementById('ld-crest'),ldTitle=document.getElementById('ld-title'),ldSub=document.getElementById('ld-sub');
+const zoneFlash=document.getElementById('zone-flash'),zoneHintEl=document.getElementById('zone-hint');
+const popupEl=document.getElementById('popup');
+const vhsGlitch=document.getElementById('vhs-glitch'),chromab=document.getElementById('chromab');
+const vpnShield=document.getElementById('vpn-shield'),vpnText=document.getElementById('vpn-text');
+const toolFlash=document.getElementById('tool-flash');
+const adBlockerOverlay=document.getElementById('adblocker-overlay');
+const passwordOverlay=document.getElementById('password-overlay');
+const backupOverlay=document.getElementById('backup-overlay');
+const knowledgeFlash=document.getElementById('knowledge-flash');
+const floatTip=document.getElementById('float-tip');
+const compassEl=document.getElementById('compass');
+const quizEl=document.getElementById('quiz');
+const narratorEl=document.getElementById('narrator');
+const narratorTextEl=document.getElementById('narrator-text');
+const pauseMenu=document.getElementById('pause-menu');
+
+// ═══════════════════════════════════════════════════════════════
+//  TEXTURE GENERATORS — Per-level wall textures
+// ═══════════════════════════════════════════════════════════════
+function drawGoldRule(ctx,x,y,w){const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'rgba(139,105,20,0)');g.addColorStop(.5,'rgba(200,168,75,0.7)');g.addColorStop(1,'rgba(139,105,20,0)');ctx.strokeStyle=g;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.stroke();}
+
+function mkFoyerWall(){
+  const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  x.fillStyle='#1a0828';x.fillRect(0,0,s,s);
+  const ds=72;x.strokeStyle='rgba(200,168,75,0.55)';x.lineWidth=2.5;
+  for(let i=-1;i<s/ds+1;i++)for(let j=-1;j<s/ds+1;j++){const cx2=i*ds+ds/2,cy2=j*ds+ds/2;x.beginPath();x.moveTo(cx2,cy2-ds/2);x.lineTo(cx2+ds/2,cy2);x.lineTo(cx2,cy2+ds/2);x.lineTo(cx2-ds/2,cy2);x.closePath();x.stroke();x.fillStyle='rgba(200,168,75,0.4)';x.font='16px serif';x.textAlign='center';x.textBaseline='middle';x.fillText('⚜',cx2,cy2);}
+  x.strokeStyle='rgba(120,40,80,0.5)';x.lineWidth=1.5;for(let i=0;i<s/ds+1;i++)for(let j=0;j<s/ds+1;j++){const cx2=i*ds+ds/2,cy2=j*ds+ds/2;x.beginPath();x.arc(cx2,cy2,18,0,Math.PI*2);x.stroke();x.beginPath();x.moveTo(cx2-8,cy2);x.lineTo(cx2+8,cy2);x.moveTo(cx2,cy2-8);x.lineTo(cx2,cy2+8);x.stroke();}
+  drawGoldRule(x,0,s*.18,s);drawGoldRule(x,0,s*.82,s);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.4);return t;
+}
+
+function mkLibraryWall(){
+  const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  x.fillStyle='#120a04';x.fillRect(0,0,s,s);
+  let py=0;const plankH=52;while(py<s){const v=16+(Math.floor(Math.random()*16));const g=x.createLinearGradient(0,py,0,py+plankH);g.addColorStop(0,`rgb(${v+8},${v+4},${v-2})`);g.addColorStop(.5,`rgb(${v+5},${v+2},${v-3})`);g.addColorStop(1,`rgb(${v+3},${v},${v-4})`);x.fillStyle=g;x.fillRect(0,py+1,s,plankH-2);
+    x.strokeStyle='rgba(0,0,0,0.2)';x.lineWidth=0.7;for(let g2=0;g2<6;g2++){const gy=py+5+g2*(plankH/7);x.beginPath();x.moveTo(0,gy+(Math.random()-.5)*2);x.bezierCurveTo(s/3,gy+(Math.random()-.5)*4,2*s/3,gy+(Math.random()-.5)*4,s,gy+(Math.random()-.5)*2);x.stroke();}
+    x.fillStyle='rgba(0,0,0,0.6)';x.fillRect(0,py,s,1.5);py+=plankH;}
+  for(let i=0;i<4;i++){const px=Math.random()*s,pw2=40+Math.random()*60,ph2=60+Math.random()*80,py2=Math.random()*s;x.fillStyle='rgba(0,40,20,0.7)';x.fillRect(px,py2,pw2,ph2);x.strokeStyle='rgba(0,255,100,0.3)';x.lineWidth=1;for(let tr=0;tr<8;tr++){x.beginPath();x.moveTo(px+Math.random()*pw2,py2+Math.random()*ph2);let nx2=px+Math.random()*pw2,ny2=py2+Math.random()*ph2;x.lineTo(nx2,ny2);x.stroke();x.fillStyle='rgba(0,255,100,0.4)';x.beginPath();x.arc(nx2,ny2,2,0,Math.PI*2);x.fill();}}
+  const web=(cx2,cy2,r)=>{x.strokeStyle='rgba(200,190,180,0.15)';x.lineWidth=0.7;for(let i=0;i<10;i++){const a=(i/10)*Math.PI/2;x.beginPath();x.moveTo(cx2,cy2);x.lineTo(cx2+Math.cos(a)*r,cy2+Math.sin(a)*r);x.stroke();}for(let ring=1;ring<=4;ring++){const rr=r*ring/4;x.beginPath();x.arc(cx2,cy2,rr,0,Math.PI/2);x.stroke();}};
+  web(0,0,70);web(s,0,70);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.4);return t;
+}
+
+function mkGraveWall(){
+  const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  // Dense hedge/bush texture
+  x.fillStyle='#0a1808';x.fillRect(0,0,s,s);
+  // Layered leaf clusters
+  for(let i=0;i<800;i++){const lx=Math.random()*s,ly=Math.random()*s,lr=3+Math.random()*10;
+    const h=80+Math.random()*40|0,sat=40+Math.random()*30|0,lt=8+Math.random()*18|0;
+    x.fillStyle=`hsl(${h},${sat}%,${lt}%)`;x.beginPath();x.ellipse(lx,ly,lr,lr*.7,Math.random()*Math.PI,0,Math.PI*2);x.fill();}
+  // Darker depth shadows between leaves
+  for(let i=0;i<200;i++){const dx=Math.random()*s,dy=Math.random()*s;
+    x.fillStyle='rgba(0,8,0,0.5)';x.beginPath();x.arc(dx,dy,2+Math.random()*5,0,Math.PI*2);x.fill();}
+  // Occasional small flowers/berries
+  for(let i=0;i<15;i++){const fx=Math.random()*s,fy=Math.random()*s;
+    x.fillStyle=Math.random()<.5?'rgba(180,60,60,0.5)':'rgba(200,200,100,0.4)';
+    x.beginPath();x.arc(fx,fy,1.5,0,Math.PI*2);x.fill();}
+  // Branch structure underneath
+  x.strokeStyle='rgba(40,30,10,0.35)';x.lineWidth=2;
+  for(let i=0;i<8;i++){x.beginPath();x.moveTo(Math.random()*s,s);
+    x.bezierCurveTo(Math.random()*s,s*.6,Math.random()*s,s*.3,Math.random()*s,0);x.stroke();}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.4);return t;
+}
+
+function mkBallroomWall(){
+  const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  x.fillStyle='#0a0410';x.fillRect(0,0,s,s);
+  const gs=80;x.strokeStyle='rgba(200,168,75,0.35)';x.lineWidth=1.5;
+  for(let i=0;i<s/gs+1;i++){x.beginPath();x.moveTo(i*gs,0);x.lineTo(i*gs,s);x.stroke();x.beginPath();x.moveTo(0,i*gs);x.lineTo(s,i*gs);x.stroke();}
+  for(let i=0;i<s/gs;i++)for(let j=0;j<s/gs;j++){const cx2=i*gs+gs/2,cy2=j*gs+gs/2;x.strokeStyle='rgba(200,168,75,0.25)';x.lineWidth=1;
+    x.beginPath();x.moveTo(cx2-20,cy2);x.bezierCurveTo(cx2-20,cy2-20,cx2+20,cy2-20,cx2+20,cy2);x.stroke();
+    x.beginPath();x.moveTo(cx2-20,cy2);x.bezierCurveTo(cx2-20,cy2+20,cx2+20,cy2+20,cx2+20,cy2);x.stroke();
+    x.fillStyle='rgba(200,168,75,0.2)';x.beginPath();x.arc(cx2,cy2,4,0,Math.PI*2);x.fill();}
+  drawGoldRule(x,0,s*.15,s);drawGoldRule(x,0,s*.85,s);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.4);return t;
+}
+
+function mkAtticWall(){
+  const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  x.fillStyle='#0e0808';x.fillRect(0,0,s,s);
+  let py=0;const plankH=38;while(py<s){const v=12+(Math.random()*10|0);x.fillStyle=`rgb(${v+4},${v+2},${v-2})`;x.fillRect(0,py+1,s,plankH-2);x.fillStyle='rgba(0,0,0,0.5)';x.fillRect(0,py,s,1.5);
+    for(let n=0;n<4;n++){const nx=15+Math.random()*(s-30);x.fillStyle='rgba(0,0,0,0.7)';x.beginPath();x.arc(nx,py+plankH/2,1.5,0,Math.PI*2);x.fill();}py+=plankH;}
+  const web=(cx2,cy2,r)=>{x.strokeStyle='rgba(200,190,180,0.2)';x.lineWidth=0.7;for(let i=0;i<12;i++){const a=(i/12)*Math.PI/2;x.beginPath();x.moveTo(cx2,cy2);x.lineTo(cx2+Math.cos(a)*r,cy2+Math.sin(a)*r);x.stroke();}for(let ring=1;ring<=5;ring++){const rr=r*ring/5;x.beginPath();x.arc(cx2,cy2,rr,0,Math.PI/2);x.stroke();}};
+  web(0,0,100);web(s,0,100);web(0,s,80);web(s,s,80);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.4);return t;
+}
+
+// Floor textures
+function mkFloorMarble(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');const ts=80;for(let i=0;i<s/ts;i++)for(let j=0;j<s/ts;j++){const white=(i+j)%2===0;x.fillStyle=white?'#ddd4c8':'#0e0e12';x.fillRect(i*ts,j*ts,ts,ts);x.strokeStyle=white?'rgba(200,185,165,0.5)':'rgba(30,30,40,0.5)';x.lineWidth=0.8;for(let v=0;v<5;v++){x.beginPath();x.moveTo(i*ts+Math.random()*ts,j*ts);x.bezierCurveTo(i*ts+Math.random()*ts,j*ts+ts/3,i*ts+Math.random()*ts,j*ts+ts*2/3,i*ts+Math.random()*ts,j*ts+ts);x.stroke();}x.strokeStyle='rgba(80,60,40,0.35)';x.lineWidth=1.8;x.strokeRect(i*ts,j*ts,ts,ts);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(5,5);return t;}
+function mkFloorHardwood(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.fillStyle='#100a04';x.fillRect(0,0,s,s);let px=0;while(px<s){const pw=34+(Math.random()*14|0),v=16+(Math.random()*14|0);const g=x.createLinearGradient(px,0,px+pw,0);g.addColorStop(0,`rgb(${v-2},${v-4},${v-8})`);g.addColorStop(.5,`rgb(${v+6},${v+2},${v-2})`);g.addColorStop(1,`rgb(${v-2},${v-4},${v-8})`);x.fillStyle=g;x.fillRect(px,0,pw-1,s);x.fillStyle='rgba(0,0,0,0.35)';x.fillRect(px+pw-1,0,1,s);px+=pw;}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,7);return t;}
+function mkFloorGrass(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');
+  x.fillStyle='#0a1206';x.fillRect(0,0,s,s);
+  // Dirt patches
+  for(let i=0;i<40;i++){const dx=Math.random()*s,dy=Math.random()*s,dr=10+Math.random()*30;
+    x.fillStyle=`rgba(${30+Math.random()*20|0},${20+Math.random()*15|0},${8+Math.random()*8|0},0.5)`;
+    x.beginPath();x.ellipse(dx,dy,dr,dr*.7,Math.random()*Math.PI,0,Math.PI*2);x.fill();}
+  // Grass blades
+  for(let i=0;i<1200;i++){const gx=Math.random()*s,gy=Math.random()*s;
+    const h=85+Math.random()*40|0,lt=6+Math.random()*14|0;
+    x.strokeStyle=`hsl(${h},50%,${lt}%)`;x.lineWidth=.8;
+    x.beginPath();x.moveTo(gx,gy);x.lineTo(gx+(Math.random()-.5)*4,gy-4-Math.random()*8);x.stroke();}
+  // Small stones
+  for(let i=0;i<20;i++){const sx2=Math.random()*s,sy2=Math.random()*s;
+    x.fillStyle=`rgba(${40+Math.random()*20|0},${40+Math.random()*20|0},${35+Math.random()*15|0},0.6)`;
+    x.beginPath();x.arc(sx2,sy2,1.5+Math.random()*3,0,Math.PI*2);x.fill();}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(5,5);return t;}
+function mkFloorFlagstone(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.fillStyle='#0c0a08';x.fillRect(0,0,s,s);for(let i=0;i<20;i++)for(let j=0;j<20;j++){const fx=i*26+(Math.random()*10|0),fy=j*26+(Math.random()*10|0),fw=18+(Math.random()*12|0),fh=18+(Math.random()*12|0),v=20+(Math.random()*18|0);x.fillStyle=`rgb(${v},${v+1},${v-3})`;x.fillRect(fx,fy,fw,fh);x.strokeStyle='rgba(4,4,2,0.8)';x.lineWidth=1.5;x.strokeRect(fx,fy,fw,fh);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,4);return t;}
+function mkFloorParquet(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.fillStyle='#140a04';x.fillRect(0,0,s,s);const bS=68;for(let bi=0;bi<Math.ceil(s/bS)+1;bi++)for(let bj=0;bj<Math.ceil(s/bS)+1;bj++){const isH=(bi+bj)%2===0,nP=5,pW=bS/nP;for(let p=0;p<nP;p++){const v=18+(Math.random()*12|0);x.fillStyle=`rgb(${v+4},${v},${v-4})`;if(isH)x.fillRect(bi*bS+p*pW,bj*bS,pW-1,bS);else x.fillRect(bi*bS,bj*bS+p*pW,bS,pW-1);}x.strokeStyle='rgba(0,0,0,0.45)';x.lineWidth=1.2;x.strokeRect(bi*bS,bj*bS,bS,bS);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,4);return t;}
+
+// Ceiling textures
+function mkCeilingFoyer(){const s=256,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.fillStyle='#12060e';x.fillRect(0,0,s,s);const pw=64;for(let i=0;i<4;i++)for(let j=0;j<4;j++){x.strokeStyle='rgba(160,30,50,0.55)';x.lineWidth=2.5;x.strokeRect(i*pw+5,j*pw+5,pw-10,pw-10);x.strokeStyle='rgba(180,120,40,0.3)';x.lineWidth=1;x.strokeRect(i*pw+11,j*pw+11,pw-22,pw-22);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,3);return t;}
+function mkCeilingGeneric(){const s=256,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');x.fillStyle='#080608';x.fillRect(0,0,s,s);const pw=64;for(let i=0;i<4;i++)for(let j=0;j<4;j++){x.fillStyle='rgba(200,165,50,0.03)';x.fillRect(i*pw+5,j*pw+5,pw-10,pw-10);x.strokeStyle='rgba(200,165,50,0.4)';x.lineWidth=1.8;x.strokeRect(i*pw+5,j*pw+5,pw-10,pw-10);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,3);return t;}
+function mkCeilingSky(){const s=512,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');const g=x.createRadialGradient(s/2,s/2,0,s/2,s/2,s*.7);g.addColorStop(0,'#0a0e1a');g.addColorStop(.5,'#060a14');g.addColorStop(1,'#020408');x.fillStyle=g;x.fillRect(0,0,s,s);for(let i=0;i<200;i++){const sx2=Math.random()*s,sy2=Math.random()*s,bright=.3+Math.random()*.7,size=Math.random()<.1?2:Math.random()<.3?1.2:.6;x.fillStyle=`rgba(220,230,255,${bright})`;x.beginPath();x.arc(sx2,sy2,size,0,Math.PI*2);x.fill();}const mx=s*.7,my=s*.25,mr=28;const mg=x.createRadialGradient(mx,my,0,mx,my,mr*1.8);mg.addColorStop(0,'rgba(230,230,210,.9)');mg.addColorStop(.3,'rgba(200,200,180,.4)');mg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=mg;x.fillRect(mx-mr*2,my-mr*2,mr*4,mr*4);x.fillStyle='rgba(230,230,210,.85)';x.beginPath();x.arc(mx,my,mr,0,Math.PI*2);x.fill();const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t;}
+
+// Level-specific texture sets
+function getTextures(levelId){
+  if(levelId===0)return{wall:mkFoyerWall(),floor:mkFloorMarble(),ceil:mkCeilingFoyer()};
+  if(levelId===1)return{wall:mkLibraryWall(),floor:mkFloorHardwood(),ceil:mkCeilingGeneric()};
+  if(levelId===2)return{wall:mkGraveWall(),floor:mkFloorGrass(),ceil:mkCeilingSky()};
+  if(levelId===3)return{wall:mkBallroomWall(),floor:mkFloorParquet(),ceil:mkCeilingGeneric()};
+  return{wall:mkAtticWall(),floor:mkFloorFlagstone(),ceil:mkCeilingGeneric()};
+}
+
+function mkTrimTexture(){const c=document.createElement('canvas');c.width=256;c.height=32;const x=c.getContext('2d');x.fillStyle='#1a1004';x.fillRect(0,0,256,32);const g=x.createLinearGradient(0,0,0,32);g.addColorStop(0,'rgba(200,168,75,0.7)');g.addColorStop(.3,'rgba(139,105,20,0.5)');g.addColorStop(.7,'rgba(139,105,20,0.5)');g.addColorStop(1,'rgba(200,168,75,0.7)');x.fillStyle=g;x.fillRect(0,4,256,24);x.strokeStyle='rgba(40,20,5,0.6)';x.lineWidth=1.5;for(let i=0;i<256;i+=24){x.beginPath();x.moveTo(i+12,6);x.lineTo(i+20,16);x.lineTo(i+12,26);x.lineTo(i+4,16);x.closePath();x.stroke();}const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;return t;}
+
+// ── MURAL TEXTURES (level-themed wall art) ───────────────────
+function mkMural_TrackerEye(){
+  const w=160,h=200,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle='#0a0414';x.fillRect(0,0,w,h);x.strokeStyle='#8b00cc';x.lineWidth=5;x.strokeRect(3,3,w-6,h-6);
+  const eg=x.createRadialGradient(w/2,h/2,2,w/2,h/2,55);eg.addColorStop(0,'rgba(200,0,255,0.9)');eg.addColorStop(.3,'rgba(100,0,200,0.5)');eg.addColorStop(1,'rgba(0,0,0,0)');
+  x.fillStyle=eg;x.beginPath();x.arc(w/2,h/2,55,0,Math.PI*2);x.fill();
+  for(let r=4;r<50;r+=7){x.strokeStyle=`rgba(180,0,255,${0.15-r*.002})`;x.lineWidth=1;x.beginPath();x.arc(w/2,h/2,r,0,Math.PI*2);x.stroke();}
+  x.fillStyle='rgba(10,0,20,0.95)';x.beginPath();x.arc(w/2,h/2,14,0,Math.PI*2);x.fill();
+  x.strokeStyle='rgba(150,0,220,0.6)';x.lineWidth=3;x.beginPath();x.ellipse(w/2,h/2,60,30,0,0,Math.PI);x.stroke();x.beginPath();x.ellipse(w/2,h/2,60,30,0,Math.PI,0);x.stroke();
+  x.fillStyle='rgba(200,168,75,0.4)';x.font='9px serif';x.textAlign='center';
+  for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;x.fillText('🍪',w/2+Math.cos(a)*68,h/2+Math.sin(a)*40);}
+  x.fillStyle='rgba(200,0,255,0.6)';x.font='italic 8px serif';x.fillText('YOU ARE BEING WATCHED',w/2,h-8);
+  return new THREE.CanvasTexture(c);
+}
+function mkMural_PhishingMask(){
+  const w=160,h=200,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle='#08100a';x.fillRect(0,0,w,h);x.strokeStyle='#0066ff';x.lineWidth=5;x.strokeRect(3,3,w-6,h-6);
+  const face=(fx,col,label)=>{x.fillStyle=col;x.beginPath();x.arc(fx,h/2-10,32,0,Math.PI*2);x.fill();
+    x.fillStyle='rgba(0,0,0,0.9)';x.beginPath();x.arc(fx-10,h/2-18,6,0,Math.PI*2);x.fill();x.beginPath();x.arc(fx+10,h/2-18,6,0,Math.PI*2);x.fill();
+    x.fillStyle='rgba(50,150,255,0.9)';x.beginPath();x.arc(fx-10,h/2-18,3,0,Math.PI*2);x.fill();x.beginPath();x.arc(fx+10,h/2-18,3,0,Math.PI*2);x.fill();
+    x.fillStyle='rgba(0,100,200,0.5)';x.font='8px serif';x.textAlign='center';x.fillText(label,fx,h/2+30);};
+  face(w/3,'rgba(100,180,255,0.4)','REAL');face(2*w/3,'rgba(255,80,80,0.4)','FAKE');
+  x.fillStyle='rgba(0,100,200,0.55)';x.font='italic 8px serif';x.textAlign='center';x.fillText('"WHICH IS REAL?"',w/2,h-8);
+  return new THREE.CanvasTexture(c);
+}
+function mkMural_DataHarvest(){
+  const w=160,h=200,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle='#0a0808';x.fillRect(0,0,w,h);x.strokeStyle='#884400';x.lineWidth=5;x.strokeRect(3,3,w-6,h-6);
+  x.fillStyle='rgba(60,40,20,0.6)';x.beginPath();x.arc(w/2,h/3,22,0,Math.PI*2);x.fill();
+  for(const ex of[w/2-8,w/2+8]){const eg2=x.createRadialGradient(ex,h/3-5,0,ex,h/3-5,7);eg2.addColorStop(0,'rgba(255,50,0,1)');eg2.addColorStop(1,'rgba(255,0,0,0)');x.fillStyle=eg2;x.beginPath();x.arc(ex,h/3-5,7,0,Math.PI*2);x.fill();}
+  x.fillStyle='rgba(255,150,0,0.3)';x.font='7px monospace';
+  ['NAME','AGE','SCHOOL','HOBBY','LOCATION','EMAIL'].forEach((w2,i)=>x.fillText(w2,30+Math.random()*100,h/2+i*18));
+  x.fillStyle='rgba(255,120,0,0.55)';x.font='italic 8px serif';x.textAlign='center';x.fillText('YOUR DATA FOR SALE',w/2,h-8);
+  return new THREE.CanvasTexture(c);
+}
+function mkMural_RansomSafes(){
+  const w=160,h=200,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle='#0e0004';x.fillRect(0,0,w,h);x.strokeStyle='#cc0000';x.lineWidth=5;x.strokeRect(3,3,w-6,h-6);
+  const safe=(sx,sy,sz)=>{x.fillStyle='rgba(40,20,20,0.8)';x.fillRect(sx,sy,sz,sz*.8);x.strokeStyle='rgba(200,0,0,0.6)';x.lineWidth=2;x.strokeRect(sx,sy,sz,sz*.8);x.fillStyle='rgba(100,0,0,0.7)';x.beginPath();x.arc(sx+sz/2,sy+sz*.4,sz*.12,0,Math.PI*2);x.fill();};
+  safe(20,20,50);safe(90,30,45);safe(35,80,55);safe(100,90,40);safe(55,145,48);
+  x.fillStyle='rgba(255,80,0,0.55)';x.font='italic 8px serif';x.textAlign='center';x.fillText('ENCRYPTED — PAY NOW',w/2,h-8);
+  return new THREE.CanvasTexture(c);
+}
+let muralPool=null;
+function getMuralPool(){if(!muralPool)muralPool=[mkMural_TrackerEye(),mkMural_PhishingMask(),mkMural_DataHarvest(),mkMural_RansomSafes(),mkMural_TrackerEye(),mkMural_PhishingMask()];return muralPool;}
+
+function makeBallroomPillar(){
+  const G=new THREE.Group();
+  const pillarM=new THREE.MeshStandardMaterial({color:0x1a1018,emissive:0x0a0008,emissiveIntensity:.1,roughness:.4,metalness:.6});
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(.22,.28,.3,8),pillarM);base.position.y=.15;G.add(base);
+  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.15,.18,WH-.6,10),pillarM);shaft.position.y=WH/2;G.add(shaft);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.25,.15,.3,8),pillarM);cap.position.y=WH-.15;G.add(cap);
+  const gl=new THREE.PointLight(0xffaa44,.4,3);gl.position.y=WH-.3;G.add(gl);
+  return G;
+}
+
+// ── CHANDELIER ──────────────────────────────────────────────
+function makeChandelier(color,intensity){
+  const G=new THREE.Group();
+  const goldM=new THREE.MeshStandardMaterial({color:0xc8a84b,roughness:.3,metalness:.8,emissive:0x8b6914,emissiveIntensity:.2});
+  // Chain
+  for(let i=0;i<4;i++){const link=new THREE.Mesh(new THREE.TorusGeometry(.03,.008,4,8),goldM);link.position.y=WH-.4-i*.15;link.rotation.x=i%2===0?0:Math.PI/2;G.add(link);}
+  // Ring
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.5,.025,8,16),goldM);ring.position.y=WH-1.1;ring.rotation.x=Math.PI/2;G.add(ring);
+  // Arms and candles
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;const ax=Math.cos(a)*.5,az=Math.sin(a)*.5;
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(.01,.015,.5,4),goldM);arm.position.set(ax*.5,WH-1.1,az*.5);arm.rotation.z=Math.PI/2;arm.rotation.y=-a;G.add(arm);
+    const cup=new THREE.Mesh(new THREE.CylinderGeometry(.04,.025,.06,6),goldM);cup.position.set(ax,WH-1.1,az);G.add(cup);
+    const flame=new THREE.Mesh(new THREE.SphereGeometry(.025,5,5),new THREE.MeshStandardMaterial({color:0xffcc44,emissive:0xffaa00,emissiveIntensity:5,transparent:true,opacity:.9}));
+    flame.position.set(ax,WH-1.04,az);flame.userData.fli=i;G.add(flame);}
+  const gl=new THREE.PointLight(color||0xffcc88,intensity||2.5,12);gl.position.y=WH-1.3;G.add(gl);
+  G.userData.chandelierLight=gl;
+  return G;
+}
+
+// ── STRETCHING PORTRAIT (Disney Haunted Mansion) ────────────
+function makeStretchingPortrait(){
+  const G=new THREE.Group();
+  const w=.8,h=2.2;
+  const pc=document.createElement('canvas');pc.width=128;pc.height=360;const px=pc.getContext('2d');
+  // Dark ornate frame
+  px.fillStyle='#0a0414';px.fillRect(0,0,128,360);
+  px.strokeStyle='rgba(200,168,75,0.7)';px.lineWidth=4;px.strokeRect(4,4,120,352);
+  px.strokeStyle='rgba(139,105,20,0.5)';px.lineWidth=2;px.strokeRect(10,10,108,340);
+  // Elongated figure
+  const fig=Math.random();
+  if(fig<.33){
+    // Skeleton stretching
+    px.fillStyle='rgba(200,190,170,0.6)';
+    px.beginPath();px.arc(64,60,18,0,Math.PI*2);px.fill();
+    px.fillStyle='rgba(0,0,0,0.9)';px.beginPath();px.arc(57,55,5,0,Math.PI*2);px.fill();px.beginPath();px.arc(71,55,5,0,Math.PI*2);px.fill();
+    px.fillStyle='rgba(200,190,170,0.5)';px.fillRect(60,78,8,180);
+    for(const sx of[-1,1]){px.fillRect(64+sx*12,90,6,130);px.fillRect(64+sx*8,260,6,80);}
+    px.fillStyle='rgba(200,0,255,0.3)';px.font='8px serif';px.textAlign='center';px.fillText('GROWING...',64,350);
+  } else if(fig<.66){
+    // Data vines growing upward
+    px.strokeStyle='rgba(0,200,100,0.5)';px.lineWidth=2;
+    for(let v=0;v<5;v++){px.beginPath();const vx=20+Math.random()*88;px.moveTo(vx,360);
+      for(let y=360;y>20;y-=15){px.lineTo(vx+(Math.random()-.5)*20,y);}px.stroke();
+      for(let y=50;y<350;y+=30+Math.random()*40){px.fillStyle='rgba(0,255,100,0.3)';px.beginPath();px.arc(vx+(Math.random()-.5)*15,y,3,0,Math.PI*2);px.fill();}}
+    px.fillStyle='rgba(0,200,100,0.4)';px.font='7px serif';px.textAlign='center';px.fillText('YOUR DATA GROWS',64,350);
+  } else {
+    // Elongated eye
+    const eg=px.createRadialGradient(64,180,5,64,180,50);eg.addColorStop(0,'rgba(200,0,255,0.8)');eg.addColorStop(.5,'rgba(80,0,140,0.4)');eg.addColorStop(1,'rgba(0,0,0,0)');
+    px.fillStyle=eg;px.beginPath();px.ellipse(64,180,45,120,0,0,Math.PI*2);px.fill();
+    px.fillStyle='rgba(10,0,20,0.95)';px.beginPath();px.arc(64,180,16,0,Math.PI*2);px.fill();
+    for(let r=10;r<45;r+=8){px.strokeStyle=`rgba(150,0,220,${.12-r*.002})`;px.lineWidth=.8;px.beginPath();px.ellipse(64,180,r,r*2.5,0,0,Math.PI*2);px.stroke();}
+    px.fillStyle='rgba(180,0,255,0.4)';px.font='7px serif';px.textAlign='center';px.fillText('ALWAYS WATCHING',64,350);
+  }
+  const tex=new THREE.CanvasTexture(pc);
+  const frame=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,roughness:.5,emissive:new THREE.Color(.02,0,.03),emissiveIntensity:.5}));
+  frame.position.y=WH*.55;G.add(frame);
+  // Frame glow
+  const gl=new THREE.PointLight(0x6600aa,.4,2.5);gl.position.set(0,WH*.55,.3);G.add(gl);
+  return G;
+}
+
+// ── TREE (Graveyard) ────────────────────────────────────────
+function makeTree(){
+  const G=new THREE.Group();
+  const barkM=new THREE.MeshStandardMaterial({color:0x1a1008,roughness:.95,metalness:0});
+  // Trunk — tapered cylinder
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.08,.15,2.5,7),barkM);trunk.position.y=1.25;G.add(trunk);
+  // Branches
+  for(let i=0;i<5;i++){const a=Math.random()*Math.PI*2;const by=1.5+Math.random()*1.2;const bl=.5+Math.random()*.8;
+    const br=new THREE.Mesh(new THREE.CylinderGeometry(.01,.04,bl,4),barkM);
+    br.position.set(Math.cos(a)*.15,by,Math.sin(a)*.15);br.rotation.z=Math.PI/3*(Math.random()>.5?1:-1);br.rotation.y=a;G.add(br);}
+  // Canopy — cluster of dark spheres
+  const leafM=new THREE.MeshStandardMaterial({color:0x0a1a08,emissive:0x001a00,emissiveIntensity:.1,roughness:.9,transparent:true,opacity:.85});
+  for(let i=0;i<6;i++){const lf=new THREE.Mesh(new THREE.SphereGeometry(.3+Math.random()*.3,6,5),leafM);
+    lf.position.set((Math.random()-.5)*.6,2.5+Math.random()*.8,(Math.random()-.5)*.6);lf.scale.y=.6+Math.random()*.3;G.add(lf);}
+  // Ground roots
+  const rootM=new THREE.MeshStandardMaterial({color:0x120a04,roughness:.95});
+  for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2+Math.random()*.5;const rt=new THREE.Mesh(new THREE.CylinderGeometry(.01,.03,.6,3),rootM);
+    rt.position.set(Math.cos(a)*.2,.05,Math.sin(a)*.2);rt.rotation.z=Math.PI/2.5;rt.rotation.y=a;G.add(rt);}
+  return G;
+}
+
+// ── MAUSOLEUM (Graveyard) ───────────────────────────────────
+function makeMausoleum(){
+  const G=new THREE.Group();
+  const stoneM=new THREE.MeshStandardMaterial({color:0x2a2826,roughness:.95,metalness:.05});
+  const darkM=new THREE.MeshStandardMaterial({color:0x0a0808,roughness:.9});
+  // Base
+  const base=new THREE.Mesh(new THREE.BoxGeometry(2.2,.3,1.6),stoneM);base.position.y=.15;G.add(base);
+  // Walls
+  const back=new THREE.Mesh(new THREE.BoxGeometry(2,.15,1.4),stoneM);back.position.set(0,1.1,0);G.add(back);
+  for(const sx of[-1,1]){const sw=new THREE.Mesh(new THREE.BoxGeometry(.15,2,1.4),stoneM);sw.position.set(sx*.95,1.1,0);G.add(sw);}
+  // Roof
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(2.4,.15,1.8),stoneM);roof.position.y=2.2;G.add(roof);
+  // Peaked top
+  const peak=new THREE.Mesh(new THREE.CylinderGeometry(0,.3,.5,4),stoneM);peak.position.y=2.5;peak.rotation.y=Math.PI/4;G.add(peak);
+  // Dark entrance
+  const door=new THREE.Mesh(new THREE.BoxGeometry(.6,1.4,.05),darkM);door.position.set(0,.9,.71);G.add(door);
+  // Cross on top
+  const crossV=new THREE.Mesh(new THREE.BoxGeometry(.05,.4,.05),stoneM);crossV.position.y=2.85;G.add(crossV);
+  const crossH=new THREE.Mesh(new THREE.BoxGeometry(.25,.05,.05),stoneM);crossH.position.y=2.75;G.add(crossH);
+  // Eerie glow from inside
+  const gl=new THREE.PointLight(0x2244aa,.6,4);gl.position.set(0,1,.5);G.add(gl);
+  return G;
+}
+
+// ── IRON FENCE SEGMENT (Graveyard) ──────────────────────────
+function makeIronFence(){
+  const G=new THREE.Group();
+  const ironM=new THREE.MeshStandardMaterial({color:0x1a1a20,roughness:.5,metalness:.8});
+  // Horizontal bars
+  for(const fy of[.2,1.0]){const bar=new THREE.Mesh(new THREE.BoxGeometry(CELL-.2,.03,.03),ironM);bar.position.y=fy;G.add(bar);}
+  // Vertical bars with spear tops
+  for(let i=0;i<6;i++){const fx=(i/5-.5)*(CELL-.4);const bar=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.2,4),ironM);bar.position.set(fx,.6,0);G.add(bar);
+    const spear=new THREE.Mesh(new THREE.CylinderGeometry(0,.025,.12,4),ironM);spear.position.set(fx,1.25,0);G.add(spear);}
+  return G;
+}
+
+// ── BOOKSHELF PROTRUSION (Library) ──────────────────────────
+function makeBookshelfUnit(){
+  const G=new THREE.Group();
+  const woodM=new THREE.MeshStandardMaterial({color:0x1a0e04,roughness:.85,metalness:.05});
+  // Shelf frame
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(.6,WH-.4,.3),woodM);frame.position.set(0,WH/2-.1,0);G.add(frame);
+  // Shelves
+  for(let sy=.5;sy<WH-.5;sy+=.65){
+    const shelf=new THREE.Mesh(new THREE.BoxGeometry(.65,.04,.35),woodM);shelf.position.set(0,sy,0);G.add(shelf);
+    // Books on each shelf
+    let bx=-.25;while(bx<.25){const bw=.03+Math.random()*.04,bh=.2+Math.random()*.35;
+      const bookCol=Math.random()<.3?0x8b0000:Math.random()<.5?0x003366:Math.random()<.5?0x2a1a00:0x1a0a2a;
+      const bookM=new THREE.MeshStandardMaterial({color:bookCol,roughness:.8,emissive:new THREE.Color(bookCol),emissiveIntensity:.05});
+      const book=new THREE.Mesh(new THREE.BoxGeometry(bw,bh,.22),bookM);
+      book.position.set(bx+bw/2,sy+.02+bh/2,0);
+      if(Math.random()<.15)book.rotation.z=.15*(Math.random()>.5?1:-1);
+      G.add(book);bx+=bw+.005;}}
+  return G;
+}
+
+// ── ATTIC FURNITURE ─────────────────────────────────────────
+function makeAtticChair(){
+  const G=new THREE.Group();
+  const woodM=new THREE.MeshStandardMaterial({color:0x1a1008,roughness:.9});
+  const seat=new THREE.Mesh(new THREE.BoxGeometry(.4,.04,.4),woodM);seat.position.y=.45;G.add(seat);
+  for(const lx of[-.15,.15])for(const lz of[-.15,.15]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.43,4),woodM);leg.position.set(lx,.22,lz);G.add(leg);}
+  const back=new THREE.Mesh(new THREE.BoxGeometry(.4,.5,.04),woodM);back.position.set(0,.7,-.18);G.add(back);
+  G.userData.isObstacle=true;return G;
+}
+function makeAtticCrate(){
+  const G=new THREE.Group();
+  const woodM=new THREE.MeshStandardMaterial({color:0x1a1408,roughness:.95});
+  const crate=new THREE.Mesh(new THREE.BoxGeometry(.7,.5,.5),woodM);crate.position.y=.25;G.add(crate);
+  // Bands
+  const bandM=new THREE.MeshStandardMaterial({color:0x2a2018,roughness:.7,metalness:.3});
+  for(const by of[.12,.38]){const band=new THREE.Mesh(new THREE.BoxGeometry(.72,.04,.52),bandM);band.position.y=by;G.add(band);}
+  G.userData.isObstacle=true;return G;
+}
+function makeAtticTrunk(){
+  const G=new THREE.Group();
+  const bodyM=new THREE.MeshStandardMaterial({color:0x1a0a04,roughness:.85,metalness:.1});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.9,.5,.5),bodyM);body.position.y=.25;G.add(body);
+  // Domed lid
+  const lid=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.9,8,1,false,0,Math.PI),bodyM);lid.position.y=.5;lid.rotation.z=Math.PI/2;lid.rotation.y=Math.PI/2;G.add(lid);
+  // Metal fittings
+  const metalM=new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.4,metalness:.7});
+  const clasp=new THREE.Mesh(new THREE.BoxGeometry(.15,.08,.52),metalM);clasp.position.set(0,.25,.01);G.add(clasp);
+  G.userData.isObstacle=true;return G;
+}
+function makeAtticBarrel(){
+  const G=new THREE.Group();
+  const woodM=new THREE.MeshStandardMaterial({color:0x1a1008,roughness:.9});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.22,.2,.7,8),woodM);body.position.y=.35;G.add(body);
+  const bandM=new THREE.MeshStandardMaterial({color:0x2a2018,roughness:.5,metalness:.5});
+  for(const by of[.15,.55]){const band=new THREE.Mesh(new THREE.TorusGeometry(.22,.015,4,8),bandM);band.position.y=by;band.rotation.x=Math.PI/2;G.add(band);}
+  G.userData.isObstacle=true;return G;
+}
+
+// ── BALLROOM CURTAIN ────────────────────────────────────────
+function makeCurtain(){
+  const G=new THREE.Group();
+  const fabricM=new THREE.MeshStandardMaterial({color:0x2a0018,emissive:0x0a0008,emissiveIntensity:.1,roughness:.85,side:THREE.DoubleSide});
+  // Two panels
+  for(const sx of[-.4,.4]){const panel=new THREE.Mesh(new THREE.PlaneGeometry(.6,WH-.5),fabricM);panel.position.set(sx,WH*.5-.1,0);
+    // Slight gather
+    const geo=panel.geometry;const pos=geo.attributes.position;
+    for(let i=0;i<pos.count;i++){const y=pos.getY(i);pos.setZ(i,Math.sin(y*3)*.06);}
+    geo.computeVertexNormals();G.add(panel);}
+  // Tieback
+  const goldM=new THREE.MeshStandardMaterial({color:0xc8a84b,roughness:.3,metalness:.8});
+  for(const sx of[-.4,.4]){const tie=new THREE.Mesh(new THREE.TorusGeometry(.08,.015,4,8),goldM);tie.position.set(sx,WH*.35,0);G.add(tie);}
+  return G;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ENEMY FACTORIES
+// ═══════════════════════════════════════════════════════════════
+function mkEnemyLabel(name,sub,borderCol,textCol){
+  const lc=document.createElement('canvas');lc.width=320;lc.height=76;const lx=lc.getContext('2d');
+  lx.fillStyle='rgba(0,0,0,.85)';const r=8;lx.beginPath();lx.moveTo(r,0);lx.lineTo(320-r,0);lx.quadraticCurveTo(320,0,320,r);lx.lineTo(320,76-r);lx.quadraticCurveTo(320,76,320-r,76);lx.lineTo(r,76);lx.quadraticCurveTo(0,76,0,76-r);lx.lineTo(0,r);lx.quadraticCurveTo(0,0,r,0);lx.closePath();lx.fill();
+  lx.strokeStyle=borderCol||'#ff5555';lx.lineWidth=1.5;lx.stroke();lx.fillStyle=textCol||'#ff5555';lx.font='bold 16px serif';lx.textAlign='center';lx.shadowColor=borderCol;lx.shadowBlur=8;lx.fillText(name,160,28);lx.font='11px serif';lx.fillStyle='rgba(220,200,240,.8)';lx.shadowBlur=0;lx.fillText(sub,160,50);
+  const lbl=new THREE.Mesh(new THREE.PlaneGeometry(2,.48),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(lc),transparent:true,depthWrite:false,side:THREE.DoubleSide}));lbl.position.y=2.5;lbl.userData.lbl=true;return lbl;
+}
+
+function makePhantomTracker(){
+  const G=new THREE.Group();const d=getDiff();
+  const coatM=new THREE.MeshStandardMaterial({color:0x0e0020,emissive:0x6600aa,emissiveIntensity:.35,transparent:true,opacity:.94,roughness:.5});
+  const glowM=new THREE.MeshStandardMaterial({color:0x9900ff,emissive:0xaa00ff,emissiveIntensity:1.8,roughness:.1,transparent:true,opacity:.9});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.2,.38,1.4,10),coatM);body.position.y=-.1;G.add(body);
+  for(const sx of[-1,1]){const lp=new THREE.Mesh(new THREE.BoxGeometry(.1,.55,.07),coatM);lp.position.set(sx*.13,.25,.2);lp.rotation.z=sx*.2;G.add(lp);}
+  const headG=new THREE.Group();headG.position.y=1.08;G.add(headG);
+  const hd=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),new THREE.MeshStandardMaterial({color:0x2a2040,emissive:0x330066,emissiveIntensity:.2}));hd.scale.set(1,1.22,.88);headG.add(hd);
+  const eyeM=new THREE.MeshStandardMaterial({color:0xcc00ff,emissive:0xff00ff,emissiveIntensity:3});
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10),eyeM);eye.position.set(0,0,.18);headG.add(eye);
+  const pupil=new THREE.Mesh(new THREE.SphereGeometry(.05,8,8),new THREE.MeshBasicMaterial({color:0x000000}));pupil.position.set(0,0,.26);headG.add(pupil);
+  const gl=new THREE.PointLight(0xaa00ff,2,6);gl.position.y=.5;G.add(gl);
+  const orbitMeshes=[];for(let i=0;i<4;i++){const om=new THREE.Mesh(new THREE.BoxGeometry(.06,.06,.06),glowM);om.userData={orbitR:.6,orbitSpeed:1.5+i*.4,orbitPhase:i*Math.PI/2,orbitY:.3+i*.15};G.add(om);orbitMeshes.push(om);}
+  const tails=[];for(let i=0;i<5;i++){const seg=new THREE.Mesh(new THREE.CylinderGeometry(.22-i*.03,.26-i*.03,.22,8),new THREE.MeshStandardMaterial({color:0x0a0018,emissive:0x440066,emissiveIntensity:.2,transparent:true,opacity:.8-i*.13}));seg.position.y=-1.3-i*.22;seg.userData.ti=i;seg.userData.by=seg.position.y;G.add(seg);tails.push(seg);}
+  G.add(mkEnemyLabel('PHANTOM TRACKER','Uses tracking cookies to follow you','#aa44ff','#cc66ff'));
+  G.userData={type:'enemy',enemyType:'phantom',headG,tails,orbitMeshes,gl,phase:Math.random()*Math.PI*2,speed:d.espeed*.9,lastDmg:0,dmg:Math.round(12*d.enemyDmgMult),alive:true,dissolveTimer:0,startPos:null};
+  return G;
+}
+
+function makePhishingSpecter(){
+  const G=new THREE.Group();const d=getDiff();
+  const bodyM=new THREE.MeshStandardMaterial({color:0x001840,emissive:0x0044aa,emissiveIntensity:.3,transparent:true,opacity:.88});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.18,.35,1.5,10),bodyM);body.position.y=-.2;G.add(body);
+  const padlockG=new THREE.Group();padlockG.position.y=1;G.add(padlockG);
+  const lockBody=new THREE.Mesh(new THREE.BoxGeometry(.35,.3,.15),new THREE.MeshStandardMaterial({color:0x003388,emissive:0x0066ff,emissiveIntensity:.8}));padlockG.add(lockBody);
+  const shackle=new THREE.Mesh(new THREE.TorusGeometry(.12,.03,8,12,Math.PI),new THREE.MeshStandardMaterial({color:0x4488ff,emissive:0x4488ff,emissiveIntensity:1}));shackle.position.y=.2;shackle.rotation.x=0;padlockG.add(shackle);
+  // Crack
+  const crackM=new THREE.MeshBasicMaterial({color:0xff4400});
+  const cr=new THREE.Mesh(new THREE.BoxGeometry(.02,.25,.16),crackM);cr.position.set(.03,0,0);cr.rotation.z=.15;padlockG.add(cr);
+  const gl=new THREE.PointLight(0x0066ff,2,6);gl.position.y=.5;G.add(gl);
+  const tails=[];for(let i=0;i<4;i++){const seg=new THREE.Mesh(new THREE.CylinderGeometry(.2-i*.03,.24-i*.03,.2,8),new THREE.MeshStandardMaterial({color:0x000820,emissive:0x002266,emissiveIntensity:.2,transparent:true,opacity:.7-i*.12}));seg.position.y=-1.2-i*.2;seg.userData.ti=i;seg.userData.by=seg.position.y;G.add(seg);tails.push(seg);}
+  G.add(mkEnemyLabel('PHISHING SPECTER','Creates fake login pages to steal passwords','#4488ff','#66aaff'));
+  G.userData={type:'enemy',enemyType:'phishing',headG:padlockG,tails,orbitMeshes:[],gl,phase:Math.random()*Math.PI*2,speed:d.espeed*.8,lastDmg:0,dmg:Math.round(10*d.enemyDmgMult),alive:true,dissolveTimer:0,startPos:null};
+  return G;
+}
+
+function makeGargoyle(){
+  const G=new THREE.Group();const d=getDiff();
+  const stoneM=new THREE.MeshStandardMaterial({color:0x3a3832,emissive:0x221100,emissiveIntensity:.15,roughness:.95});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.25,.4,1.6,8),stoneM);body.position.y=-.1;G.add(body);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.25,8,8),stoneM);head.position.y=.95;head.scale.set(1,.9,.85);G.add(head);
+  const eyeOffM=new THREE.MeshStandardMaterial({color:0x332200,emissive:0x332200,emissiveIntensity:.3});
+  const eyeOnM=new THREE.MeshStandardMaterial({color:0xff4400,emissive:0xff6600,emissiveIntensity:3});
+  const eyes=[];for(const sx of[-1,1]){const eye=new THREE.Mesh(new THREE.SphereGeometry(.06,8,8),eyeOffM);eye.position.set(sx*.1,.95,.2);G.add(eye);eyes.push(eye);}
+  // Wings
+  for(const sx of[-1,1]){const wing=new THREE.Mesh(new THREE.BoxGeometry(.05,.8,.5),stoneM);wing.position.set(sx*.4,.3,-.1);wing.rotation.z=sx*.3;G.add(wing);}
+  const gl=new THREE.PointLight(0xdd6600,1.5,5);gl.position.y=.5;G.add(gl);
+  G.add(mkEnemyLabel('DATA BROKER GARGOYLE','Collects and sells your personal info','#ffaa44','#ffcc66'));
+  G.userData={type:'enemy',enemyType:'gargoyle',eyes,eyeOffM,eyeOnM,tails:[],orbitMeshes:[],gl,phase:Math.random()*Math.PI*2,speed:d.espeed*.55,lastDmg:0,dmg:Math.round(8*d.enemyDmgMult),alive:true,eyesRed:false,adTimer:0,dissolveTimer:0,startPos:null};
+  return G;
+}
+
+function makeRansomwarePoltergeist(){
+  const G=new THREE.Group();const d=getDiff();
+  const chaosM=new THREE.MeshStandardMaterial({color:0x200000,emissive:0xcc0000,emissiveIntensity:.5,transparent:true,opacity:.85});
+  const core=new THREE.Mesh(new THREE.SphereGeometry(.35,10,10),chaosM);G.add(core);
+  // Orbiting locked safes
+  const safeM=new THREE.MeshStandardMaterial({color:0x1a0000,emissive:0x880000,emissiveIntensity:.6,roughness:.5});
+  const orbitMeshes=[];for(let i=0;i<5;i++){const safe=new THREE.Mesh(new THREE.BoxGeometry(.18,.15,.15),safeM);safe.userData={orbitR:.7+i*.12,orbitSpeed:1.2+i*.3,orbitPhase:i*Math.PI*2/5,orbitY:-.3+i*.2};G.add(safe);orbitMeshes.push(safe);}
+  // Glitch fragments
+  for(let i=0;i<8;i++){const frag=new THREE.Mesh(new THREE.BoxGeometry(.04,.04,.04),new THREE.MeshBasicMaterial({color:0xff0000,transparent:true,opacity:.6}));frag.position.set((Math.random()-.5)*.8,(Math.random()-.5)*1.2,(Math.random()-.5)*.8);G.add(frag);}
+  const gl=new THREE.PointLight(0xff2200,2.5,7);gl.position.y=.3;G.add(gl);
+  G.add(mkEnemyLabel('RANSOMWARE POLTERGEIST','Locks your files and demands payment','#ff4444','#ff6666'));
+  G.userData={type:'enemy',enemyType:'ransomware',tails:[],orbitMeshes,gl,phase:Math.random()*Math.PI*2,speed:d.espeed*1.25,lastDmg:0,dmg:Math.round(16*d.enemyDmgMult),alive:true,chargeTimer:0,dissolveTimer:0,startPos:null};
+  return G;
+}
+
+function makeEnemyForLevel(levelId){
+  if(levelId===0)return makePhantomTracker();
+  if(levelId===1)return makePhishingSpecter();
+  if(levelId===2)return makeGargoyle();
+  if(levelId===3)return makeRansomwarePoltergeist();
+  // Attic: mixed
+  const types=[makePhantomTracker,makePhishingSpecter,makeGargoyle,makeRansomwarePoltergeist];
+  return types[Math.floor(Math.random()*types.length)]();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DECORATION FACTORIES
+// ═══════════════════════════════════════════════════════════════
+function makeWallSconce(){const G=new THREE.Group();const arm=new THREE.Mesh(new THREE.CylinderGeometry(.02,.035,.25,6),new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.3,metalness:.8}));arm.rotation.z=Math.PI/2;G.add(arm);const dish=new THREE.Mesh(new THREE.CylinderGeometry(.06,.04,.06,8),new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.3,metalness:.8}));dish.position.set(.12,0,0);G.add(dish);const fl=new THREE.Mesh(new THREE.SphereGeometry(.04,6,6),new THREE.MeshStandardMaterial({color:0xffcc44,emissive:0xffaa00,emissiveIntensity:4,transparent:true,opacity:.9}));fl.position.set(.12,.06,0);G.add(fl);G.userData.fl=fl;const lt=new THREE.PointLight(0xffaa44,1.2,4.5);lt.position.set(.12,.1,0);G.add(lt);G.userData.lt=lt;return G;}
+
+function makeCandelabra(){const G=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.08,.12,.06,8),new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.3,metalness:.8}));G.add(base);const stem=new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.5,6),new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.3,metalness:.8}));stem.position.y=.28;G.add(stem);const fl=new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),new THREE.MeshStandardMaterial({color:0xffcc44,emissive:0xffaa00,emissiveIntensity:4,transparent:true,opacity:.9}));fl.position.y=.56;G.add(fl);G.userData.flame=fl;const lt=new THREE.PointLight(0xffaa44,.8,3.5);lt.position.y=.58;G.add(lt);G.userData.lt=lt;return G;}
+
+function makePortalObj(ptype){const G=new THREE.Group();const d=PORTALS_DATA[ptype];if(!d)return G;const gl=new THREE.PointLight(d.color,2,6);gl.position.y=2;G.add(gl);G.userData.gl=gl;const ring=new THREE.Mesh(new THREE.TorusGeometry(.8,.06,8,24),new THREE.MeshStandardMaterial({color:d.color,emissive:d.emissive,emissiveIntensity:2,transparent:true,opacity:.7}));ring.position.y=1.8;ring.rotation.x=Math.PI/2;G.add(ring);const iconC=document.createElement('canvas');iconC.width=128;iconC.height=128;const ix=iconC.getContext('2d');ix.fillStyle='rgba(0,0,0,0)';ix.fillRect(0,0,128,128);ix.font='64px serif';ix.textAlign='center';ix.textBaseline='middle';ix.fillText(d.icon,64,64);const iconM=new THREE.Mesh(new THREE.PlaneGeometry(.8,.8),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(iconC),transparent:true,side:THREE.DoubleSide}));iconM.position.y=1.8;G.add(iconM);return G;}
+
+function makePickup(){const G=new THREE.Group();const orb=new THREE.Mesh(new THREE.SphereGeometry(.15,8,8),new THREE.MeshStandardMaterial({color:0x44ffcc,emissive:0x00ffaa,emissiveIntensity:2,transparent:true,opacity:.7}));G.add(orb);const gl=new THREE.PointLight(0x44ffcc,.8,3);G.add(gl);G.userData.phase=Math.random()*Math.PI*2;G.userData.collected=false;return G;}
+
+function makeTombstone(text){const G=new THREE.Group();const stone=new THREE.Mesh(new THREE.BoxGeometry(.5,.8,.12),new THREE.MeshStandardMaterial({color:0x3a3832,roughness:.95}));stone.position.y=.4;G.add(stone);const top=new THREE.Mesh(new THREE.SphereGeometry(.25,8,4,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x3a3832,roughness:.95}));top.scale.set(1,.4,.5);top.position.y=.8;G.add(top);
+  const tc=document.createElement('canvas');tc.width=128;tc.height=160;const tx=tc.getContext('2d');tx.fillStyle='rgba(0,0,0,0)';tx.fillRect(0,0,128,160);tx.fillStyle='rgba(200,190,170,0.5)';tx.font='10px serif';tx.textAlign='center';text.split('\n').forEach((l,i)=>tx.fillText(l,64,50+i*18));const tm=new THREE.Mesh(new THREE.PlaneGeometry(.4,.5),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tc),transparent:true}));tm.position.set(0,.45,.07);G.add(tm);return G;}
+
+function makeFinalDoor(wx,yOff,wz,grp){
+  const doorM=new THREE.MeshStandardMaterial({color:0x1a0800,emissive:0x331100,emissiveIntensity:.3,roughness:.6,metalness:.4});
+  const frameM=new THREE.MeshStandardMaterial({color:0x8b6914,roughness:.3,metalness:.8,emissive:0x8b6914,emissiveIntensity:.2});
+  const lp=new THREE.Mesh(new THREE.BoxGeometry(CELL*.45,WH-.4,.1),doorM);lp.position.set(wx-CELL*.22,yOff+WH/2,wz);grp.add(lp);
+  const rp=new THREE.Mesh(new THREE.BoxGeometry(CELL*.45,WH-.4,.1),doorM);rp.position.set(wx+CELL*.22,yOff+WH/2,wz);grp.add(rp);
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(CELL+.2,.2,.15),frameM);frame.position.set(wx,yOff+WH-.15,wz);grp.add(frame);
+  const padlockM=new THREE.MeshStandardMaterial({color:0xcc0000,emissive:0xff2200,emissiveIntensity:1.5});
+  const padlock=new THREE.Mesh(new THREE.BoxGeometry(.3,.25,.15),padlockM);padlock.position.set(wx,yOff+WH*.5,wz+.12);grp.add(padlock);
+  const shackle=new THREE.Mesh(new THREE.TorusGeometry(.1,.025,8,12,Math.PI),padlockM);shackle.position.set(wx,yOff+WH*.5+.15,wz+.12);grp.add(shackle);
+  const lockGlow=new THREE.PointLight(0xff2200,3,5);lockGlow.position.set(wx,yOff+WH*.5,wz+.3);grp.add(lockGlow);
+  const fd={lp,rp,padlock,shackle,lockGlow};lp.userData=fd;return lp;
+}
+
+function makeDigitalDust(grp,count,yOff){const geo=new THREE.BufferGeometry();const pos=new Float32Array(count*3);for(let i=0;i<count;i++){pos[i*3]=Math.random()*100;pos[i*3+1]=yOff+Math.random()*WH;pos[i*3+2]=Math.random()*100;}geo.setAttribute('position',new THREE.BufferAttribute(pos,3));const mat=new THREE.PointsMaterial({color:0x44ffcc,size:.04,transparent:true,opacity:.3});grp.add(new THREE.Points(geo,mat));}
+
+// ═══════════════════════════════════════════════════════════════
+//  LEVEL BUILDER & DISPOSAL
+// ═══════════════════════════════════════════════════════════════
+function disposeLevel(){
+  if(!levelGroup)return;
+  levelGroup.traverse(obj=>{
+    if(obj.geometry)obj.geometry.dispose();
+    if(obj.material){
+      if(Array.isArray(obj.material))obj.material.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});
+      else{if(obj.material.map)obj.material.map.dispose();obj.material.dispose();}
+    }
+  });
+  scene.remove(levelGroup);
+  if(ambientLight){scene.remove(ambientLight);ambientLight=null;}
+  if(dirLight){scene.remove(dirLight);dirLight=null;}
+  enemies=[];portals=[];pickups=[];candles=[];obstacles=[];adProjectiles.forEach(p=>scene.remove(p));adProjectiles=[];
+  levelGroup=null;finalDoorMesh=null;finalDoorUnlocked=false;exitWX=null;exitWZ=null;
+  // Clear mural pool so textures get regenerated fresh per level
+  if(muralPool){muralPool.forEach(t=>t.dispose());muralPool=null;}
+}
+
+let obstacles=[]; // Attic furniture collision boxes
+function buildLevel(levelIdx){
+  const lv=LEVELS[levelIdx];const map=lv.maze;
+  const grp=new THREE.Group();levelGroup=grp;
+  const rows=map.length,cols=map[0].length;
+  const tex=getTextures(levelIdx);
+  const trimTex=mkTrimTexture();
+  const murals=getMuralPool();let muralIdx=0;
+  const sconces=[],candleSpots=[],tombSpots=[],pillarSpots=[];
+  const portraitSpots=[],bookshelfSpots=[],treeSpots=[],fenceSpots=[];
+  const furnitureSpots=[],curtainSpots=[],chandelierSpots=[];
+  obstacles=[];
+
+  for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+    const cell=map[row][col];const wx=col*CELL+CELL/2,wz=row*CELL+CELL/2;
+    if(cell!==1){
+      const fl=new THREE.Mesh(new THREE.BoxGeometry(CELL,.12,CELL),new THREE.MeshStandardMaterial({map:tex.floor,roughness:.85,metalness:.05}));fl.position.set(wx,.06,wz);grp.add(fl);
+      if(!lv.outdoor){
+        const cl=new THREE.Mesh(new THREE.BoxGeometry(CELL,.1,CELL),new THREE.MeshStandardMaterial({map:tex.ceil,roughness:.9}));cl.position.set(wx,WH-.05,wz);grp.add(cl);
+      }
+    }
+    if(cell===1){
+      if(lv.outdoor){
+        // Outdoor: hedge blocks with rounded tops
+        const wm=new THREE.Mesh(new THREE.BoxGeometry(CELL,WH*.8,CELL),new THREE.MeshStandardMaterial({map:tex.wall,roughness:.95,metalness:0}));wm.position.set(wx,WH*.4,wz);grp.add(wm);
+        // Rounded hedge top
+        const topM=new THREE.MeshStandardMaterial({color:0x0c1808,roughness:.95});
+        const top=new THREE.Mesh(new THREE.SphereGeometry(CELL*.52,6,4,0,Math.PI*2,0,Math.PI/2),topM);top.position.set(wx,WH*.8,wz);top.scale.set(1,.3,1);grp.add(top);
+      } else {
+        const wm=new THREE.Mesh(new THREE.BoxGeometry(CELL,WH,CELL),new THREE.MeshStandardMaterial({map:tex.wall,roughness:.88,metalness:.04}));wm.position.set(wx,WH/2,wz);grp.add(wm);
+      }
+    } else if(cell===0||cell>=2){
+      const dirs=[{dr:-1,dc:0},{dr:1,dc:0},{dr:0,dc:-1},{dr:0,dc:1}];
+      for(const d of dirs){
+        const nr=row+d.dr,nc=col+d.dc;
+        const neighborCell=(nr>=0&&nr<rows&&nc>=0&&nc<cols)?map[nr][nc]:1;
+        if(neighborCell===1){
+          const off2=CELL/2-.01;
+          if(!lv.outdoor){
+            const wallFace=new THREE.Mesh(new THREE.PlaneGeometry(CELL,WH),new THREE.MeshStandardMaterial({map:tex.wall,roughness:.88,metalness:.04}));
+            wallFace.position.set(wx+d.dc*off2,WH/2,wz+d.dr*off2);
+            if(d.dr===-1)wallFace.rotation.y=0;else if(d.dr===1)wallFace.rotation.y=Math.PI;else if(d.dc===-1)wallFace.rotation.y=Math.PI/2;else wallFace.rotation.y=-Math.PI/2;
+            grp.add(wallFace);
+            // Trim strips
+            for(const trimY of[.2,WH-.3]){const trimMesh=new THREE.Mesh(new THREE.PlaneGeometry(CELL,.3),new THREE.MeshStandardMaterial({map:trimTex.clone(),roughness:.3,metalness:.7,emissive:new THREE.Color(0x8b6914),emissiveIntensity:.15}));trimMesh.position.set(wx+d.dc*(off2-.005),trimY,wz+d.dr*(off2-.005));trimMesh.rotation.y=wallFace.rotation.y;grp.add(trimMesh);}
+          }
+          // FOYER: Stretching portraits + murals
+          if(levelIdx===0){
+            if(Math.random()<.18)portraitSpots.push({wx,wz,dr:d.dr,dc:d.dc});
+            else if(Math.random()<.12){const mTex=murals[muralIdx%murals.length];muralIdx++;
+              const pm=new THREE.Mesh(new THREE.PlaneGeometry(.92,1.2),new THREE.MeshStandardMaterial({map:mTex,roughness:.45,emissive:new THREE.Color(.04,.01,.04),emissiveIntensity:.5}));
+              pm.position.set(wx+d.dc*(off2-.01),WH*.56,wz+d.dr*(off2-.01));pm.rotation.y=(d.dr===-1?0:d.dr===1?Math.PI:d.dc===-1?Math.PI/2:-Math.PI/2);grp.add(pm);}
+          }
+          // LIBRARY: Bookshelf protrusions
+          if(levelIdx===1&&Math.random()<.2)bookshelfSpots.push({wx,wz,dr:d.dr,dc:d.dc});
+          // BALLROOM: Murals + curtains
+          if(levelIdx===3){
+            if(Math.random()<.1)curtainSpots.push({wx,wz,dr:d.dr,dc:d.dc});
+            else if(Math.random()<.12){const mTex=murals[muralIdx%murals.length];muralIdx++;
+              const pm=new THREE.Mesh(new THREE.PlaneGeometry(.92,1.2),new THREE.MeshStandardMaterial({map:mTex,roughness:.45,emissive:new THREE.Color(.04,.01,.04),emissiveIntensity:.5}));
+              pm.position.set(wx+d.dc*(off2-.01),WH*.56,wz+d.dr*(off2-.01));pm.rotation.y=(d.dr===-1?0:d.dr===1?Math.PI:d.dc===-1?Math.PI/2:-Math.PI/2);grp.add(pm);}
+          }
+          // Sconces (not in graveyard)
+          if(!lv.outdoor){
+            const sChance=levelIdx===0?.35:levelIdx===1?.3:levelIdx===3?.28:.22;
+            if(Math.random()<sChance)sconces.push({wx,wz,dr:d.dr,dc:d.dc});
+            if(Math.random()<.14)candleSpots.push({wx,wz,dr:d.dr,dc:d.dc});
+          }
+        }
+      }
+      if(cell>=2&&cell<=5){
+        const po=makePortalObj(cell);po.position.set(wx,0,wz);portals.push({mesh:po,ptype:cell,wx,wz,triggered:false});grp.add(po);
+      } else if(cell===8){
+        const en=makeEnemyForLevel(levelIdx);en.position.set(wx,1.05,wz);
+        en.userData.floatBase=1.05;en.userData.startPos=new THREE.Vector3(wx,1.05,wz);
+        grp.add(en);enemies.push(en);
+      } else if(cell===9){
+        if(levelIdx===4){finalDoorMesh=makeFinalDoor(wx,0,wz,grp);exitWX=wx;exitWZ=wz;}
+        else{exitWX=wx;exitWZ=wz;
+          const exitGlow=new THREE.PointLight(0xffd700,2,5);exitGlow.position.set(wx,2,wz);grp.add(exitGlow);
+          const exitRing=new THREE.Mesh(new THREE.TorusGeometry(.6,.04,8,24),new THREE.MeshStandardMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:2,transparent:true,opacity:.6}));exitRing.position.set(wx,1.5,wz);exitRing.rotation.x=Math.PI/2;grp.add(exitRing);}
+      }
+      // Collect per-level decoration positions
+      if(cell===0){
+        if(levelIdx===2){
+          if(Math.random()<.2)tombSpots.push({wx,wz,idx:tombSpots.length});
+          if(Math.random()<.06)treeSpots.push({wx,wz});
+          if(Math.random()<.015)fenceSpots.push({wx,wz});
+        }
+        if(levelIdx===3&&Math.random()<.04)pillarSpots.push({wx,wz});
+        if(levelIdx===4&&Math.random()<.06)furnitureSpots.push({wx,wz});
+        // Chandelier spots (large rooms)
+        if((levelIdx===0||levelIdx===3)&&Math.random()<.008)chandelierSpots.push({wx,wz});
+      }
+    }
+  }
+  // ── PLACE SCONCES ──
+  for(let i=0;i<Math.min(sconces.length,28);i++){const sc=sconces[i];const scon=makeWallSconce();const off2=CELL*.52;scon.position.set(sc.wx+sc.dc*off2,2.2,sc.wz+sc.dr*off2);if(sc.dr===-1)scon.rotation.y=Math.PI;else if(sc.dr===1)scon.rotation.y=0;else if(sc.dc===-1)scon.rotation.y=-Math.PI/2;else scon.rotation.y=Math.PI/2;grp.add(scon);candles.push(scon);}
+  for(let i=0;i<Math.min(candleSpots.length,14);i++){const cs=candleSpots[i];const cand=makeCandelabra();cand.position.set(cs.wx+cs.dc*CELL*.3,0,cs.wz+cs.dr*CELL*.3);grp.add(cand);candles.push(cand);}
+
+  // ── FOYER: Stretching portraits + central chandelier ──
+  if(levelIdx===0){
+    for(const ps of portraitSpots){const sp=makeStretchingPortrait();const off2=CELL*.5-.02;sp.position.set(ps.wx+ps.dc*off2,0,ps.wz+ps.dr*off2);
+      sp.rotation.y=(ps.dr===-1?0:ps.dr===1?Math.PI:ps.dc===-1?Math.PI/2:-Math.PI/2);grp.add(sp);}
+    // Grand foyer chandelier
+    const foyerChand=makeChandelier(0xffcc88,3.5);const fmx=cols*CELL/2,fmz=rows*CELL/2;foyerChand.position.set(fmx,0,fmz);grp.add(foyerChand);candles.push(foyerChand);
+    // Warm uplights along floor
+    for(let i=0;i<6;i++){const ul=new THREE.PointLight(0xffaa66,.5,5);ul.position.set(4+i*(cols*CELL-8)/5,.3,rows*CELL/2+(Math.random()-.5)*6);grp.add(ul);}
+  }
+  // ── LIBRARY: Bookshelf protrusions ──
+  if(levelIdx===1){
+    for(let i=0;i<Math.min(bookshelfSpots.length,16);i++){const bs=bookshelfSpots[i];const bk=makeBookshelfUnit();const off2=CELL*.42;bk.position.set(bs.wx+bs.dc*off2,0,bs.wz+bs.dr*off2);
+      bk.rotation.y=(bs.dr===-1?0:bs.dr===1?Math.PI:bs.dc===-1?Math.PI/2:-Math.PI/2);grp.add(bk);}
+    // Green reading lamps
+    for(let i=0;i<4;i++){const rl=new THREE.PointLight(0x44aa66,.6,4);rl.position.set(5+i*(cols*CELL-10)/3,1.5,rows*CELL/2+(Math.random()-.5)*rows*CELL*.4);grp.add(rl);}
+  }
+  // ── GRAVEYARD: Tombstones, trees, mausoleums, iron fences ──
+  if(levelIdx===2){
+    for(const ts of tombSpots){const stone=makeTombstone(EPITAPHS[ts.idx%EPITAPHS.length]);stone.position.set(ts.wx+(Math.random()-.5)*.6,0,ts.wz+(Math.random()-.5)*.6);stone.rotation.y=Math.random()*Math.PI*2;grp.add(stone);}
+    for(const ts2 of treeSpots){const tree=makeTree();tree.position.set(ts2.wx+(Math.random()-.5)*.4,0,ts2.wz+(Math.random()-.5)*.4);tree.rotation.y=Math.random()*Math.PI*2;grp.add(tree);}
+    // 1-2 mausoleums
+    for(let i=0;i<2;i++){const mx=6+Math.random()*(cols*CELL-12),mz=6+Math.random()*(rows*CELL-12);
+      if(!isWall(mx,mz)){const mauso=makeMausoleum();mauso.position.set(mx,0,mz);mauso.rotation.y=Math.random()*Math.PI*2;grp.add(mauso);}}
+    for(const fs2 of fenceSpots){const fence=makeIronFence();fence.position.set(fs2.wx,0,fs2.wz);fence.rotation.y=Math.random()*Math.PI;grp.add(fence);}
+    // Moonlight pools
+    for(let i=0;i<8;i++){const ml=new THREE.PointLight(0x4466cc,.4,5);ml.position.set(3+Math.random()*(cols*CELL-6),3,3+Math.random()*(rows*CELL-6));grp.add(ml);}
+    // Ground fog — low-lying particle plane
+    const fogGeo=new THREE.PlaneGeometry(cols*CELL,rows*CELL);const fogMat=new THREE.MeshBasicMaterial({color:0x8899aa,transparent:true,opacity:.06,side:THREE.DoubleSide});
+    const fogPlane=new THREE.Mesh(fogGeo,fogMat);fogPlane.rotation.x=-Math.PI/2;fogPlane.position.y=.2;grp.add(fogPlane);
+  }
+  // ── BALLROOM: Pillars, curtains, central chandelier ──
+  if(levelIdx===3){
+    for(const ps of pillarSpots){const pil=makeBallroomPillar();pil.position.set(ps.wx,0,ps.wz);grp.add(pil);}
+    for(let i=0;i<Math.min(curtainSpots.length,10);i++){const cs2=curtainSpots[i];const curt=makeCurtain();const off2=CELL*.5-.02;curt.position.set(cs2.wx+cs2.dc*off2,0,cs2.wz+cs2.dr*off2);
+      curt.rotation.y=(cs2.dr===-1?0:cs2.dr===1?Math.PI:cs2.dc===-1?Math.PI/2:-Math.PI/2);grp.add(curt);}
+    // Grand ballroom chandelier
+    const ballChand=makeChandelier(0xffaacc,3);ballChand.position.set(cols*CELL/2,0,rows*CELL/2);grp.add(ballChand);candles.push(ballChand);
+  }
+  // ── ATTIC: Furniture obstacles ──
+  if(levelIdx===4){
+    const furnFactories=[makeAtticChair,makeAtticCrate,makeAtticTrunk,makeAtticBarrel];
+    for(const fs2 of furnitureSpots){
+      const factory=furnFactories[Math.floor(Math.random()*furnFactories.length)];
+      const furn=factory();furn.position.set(fs2.wx+(Math.random()-.5)*.4,0,fs2.wz+(Math.random()-.5)*.4);
+      furn.rotation.y=Math.random()*Math.PI*2;grp.add(furn);
+      obstacles.push({x:fs2.wx,z:fs2.wz,r:.4});
+    }
+  }
+  // ── CHANDELIERS for large rooms ──
+  for(const cs3 of chandelierSpots){if(levelIdx!==0&&levelIdx!==3){const ch=makeChandelier(0xffcc88,1.5);ch.position.set(cs3.wx,0,cs3.wz);grp.add(ch);candles.push(ch);}}
+
+  // Pickups
+  let pkCount=0;for(let row=0;row<rows&&pkCount<7;row++)for(let col=0;col<cols&&pkCount<7;col++){if(map[row][col]===0&&Math.random()<.018){const pk=makePickup();pk.position.set(col*CELL+CELL/2,PH*.6,row*CELL+CELL/2);pk.userData.baseY=PH*.6;grp.add(pk);pickups.push(pk);pkCount++;}}
+  makeDigitalDust(grp,lv.outdoor?150:280,0);
+  scene.add(grp);
+  // Lighting
+  ambientLight=new THREE.AmbientLight(lv.ambientColor,lv.ambientI);scene.add(ambientLight);
+  if(lv.outdoor){dirLight=new THREE.DirectionalLight(0x4466aa,.6);dirLight.position.set(30,40,-10);scene.add(dirLight);}
+  scene.fog.color.set(lv.fogColor);scene.fog.density=lv.fogDensity;
+  renderer.setClearColor(lv.clearColor);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LEVEL TRANSITIONS
+// ═══════════════════════════════════════════════════════════════
+function showLevelLoading(levelIdx,callback){
+  const lv=LEVELS[levelIdx];
+  ldCrest.textContent=lv.loadIcon;ldTitle.textContent=lv.loadTitle;
+  ldSub.textContent=`LEVEL ${levelIdx+1} OF 5`;
+  ldBar.style.width='0%';ldMsg.textContent='';
+  ldScrn.style.display='flex';ldScrn.style.opacity='1';
+  let p=0,mi=0;
+  const iv=setInterval(()=>{p+=Math.random()*16;ldBar.style.width=Math.min(p,93)+'%';if(mi<lv.loadMsgs.length)ldMsg.textContent=lv.loadMsgs[mi++];},280);
+  setTimeout(()=>{clearInterval(iv);ldBar.style.width='100%';ldMsg.textContent='ENTER...';
+    setTimeout(()=>{ldScrn.style.opacity='0';setTimeout(()=>{ldScrn.style.display='none';callback();},500);},350);},2200);
+}
+
+function loadLevel(levelIdx){
+  const lv=LEVELS[levelIdx];currentLevel=levelIdx;
+  disposeLevel();buildLevel(levelIdx);
+  camera.position.set(lv.startCol*CELL+CELL/2,PH,lv.startRow*CELL+CELL/2);
+  yaw=0;pitch=0;
+  updateHUD();
+  // Zone entry flash
+  zoneNameEl.textContent=lv.name;
+  zoneFlash.textContent=lv.name;zoneFlash.style.opacity='1';
+  zoneHintEl.textContent=lv.hint;zoneHintEl.style.opacity='1';
+  setTimeout(()=>{zoneFlash.style.opacity='0';zoneHintEl.style.opacity='0';},3000);
+  // Narrator
+  setTimeout(()=>queueNarrator(levelIdx),3500);
+}
+
+function goToNextLevel(){
+  if(currentLevel>=4)return;
+  gameActive=false;transitioning=true;
+  transEl.style.opacity='1';
+  setTimeout(()=>{
+    showLevelLoading(currentLevel+1,()=>{
+      loadLevel(currentLevel+1);
+      transEl.style.opacity='0';
+      setTimeout(()=>{transitioning=false;gameActive=true;},600);
+    });
+  },500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENE INIT
+// ═══════════════════════════════════════════════════════════════
+let playerLight;
+function initScene(){
+  renderer=new THREE.WebGLRenderer({canvas:C,antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+  renderer.shadowMap.enabled=false;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.8;
+  renderer.outputEncoding=THREE.sRGBEncoding;renderer.setClearColor(0x02000a);
+  scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x06020f,.04);
+  camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,80);
+  playerLight=new THREE.PointLight(0xffcc88,.55,8);scene.add(playerLight);
+  clock=new THREE.Clock();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COLLISION
+// ═══════════════════════════════════════════════════════════════
+function curMaze(){return LEVELS[currentLevel].maze;}
+function cellV(gx,gz){const m=curMaze();if(gz<0||gz>=m.length||gx<0||gx>=m[0].length)return 1;return m[gz][gx];}
+function isWall(wx2,wz2){return cellV(Math.floor(wx2/CELL),Math.floor(wz2/CELL))===1;}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOOL SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function activateTool(toolKey){
+  const t=tools[toolKey],d=getDiff();
+  if(t.active||t.cooldown>0||!gameActive||popupOpen||quizOpen||gamePaused)return;
+  t.active=true;t.timer=t.duration*d.toolDurMult;
+  const btn=document.getElementById(t.btnId);btn.classList.add('active');
+  if(toolKey==='vpn'){vpnShield.classList.add('active');vpnText.classList.add('active');showToolFlash('🏮 VPN LANTERN ACTIVATED!','#44ffcc');}
+  else if(toolKey==='password'){passwordOverlay.classList.add('active');showToolFlash('🔐 PASSWORD SHIELD ACTIVATED!','#6699ff');}
+  else if(toolKey==='shield'){adBlockerOverlay.classList.add('active');for(let i=adProjectiles.length-1;i>=0;i--){scene.remove(adProjectiles[i]);adProjectiles.splice(i,1);}showToolFlash('🛡️ AD-BLOCKER SHIELD ACTIVATED!','#ffaa00');}
+  else if(toolKey==='backup'){backupOverlay.classList.add('active');showToolFlash('💾 BACKUP KEY ACTIVATED!','#44ff88');}
+  tryCounterEnemy(toolKey);
+}
+function deactivateTool(toolKey){
+  const t=tools[toolKey];t.active=false;t.cooldown=t.cooldownTime*getDiff().cooldownMult;
+  const btn=document.getElementById(t.btnId);btn.classList.remove('active');
+  if(toolKey==='vpn'){vpnShield.classList.remove('active');vpnText.classList.remove('active');}
+  else if(toolKey==='password'){passwordOverlay.classList.remove('active');}
+  else if(toolKey==='shield'){adBlockerOverlay.classList.remove('active');}
+  else if(toolKey==='backup'){backupOverlay.classList.remove('active');}
+}
+function tryCounterEnemy(toolKey){
+  const cRange=getDiff().counterRange;
+  for(const en of enemies){
+    if(!en.userData.alive)continue;
+    const d2=Math.hypot(camera.position.x-en.position.x,camera.position.z-en.position.z);
+    if(d2>cRange)continue;
+    const correctTool=COUNTER_MAP[en.userData.enemyType];
+    if(correctTool===toolKey){
+      en.userData.alive=false;en.userData.dissolveTimer=getDiff().respawnTime;en.visible=false;
+      knowledgeFlash.textContent=COUNTER_FLASH[en.userData.enemyType];knowledgeFlash.style.opacity='1';setTimeout(()=>knowledgeFlash.style.opacity='0',2500);
+      floatTip.textContent=COUNTER_TIPS[en.userData.enemyType];floatTip.style.opacity='1';setTimeout(()=>floatTip.style.opacity='0',3000);
+      playChime(600,.15);
+    }
+  }
+}
+function updateToolTimers(dt){for(const key of Object.keys(tools)){const t=tools[key];if(t.active){t.timer-=dt;if(t.timer<=0)deactivateTool(key);}if(!t.active&&t.cooldown>0){t.cooldown-=dt;if(t.cooldown<0)t.cooldown=0;}}updateToolHUD();}
+function updateToolHUD(){for(const[key,t]of Object.entries(tools)){const btn=document.getElementById(t.btnId);const keyEl=btn.querySelector('.tool-key');if(t.cooldown>0&&!t.active){btn.classList.add('on-cooldown');keyEl.textContent=`${t.cooldown.toFixed(0)}s`;}else{btn.classList.remove('on-cooldown');const keyMap={vpn:'[E]',password:'[F]',shield:'[Q]',backup:'[R]'};keyEl.textContent=keyMap[key];}}}
+function showToolFlash(msg,color){toolFlash.textContent=msg;toolFlash.style.color=color;toolFlash.style.textShadow=`0 0 20px ${color}`;toolFlash.style.opacity='1';setTimeout(()=>toolFlash.style.opacity='0',2000);}
+
+// ── AUDIO ────────────────────────────────────────────────────
+let audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playChime(freq,dur){try{const ctx=getAudioCtx();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(.3,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+dur);}catch(e){}}
+function playUnlockChime(){try{const ctx=getAudioCtx();[523,659,784,1047].forEach((f,i)=>{const osc=ctx.createOscillator();const gain=ctx.createGain();osc.type='sine';osc.frequency.value=f;gain.gain.setValueAtTime(.25,ctx.currentTime+i*.15);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.15+.5);osc.connect(gain);gain.connect(ctx.destination);osc.start(ctx.currentTime+i*.15);osc.stop(ctx.currentTime+i*.15+.5);});}catch(e){}}
+
+// ═══════════════════════════════════════════════════════════════
+//  PLAYER UPDATE
+// ═══════════════════════════════════════════════════════════════
+function updatePlayer(dt){
+  if(!gameActive||popupOpen||quizOpen||transitioning||gamePaused)return;
+  if(keys['arrowleft'])yaw+=LOOK_SPD*dt*60;if(keys['arrowright'])yaw-=LOOK_SPD*dt*60;
+  if(keys['arrowup'])pitch=Math.min(Math.PI*.42,pitch+LOOK_SPD*.7*dt*60);
+  if(keys['arrowdown'])pitch=Math.max(-Math.PI*.42,pitch-LOOK_SPD*.7*dt*60);
+  camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;
+  const fwd=new THREE.Vector3();camera.getWorldDirection(fwd);fwd.y=0;fwd.normalize();
+  const rgt=new THREE.Vector3();rgt.crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize();
+  let dx=0,dz=0;const sp=getDiff().pspeed*dt*60;
+  if(keys['w']){dx+=fwd.x*sp;dz+=fwd.z*sp;}if(keys['s']){dx-=fwd.x*sp;dz-=fwd.z*sp;}
+  if(keys['a']){dx-=rgt.x*sp;dz-=rgt.z*sp;}if(keys['d']){dx+=rgt.x*sp;dz+=rgt.z*sp;}
+  const mr=.36;const nx=camera.position.x+dx,nz=camera.position.z+dz;
+  if(!isWall(nx-mr,camera.position.z)&&!isWall(nx+mr,camera.position.z))camera.position.x=nx;
+  if(!isWall(camera.position.x,nz-mr)&&!isWall(camera.position.x,nz+mr))camera.position.z=nz;
+  // Obstacle collision (attic furniture)
+  for(const ob of obstacles){const odx=camera.position.x-ob.x,odz=camera.position.z-ob.z;const od=Math.hypot(odx,odz);
+    if(od<ob.r+mr){const push=(ob.r+mr-od);camera.position.x+=odx/od*push;camera.position.z+=odz/od*push;}}
+  camera.position.y+=(PH-camera.position.y)*.18;
+  playerLight.position.copy(camera.position);
+  updateToolTimers(dt);checkPortals();checkExit();checkPickups();checkAdProjectiles(dt);updateCompass();checkAdaptiveHints();
+}
+
+function checkPortals(){
+  let near=false;
+  for(const p of portals){
+    const d=Math.hypot(camera.position.x-p.wx,camera.position.z-p.wz);
+    if(d<3.2&&!p.triggered){near=true;hintEl.textContent='[ DRAW NEAR TO LEARN THE DARK ARTS ]';}
+    if(d<2.4&&!p.triggered){p.triggered=true;openPopup(p.ptype);break;}
+  }
+  if(exitWX&&currentLevel===4&&!finalDoorUnlocked){
+    const dd=Math.hypot(camera.position.x-exitWX,camera.position.z-exitWZ);
+    if(dd<4){near=true;hintEl.textContent='COLLECT ALL 4 DARK ARTS TO UNLOCK';}
+  }
+  if(exitWX&&currentLevel<4){
+    const dd=Math.hypot(camera.position.x-exitWX,camera.position.z-exitWZ);
+    if(dd<4){near=true;
+      const hasPortal=portals.some(p=>p.triggered);
+      hintEl.textContent=hasPortal?'[ STEP INTO THE LIGHT TO CONTINUE ]':'[ FIND THE PORTAL FIRST ]';
+    }
+  }
+  hintEl.style.opacity=near?'1':'0';
+}
+
+function checkExit(){
+  if(!exitWX||transitioning)return;
+  const d=Math.hypot(camera.position.x-exitWX,camera.position.z-exitWZ);
+  if(d<2.6){
+    if(currentLevel===4){if(finalDoorUnlocked)win();}
+    else{
+      const hasPortal=portals.some(p=>p.triggered);
+      if(hasPortal)goToNextLevel();
+    }
+  }
+}
+
+function checkPickups(){for(const p of pickups){if(p.userData.collected)continue;if(camera.position.distanceTo(p.position)<1.6){p.userData.collected=true;p.visible=false;playerHP=Math.min(100,playerHP+getDiff().pickupHP);updateHUD();}}}
+
+function spawnAdProjectile(pos){const geo=new THREE.BoxGeometry(.15,.1,.04);const mat=new THREE.MeshBasicMaterial({color:0xff8800});const pr=new THREE.Mesh(geo,mat);pr.position.copy(pos);pr.position.y=1.5;const dir=new THREE.Vector3(camera.position.x-pos.x,0,camera.position.z-pos.z).normalize().multiplyScalar(.08);pr.userData={vel:dir,life:3};scene.add(pr);adProjectiles.push(pr);}
+
+function checkAdProjectiles(dt){
+  for(let i=adProjectiles.length-1;i>=0;i--){
+    const pr=adProjectiles[i];pr.userData.life-=dt;
+    if(pr.userData.life<=0){scene.remove(pr);adProjectiles.splice(i,1);continue;}
+    pr.position.addScaledVector(pr.userData.vel,1);
+    if(tools.shield.active){scene.remove(pr);adProjectiles.splice(i,1);continue;}
+    const d=Math.hypot(pr.position.x-camera.position.x,pr.position.z-camera.position.z);
+    if(d<1.2){hit(5);scene.remove(pr);adProjectiles.splice(i,1);}
+  }
+}
+
+// ── ENEMY UPDATE ─────────────────────────────────────────────
+function updateEnemies(dt){
+  if(quizOpen||popupOpen||gamePaused)return;
+  const now=performance.now();const t=clock.elapsedTime;const d=getDiff();
+  for(const en of enemies){
+    const ud=en.userData;
+    if(!ud.alive){ud.dissolveTimer-=dt;if(ud.dissolveTimer<=0){ud.alive=true;en.visible=true;if(ud.startPos)en.position.copy(ud.startPos);}continue;}
+    const distToPlayer=Math.hypot(camera.position.x-en.position.x,camera.position.z-en.position.z);
+    en.position.y=ud.floatBase+Math.sin(t*1.8+ud.phase)*.15;
+    for(const tail of ud.tails){tail.position.x=Math.sin(t*2.5+tail.userData.ti*.4)*.12;tail.position.y=tail.userData.by+Math.sin(t*1.6+tail.userData.ti*.5)*.06;}
+    for(const om of ud.orbitMeshes){if(om.userData.orbitR){const omd=om.userData;const a=t*omd.orbitSpeed+omd.orbitPhase;om.position.set(Math.cos(a)*omd.orbitR,omd.orbitY+Math.sin(t*1.5)*.1,Math.sin(a)*omd.orbitR);om.rotation.y+=dt*2;}}
+    if(ud.gl)ud.gl.intensity=(ud.gl.intensity*.85)+(((2+Math.sin(t*3)*.8))*.15);
+    if(ud.enemyType==='phantom'){if(ud.headG)ud.headG.rotation.y=t*1.2;if(tools.vpn.active&&distToPlayer<8)continue;}
+    if(ud.enemyType==='gargoyle'){
+      const inRange=distToPlayer<14;
+      if(inRange&&!ud.eyesRed){ud.eyesRed=true;if(ud.eyes)ud.eyes.forEach(e=>e.material=ud.eyeOnM);}
+      else if(!inRange&&ud.eyesRed){ud.eyesRed=false;if(ud.eyes)ud.eyes.forEach(e=>e.material=ud.eyeOffM);}
+      if(inRange){ud.adTimer-=dt;if(ud.adTimer<=0){ud.adTimer=3.5+Math.random()*2;spawnAdProjectile(en.position);}}
+    }
+    if(ud.enemyType==='ransomware'){
+      if(distToPlayer<10){ud.chargeTimer-=dt;if(ud.chargeTimer<=0){ud.chargeTimer=2+Math.random()*3;ud.speed=d.espeed*2.5;}else if(ud.chargeTimer>1.5){ud.speed=d.espeed*1.25;}}
+      if(distToPlayer<4){vhsGlitch.classList.add('active');chromab.classList.add('active');}
+      else{vhsGlitch.classList.remove('active');chromab.classList.remove('active');}
+    }
+    if(distToPlayer>0.6&&distToPlayer<20){const spd=ud.speed*dt*60;const ddx=camera.position.x-en.position.x,dz2=camera.position.z-en.position.z;const dist=Math.hypot(ddx,dz2);const nx2=en.position.x+ddx/dist*spd,nz2=en.position.z+dz2/dist*spd;if(!isWall(nx2,en.position.z))en.position.x=nx2;if(!isWall(en.position.x,nz2))en.position.z=nz2;}
+    en.rotation.y=Math.atan2(camera.position.x-en.position.x,camera.position.z-en.position.z);
+    if(distToPlayer<1.3&&(now-ud.lastDmg)>1000){ud.lastDmg=now;hit(ud.dmg);}
+    // Continuous tool counter — if matching tool is active and enemy is in range, dissolve it
+    const matchTool=COUNTER_MAP[ud.enemyType];
+    if(matchTool&&tools[matchTool].active&&distToPlayer<getDiff().counterRange+1){
+      ud.alive=false;ud.dissolveTimer=getDiff().respawnTime;en.visible=false;
+      knowledgeFlash.textContent=COUNTER_FLASH[ud.enemyType];knowledgeFlash.style.opacity='1';setTimeout(()=>knowledgeFlash.style.opacity='0',2500);
+      floatTip.textContent=COUNTER_TIPS[ud.enemyType];floatTip.style.opacity='1';setTimeout(()=>floatTip.style.opacity='0',3000);
+      playChime(600,.15);
+    }
+  }
+}
+
+function updateCompass(){
+  let targetX,targetZ;
+  // Point to portal if not triggered, else exit
+  const untriggered=portals.find(p=>!p.triggered);
+  if(untriggered){targetX=untriggered.wx;targetZ=untriggered.wz;}
+  else if(exitWX){targetX=exitWX;targetZ=exitWZ;}
+  if(targetX!==undefined){
+    const dx=targetX-camera.position.x,dz=targetZ-camera.position.z;
+    const angle=Math.atan2(dx,dz);const fwd=new THREE.Vector3();camera.getWorldDirection(fwd);
+    const camAngle=Math.atan2(fwd.x,fwd.z);const diff=angle-camAngle;
+    const arrows=['↑','↗','→','↘','↓','↙','←','↖'];
+    let idx=Math.round(((diff+Math.PI)/(Math.PI*2))*8)%8;
+    compassEl.textContent=arrows[idx]+' OBJECTIVE';compassEl.style.opacity='.7';
+  }
+}
+
+// ── DECORATION ANIMATION ─────────────────────────────────────
+function updateDecorations(dt){
+  const t=clock.elapsedTime;
+  for(const c of candles){const fl=c.userData.fl||c.userData.flame,lt=c.userData.lt;const flk=.88+Math.sin(t*18+c.position.x*4)*.12+Math.random()*.05;if(fl){fl.scale.set(.7*flk,1.4*flk,.7*flk);if(fl.material)fl.material.emissiveIntensity=4.5*flk;}if(lt)lt.intensity=(c.userData.fl?1.2:0.8)*flk;}
+  for(const po of portals){if(po.mesh.userData.gl)po.mesh.userData.gl.intensity=1.8+Math.sin(t*2.8)*.6;}
+  for(const pk of pickups){if(pk.userData.collected)continue;pk.position.y=pk.userData.baseY+Math.sin(t*2.1+pk.userData.phase)*.2;pk.rotation.y+=dt*1.9;}
+  if(finalDoorMesh&&!finalDoorUnlocked){const fd=finalDoorMesh.userData;if(fd.padlock)fd.padlock.position.y=WH*.5+.3+Math.sin(t*2)*.1;if(fd.lockGlow)fd.lockGlow.intensity=2+Math.sin(t*3)*.8;}
+}
+
+function updateGlitchEffects(){
+  let nearRansomware=false;
+  for(const en of enemies){if(!en.userData.alive)continue;const d=Math.hypot(camera.position.x-en.position.x,camera.position.z-en.position.z);if(en.userData.enemyType==='ransomware'&&d<4)nearRansomware=true;}
+  if(!nearRansomware){vhsGlitch.classList.remove('active');chromab.classList.remove('active');}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NARRATOR, PAUSE, ADAPTIVE HINTS
+// ═══════════════════════════════════════════════════════════════
+function queueNarrator(levelIdx){
+  if(narratorShownLevels.has(levelIdx))return;narratorShownLevels.add(levelIdx);
+  const lines=NARRATOR_LINES[levelIdx];if(!lines)return;
+  lines.forEach((line,i)=>setTimeout(()=>showNarrator(line),i*6000));
+}
+function showNarrator(text){narratorTextEl.textContent=text;narratorEl.classList.add('visible');clearTimeout(narratorTimer);narratorTimer=setTimeout(()=>narratorEl.classList.remove('visible'),5000);}
+
+document.getElementById('resume-btn').addEventListener('click',()=>togglePause());
+document.getElementById('journal-btn').addEventListener('click',()=>{const jc=document.getElementById('journal-content');jc.style.display=jc.style.display==='none'?'block':'none';updateJournal();});
+function togglePause(){if(!gameActive&&!gamePaused)return;gamePaused=!gamePaused;pauseMenu.style.display=gamePaused?'flex':'none';if(!gamePaused)document.getElementById('journal-content').style.display='none';}
+function updateJournal(){
+  const jc=document.getElementById('journal-content');const entries=[];
+  if(visitedPortals.has(2))entries.push({icon:'👁️',title:'TRACKING COOKIES',text:'Invisible spies that follow you across websites. Defense: Use a VPN and turn on browser privacy settings.'});
+  if(visitedPortals.has(3))entries.push({icon:'🎭',title:'PHISHING',text:'Fake websites/emails that steal passwords. Defense: Check for padlock and "https." Never click scary email links.'});
+  if(visitedPortals.has(4))entries.push({icon:'🗿',title:'DATA BROKERS',text:'Companies that secretly collect and sell your info. Defense: Use ad blocker, check app privacy settings.'});
+  if(visitedPortals.has(5))entries.push({icon:'💀',title:'RANSOMWARE',text:'Locks files and demands money. Defense: Official stores only, back up files, keep devices updated.'});
+  if(entries.length===0){jc.innerHTML='<div style="color:rgba(200,168,75,.5);text-align:center;padding:20px;font-size:11px;letter-spacing:2px">No knowledge yet. Find the glowing portals!</div>';return;}
+  jc.innerHTML=entries.map(e=>`<div class="journal-entry"><div class="journal-icon">${e.icon}</div><div class="journal-title">${e.title}</div><div class="journal-text">${e.text}</div></div>`).join('');
+}
+
+function checkAdaptiveHints(){
+  if(playerHP<40&&lastAdaptiveHintHP>=40){
+    let nearest=null,nd=Infinity;
+    for(const en of enemies){if(!en.userData.alive)continue;const d=Math.hypot(camera.position.x-en.position.x,camera.position.z-en.position.z);if(d<nd){nd=d;nearest=en;}}
+    if(nearest&&nd<15){const tips={phantom:'Press [E] for VPN Lantern!',phishing:'Press [F] for Password Shield!',gargoyle:'Press [Q] for Ad-Blocker!',ransomware:'Press [R] for Backup Key!'};showNarrator('You\'re losing soul energy! '+(tips[nearest.userData.enemyType]||'Use the right tool!'));}
+  }
+  lastAdaptiveHintHP=playerHP;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  QUIZ & UI
+// ═══════════════════════════════════════════════════════════════
+let currentQuizPortal=0,currentQuizQ=0;
+function startQuiz(ptype){currentQuizPortal=ptype;currentQuizQ=0;showQuizQuestion();quizEl.style.display='block';quizOpen=true;}
+function showQuizQuestion(){
+  const qs=QUIZ_DATA[currentQuizPortal];if(!qs||currentQuizQ>=qs.length){endQuiz();return;}
+  const q=qs[currentQuizQ];
+  document.getElementById('quiz-progress').textContent=`QUESTION ${currentQuizQ+1} / ${qs.length}`;
+  document.getElementById('quiz-question').textContent=q.q;document.getElementById('quiz-feedback').textContent='';
+  const optDiv=document.getElementById('quiz-options');optDiv.innerHTML='';
+  q.opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='quiz-option';btn.textContent=`${['A','B','C'][i]}. ${opt}`;btn.addEventListener('click',()=>answerQuiz(i));optDiv.appendChild(btn);});
+}
+function answerQuiz(idx){
+  const qs=QUIZ_DATA[currentQuizPortal];const q=qs[currentQuizQ];
+  const btns=document.querySelectorAll('.quiz-option');
+  btns.forEach((b,i)=>{b.style.pointerEvents='none';if(i===q.correct)b.classList.add('correct');if(i===idx&&i!==q.correct)b.classList.add('wrong');});
+  if(idx===q.correct){knowledgeScore++;document.getElementById('quiz-feedback').innerHTML='✓ CORRECT!<br><span style="font-size:10px;color:#aaddcc;font-weight:normal;letter-spacing:1px">'+q.explain+'</span>';document.getElementById('quiz-feedback').style.color='#44ff88';playChime(800,.12);}
+  else{document.getElementById('quiz-feedback').innerHTML='✗ Not quite!<br><span style="font-size:10px;color:#ddaaaa;font-weight:normal;letter-spacing:1px">'+q.explain+'</span>';document.getElementById('quiz-feedback').style.color='#ff6666';playChime(200,.2);}
+  setTimeout(()=>{currentQuizQ++;showQuizQuestion();},3500);
+}
+function endQuiz(){quizEl.style.display='none';quizOpen=false;updateHUD();if(currentLevel===4)checkFinalDoor();}
+
+function openPopup(ptype){
+  const d=PORTALS_DATA[ptype];
+  document.getElementById('popup-icon').textContent=d.icon;document.getElementById('popup-title').textContent=d.title;
+  document.getElementById('popup-lore').textContent=d.lore;document.getElementById('popup-body').textContent=d.body;
+  document.getElementById('popup-tip').textContent=d.tip;popupEl.style.display='block';popupOpen=true;
+  secrets++;visitedPortals.add(ptype);updateHUD();
+}
+document.getElementById('popup-close').addEventListener('click',()=>{popupEl.style.display='none';popupOpen=false;const lastPortal=[...visitedPortals].pop();if(lastPortal)startQuiz(lastPortal);});
+
+function updateHUD(){
+  hpFill.style.width=playerHP+'%';scoreEl.textContent=`Knowledge: ${knowledgeScore} / 8`;
+  levelDisplayEl.textContent=`LEVEL ${currentLevel+1} / 5 · ${LEVELS[currentLevel].name}`;
+}
+function hit(amt){playerHP=Math.max(0,playerHP-amt);updateHUD();dmgEl.style.opacity='1';setTimeout(()=>dmgEl.style.opacity='0',130);if(playerHP<=0)lose();}
+
+function checkFinalDoor(){
+  if(secrets>=4&&finalDoorMesh&&!finalDoorUnlocked){
+    finalDoorUnlocked=true;const fd=finalDoorMesh.userData;
+    if(fd.lockGlow){fd.lockGlow.color.set(0xffd700);fd.lockGlow.intensity=5;}
+    if(fd.padlock)fd.padlock.visible=false;if(fd.shackle)fd.shackle.visible=false;
+    if(fd.lp){fd.lp.rotation.y=-.8;fd.lp.position.x-=CELL*.3;}
+    if(fd.rp){fd.rp.rotation.y=.8;fd.rp.position.x+=CELL*.3;}
+    playUnlockChime();showToolFlash('🔓 THE FINAL DOOR IS OPEN!','#ffd700');
+  }
+}
+
+function win(){gameActive=false;gamePaused=false;endEl.style.display='flex';
+  document.getElementById('end-title').textContent='🏆 ESCAPED!';document.getElementById('end-title').className='end-title end-win';
+  document.getElementById('end-msg').innerHTML=`You escaped the Haunted Data Mansion!<br><br>Knowledge Score: <b>${knowledgeScore} / 8</b> · Secrets: <b>${secrets} / 4</b> · Difficulty: <b>${getDiff().label}</b><br><br><div style="text-align:left;border:1px solid rgba(139,105,20,.4);padding:14px;margin:12px 0;background:rgba(139,105,20,.08);font-size:12px;line-height:1.8"><div style="color:#c8a84b;font-size:10px;letter-spacing:4px;text-align:center;margin-bottom:10px">📜 YOUR CHEAT SHEET 📜</div><b style="color:#aa44ff">👁️ Tracking Cookies:</b> Invisible spies following you online.<br><b style="color:#aa44ff">→</b> Use a VPN. Turn on browser privacy settings.<br><br><b style="color:#4488ff">🎭 Phishing:</b> Fake sites/emails stealing passwords.<br><b style="color:#4488ff">→</b> Check for padlock 🔒 and "https." Never click scary email links.<br><br><b style="color:#ffaa44">🗿 Data Brokers:</b> Companies secretly selling your info.<br><b style="color:#ffaa44">→</b> Use an ad blocker. Check app privacy settings.<br><br><b style="color:#ff4444">💀 Ransomware:</b> Locks files, demands money.<br><b style="color:#ff4444">→</b> Official stores only. Back up files. Keep devices updated.</div>Share this knowledge — stay safe online!`;}
+
+function lose(){gameActive=false;gamePaused=false;endEl.style.display='flex';
+  document.getElementById('end-title').textContent='💀 SOUL STOLEN';document.getElementById('end-title').className='end-title end-lose';
+  document.getElementById('end-msg').innerHTML=`The Mansion's ghosts claimed your soul...<br><br>Knowledge Score: <b>${knowledgeScore} / 8</b><br><br><div style="text-align:left;border:1px solid rgba(100,40,40,.4);padding:14px;margin:12px 0;background:rgba(80,0,0,.1);font-size:12px;line-height:1.8"><div style="color:#ff6644;font-size:10px;letter-spacing:4px;text-align:center;margin-bottom:10px">🗡️ COMBAT CHEAT SHEET 🗡️</div>👁️ Phantom Tracker → <b style="color:#44ffcc">[E] VPN Lantern</b><br>🎭 Phishing Specter → <b style="color:#6699ff">[F] Password Shield</b><br>🗿 Data Broker Gargoyle → <b style="color:#ffaa00">[Q] Ad-Blocker</b><br>💀 Ransomware Poltergeist → <b style="color:#44ff88">[R] Backup Key</b></div><span style="font-size:11px;color:rgba(200,168,75,.6)">TIP: Try Explorer difficulty!</span>`;}
+
+// ── CONTROLS ─────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(e.key==='Escape'&&(gameActive||gamePaused)&&!popupOpen&&!quizOpen){togglePause();return;}
+  if(gamePaused)return;keys[k]=true;
+  if(k==='e')activateTool('vpn');if(k==='f')activateTool('password');
+  if(k==='q')activateTool('shield');if(k==='r')activateTool('backup');
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+});
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+// ── GAME LOOP ────────────────────────────────────────────────
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05);if(gameActive&&!gamePaused){updatePlayer(dt);updateEnemies(dt);updateDecorations(dt);updateGlitchEffects();}renderer.render(scene,camera);}
+
+// ── INIT ─────────────────────────────────────────────────────
+(function init(){
+  let p=0,mi=0;
+  const msgs=['AWAKENING THE DIGITAL SPIRITS...','SUMMONING THE PHANTOM TRACKER...','BUILDING THE HAUNTED MANOR...','LIGHTING THE CURSED CANDLES...','PLACING THE DARK PORTALS...','ALMOST READY — ENTER IF YOU DARE...'];
+  const iv=setInterval(()=>{p+=Math.random()*14;ldBar.style.width=Math.min(p,93)+'%';if(mi<msgs.length)ldMsg.textContent=msgs[mi++];},240);
+  initScene();
+  setTimeout(()=>{clearInterval(iv);ldBar.style.width='100%';ldMsg.textContent='ENTER... IF YOU DARE.';
+    setTimeout(()=>{ldScrn.style.display='none';insEl.style.display='flex';},350);},2800);
+  loop();
+})();
+
+document.getElementById('ins-btn').addEventListener('click',()=>{
+  insEl.style.display='none';hudEl.style.display='block';
+  showLevelLoading(0,()=>{loadLevel(0);gameActive=true;updateHUD();});
+  try{getAudioCtx();}catch(e){}
+});
+</script>
+</body>
+</html>

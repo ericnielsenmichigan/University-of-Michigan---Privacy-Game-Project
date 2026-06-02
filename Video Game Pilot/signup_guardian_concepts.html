@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signup Guardian — Concept Screens</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   DESIGN SYSTEM (Privapals extended)
+   ============================================= */
+:root {
+  --bg:        #07060F;
+  --bg2:       #0E0B1E;
+  --card:      #110E25;
+  --card2:     #16123A;
+  --cyan:      #00F0FF;
+  --cyan-d:    #0099AA;
+  --cyan-glow: rgba(0,240,255,0.25);
+  --purple:    #9B00FF;
+  --purple-d:  #6200AA;
+  --gold:      #FFE600;
+  --gold-d:    #AA9A00;
+  --pink:      #FF2D6B;
+  --green:     #00FF88;
+  --green-d:   #00AA55;
+  --orange:    #FF8C00;
+  --red:       #FF3B3B;
+  --text:      #ECE8FF;
+  --text-dim:  #7A72A0;
+  --border:    rgba(255,255,255,0.07);
+  --r:         20px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);}
+
+/* ---- Animations ---- */
+@keyframes fadeUp   {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn   {from{opacity:0}to{opacity:1}}
+@keyframes popIn    {from{transform:scale(.88) translateY(16px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+@keyframes bob      {0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes bobSlow  {0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes glow     {0%,100%{filter:drop-shadow(0 0 6px var(--cyan))}50%{filter:drop-shadow(0 0 22px var(--cyan))}}
+@keyframes glowGold {0%,100%{filter:drop-shadow(0 0 6px var(--gold))}50%{filter:drop-shadow(0 0 22px var(--gold))}}
+@keyframes glowRed  {0%,100%{filter:drop-shadow(0 0 4px var(--red)) box-shadow:0 0 12px rgba(255,59,59,.3)}50%{filter:drop-shadow(0 0 14px var(--red));box-shadow:0 0 28px rgba(255,59,59,.5)}}
+@keyframes spin     {to{transform:rotate(360deg)}}
+@keyframes shimmer  {0%{background-position:-300% 0}100%{background-position:300% 0}}
+@keyframes scanMove {from{transform:translateY(-100%)}to{transform:translateY(100vh)}}
+@keyframes pulse    {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.65;transform:scale(.96)}}
+@keyframes fillBar  {from{width:0%}to{width:var(--target-w)}}
+@keyframes glitch   {0%,90%,100%{transform:translateX(0)}92%{transform:translateX(-3px)}96%{transform:translateX(3px)}}
+@keyframes floatIn  {from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes blink    {0%,100%{opacity:1}49%{opacity:1}50%{opacity:0}99%{opacity:0}}
+@keyframes ripple   {0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.5);opacity:0}}
+@keyframes dataFlow {0%{background-position:0 0}100%{background-position:0 120px}}
+
+/* =============================================
+   NAV SIDEBAR
+   ============================================= */
+.nav-sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: rgba(11,9,30,.97);
+  border-right: 1px solid var(--border);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  backdrop-filter: blur(20px);
+}
+.nav-logo {
+  font-family:'Fredoka One',cursive;
+  font-size: 20px;
+  background: linear-gradient(135deg,var(--cyan),var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.nav-sub {
+  font-size: 10px; font-weight: 800; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 3px; margin-bottom: 28px;
+}
+.nav-label {
+  font-size: 10px; font-weight: 800; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 2px; margin: 16px 0 8px 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 12px; cursor: pointer;
+  transition: all .2s; font-size: 13px; font-weight: 700;
+  color: var(--text-dim); margin-bottom: 2px; user-select: none;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
+.nav-item.active {
+  background: rgba(0,240,255,.1); color: var(--cyan);
+  border-color: rgba(0,240,255,.2);
+}
+.nav-item .nav-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: currentColor; opacity: .5;
+}
+.nav-item.active .nav-dot { opacity: 1; box-shadow: 0 0 8px currentColor; }
+.nav-num {
+  font-size: 10px; font-weight: 900; font-family: 'Space Mono', monospace;
+  margin-left: auto; opacity: .4;
+}
+.nav-footer {
+  margin-top: auto;
+  font-size: 11px; font-weight: 700; color: var(--text-dim);
+  padding: 12px; background: rgba(255,255,255,.03);
+  border-radius: 12px; text-align: center;
+}
+
+/* =============================================
+   MAIN CONTENT AREA
+   ============================================= */
+.main {
+  margin-left: 220px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* =============================================
+   SCREEN PANELS
+   ============================================= */
+.screen-panel {
+  display: none;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.screen-panel.active { display: block; }
+
+/* shared bg grid */
+.bg-grid {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.bg-scan {
+  position: absolute; left: 0; right: 0; height: 2px; top: -2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: .4; animation: scanMove 8s linear infinite; pointer-events: none; z-index: 1;
+}
+.panel-inner {
+  position: relative; z-index: 2;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 40px;
+}
+.screen-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 10px; font-weight: 900; color: var(--cyan);
+  text-transform: uppercase; letter-spacing: 4px;
+  background: rgba(0,240,255,.08); border: 1px solid rgba(0,240,255,.2);
+  border-radius: 50px; padding: 5px 14px; margin-bottom: 20px;
+}
+.screen-label::before { content:''; width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 1.5s ease infinite; }
+
+/* =============================================
+   SCREEN 1 — SPLASH / TITLE
+   ============================================= */
+#s1 {
+  background: radial-gradient(ellipse at 30% 40%, #1A0838 0%, #07060F 60%);
+}
+.s1-hero {
+  display: flex; align-items: center; gap: 60px; margin-top: 20px;
+  min-height: calc(100vh - 140px);
+}
+.s1-left { flex: 1; }
+.s1-eyebrow {
+  font-size: 11px; font-weight: 900; color: var(--cyan);
+  text-transform: uppercase; letter-spacing: 5px; margin-bottom: 16px;
+  animation: fadeUp .6s both;
+}
+.s1-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 1.0;
+  background: linear-gradient(135deg, #fff 0%, var(--cyan) 40%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 40px rgba(0,240,255,.4));
+  animation: fadeUp .6s .1s both;
+  margin-bottom: 16px;
+}
+.s1-tagline {
+  font-size: 18px; font-weight: 700; color: var(--text-dim);
+  line-height: 1.6; margin-bottom: 32px;
+  animation: fadeUp .6s .2s both;
+  max-width: 440px;
+}
+.s1-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; animation: fadeUp .6s .3s both; }
+.s1-badge {
+  font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 50px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.badge-cyan  { background:rgba(0,240,255,.12);color:var(--cyan);border:1px solid rgba(0,240,255,.25); }
+.badge-purple{ background:rgba(155,0,255,.12);color:#CC88FF;border:1px solid rgba(155,0,255,.25); }
+.badge-gold  { background:rgba(255,230,0,.1);color:var(--gold);border:1px solid rgba(255,230,0,.25); }
+.badge-pink  { background:rgba(255,45,107,.1);color:var(--pink);border:1px solid rgba(255,45,107,.25); }
+.badge-green { background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25); }
+
+.s1-btns { display: flex; gap: 12px; animation: fadeUp .6s .4s both; }
+.btn {
+  font-family: 'Fredoka One', cursive; cursor: pointer; border: none;
+  border-radius: 50px; transition: transform .12s, filter .12s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn:active { transform: translateY(1px); }
+.btn-cyan  { background:var(--cyan);color:#07060F;padding:14px 32px;font-size:17px;box-shadow:0 0 20px var(--cyan-glow),0 5px 0 #007088; }
+.btn-ghost { background:rgba(255,255,255,.07);color:var(--text);padding:14px 28px;font-size:15px;border:1px solid var(--border); }
+.btn-purple{ background:var(--purple);color:#fff;padding:14px 32px;font-size:17px;box-shadow:0 0 20px rgba(155,0,255,.3),0 5px 0 var(--purple-d); }
+.btn-gold  { background:linear-gradient(135deg,var(--gold),#FF9900);color:#07060F;padding:14px 32px;font-size:17px;box-shadow:0 0 20px rgba(255,230,0,.3),0 5px 0 var(--gold-d); }
+.btn-green { background:var(--green);color:#07060F;padding:13px 28px;font-size:15px;box-shadow:0 0 16px rgba(0,255,136,.3),0 4px 0 var(--green-d); }
+.btn-sm    { padding:9px 20px !important; font-size:13px !important; }
+
+/* Character mascots */
+.s1-right { flex-shrink: 0; position: relative; width: 340px; height: 420px; animation: fadeIn .8s .3s both; }
+.character-card {
+  position: absolute;
+  background: linear-gradient(160deg, #1A1442, #0F0C2A);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 24px;
+  padding: 20px;
+  animation: popIn .7s both;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+.char-main { width: 220px; height: 280px; top: 0; left: 50%; transform: translateX(-50%); z-index: 3; animation-delay:.2s }
+.char-badge1 { width: 130px; bottom: 60px; left: -20px; z-index: 2; animation-delay:.4s; }
+.char-badge2 { width: 130px; bottom: 20px; right: -20px; z-index: 2; animation-delay:.5s; }
+.char-avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.char-name { font-family:'Fredoka One',cursive; font-size: 20px; text-align:center; margin-bottom: 4px; }
+.char-role { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 12px; }
+.char-stat { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.char-stat-label { font-size: 11px; font-weight: 800; color: var(--text-dim); width: 60px; flex-shrink: 0; }
+.char-stat-bar { flex: 1; height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.char-stat-fill { height: 100%; border-radius: 3px; }
+.char-emoji { font-size: 36px; text-align: center; margin-bottom: 8px; animation: bob 2s ease-in-out infinite; }
+.char-mini-text { font-size: 11px; font-weight: 700; color: var(--text-dim); text-align: center; }
+
+/* =============================================
+   SCREEN 2 — CHARACTER PROFILE
+   ============================================= */
+#s2 {
+  background: radial-gradient(ellipse at 70% 30%, #0D1B38 0%, #07060F 60%);
+}
+.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; margin-top: 8px; }
+.profile-sidebar { position: sticky; top: 24px; }
+.profile-card {
+  background: linear-gradient(160deg,#141130,#0F0D28);
+  border: 1px solid rgba(0,240,255,.15);
+  border-radius: 24px; padding: 24px;
+  box-shadow: 0 0 40px rgba(0,240,255,.06);
+  animation: popIn .5s both;
+}
+.profile-avatar-ring {
+  width: 100px; height: 100px; border-radius: 50%;
+  border: 3px solid var(--cyan); margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+  box-shadow: 0 0 0 6px rgba(0,240,255,.1), 0 0 30px rgba(0,240,255,.3);
+  animation: bob 2.4s ease-in-out infinite;
+}
+.profile-name { font-family:'Fredoka One',cursive; font-size: 22px; text-align: center; margin-bottom: 4px; }
+.profile-handle { font-size: 12px; font-weight: 800; color: var(--cyan); text-align: center; letter-spacing: 1px; margin-bottom: 16px; }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
+.profile-tag { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 50px; }
+.profile-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.profile-quick { font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.profile-quick strong { color: var(--text); font-weight: 800; }
+.profile-quick-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+
+/* Data categories */
+.data-grid { display: flex; flex-direction: column; gap: 12px; }
+.data-category {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  animation: fadeUp .5s both;
+}
+.data-cat-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; cursor: pointer;
+  transition: background .2s;
+  background: rgba(255,255,255,.02);
+  user-select: none;
+}
+.data-cat-header:hover { background: rgba(255,255,255,.05); }
+.data-cat-icon { font-size: 18px; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.data-cat-title { font-size: 14px; font-weight: 800; flex: 1; }
+.data-cat-badge { font-size: 10px; font-weight: 900; padding: 3px 8px; border-radius: 50px; }
+.data-cat-chevron { font-size: 14px; color: var(--text-dim); transition: transform .3s; }
+.data-cat-body { padding: 4px 16px 16px; display: none; }
+.data-cat-body.open { display: block; }
+.data-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.data-item:last-child { border-bottom: none; }
+.data-item-label { font-size: 12px; font-weight: 700; color: var(--text-dim); flex: 1; }
+.data-item-value { font-size: 12px; font-weight: 800; color: var(--text); font-family:'Space Mono',monospace; max-width: 180px; text-align: right; }
+.data-item-risk {
+  width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; margin-left: 8px; flex-shrink: 0;
+}
+.risk-low    { background: rgba(0,255,136,.12); color: var(--green); }
+.risk-med    { background: rgba(255,140,0,.12);  color: var(--orange); }
+.risk-high   { background: rgba(255,59,59,.12);  color: var(--red); }
+.risk-block  { background: rgba(255,45,107,.12); color: var(--pink); filter: blur(0); }
+.data-item-value.masked { filter: blur(4px); cursor: pointer; transition: filter .3s; }
+.data-item-value.masked:hover { filter: blur(0); }
+
+/* =============================================
+   SCREEN 3 — SIGNUP FORM
+   ============================================= */
+#s3 {
+  background: radial-gradient(ellipse at 50% 20%, #0A1828 0%, #07060F 55%);
+}
+.form-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; margin-top: 8px; }
+.form-card {
+  background: linear-gradient(160deg,#0F0D28,#110E24);
+  border: 1px solid var(--border);
+  border-radius: 24px; padding: 28px;
+  animation: popIn .5s both;
+}
+.form-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.form-site-logo { font-family:'Fredoka One',cursive; font-size: 22px; color: var(--gold); }
+.form-site-name { font-size: 14px; font-weight: 800; color: var(--text-dim); }
+.form-site-lock { font-size: 14px; color: var(--green); margin-left: auto; }
+.form-section-head { font-size: 11px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 3px; margin: 20px 0 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.form-label {
+  font-size: 11px; font-weight: 800; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1px;
+  display: flex; align-items: center; gap: 6px;
+}
+.form-label-optional {
+  font-size: 9px; font-weight: 800; color: var(--text-dim);
+  background: rgba(255,255,255,.06); border-radius: 4px; padding: 2px 5px;
+}
+.form-input {
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px; padding: 11px 14px; color: var(--text);
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  transition: all .2s; outline: none;
+}
+.form-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,240,255,.12); background: rgba(0,240,255,.04); }
+.form-input.risk-flagged { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,59,59,.12); animation: glowRed 2s ease infinite; }
+.form-input.risk-warn  { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,140,0,.12); }
+.form-input.safe { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,255,136,.1); }
+
+/* risk tooltip inline */
+.risk-inline {
+  font-size: 11px; font-weight: 800; border-radius: 8px; padding: 7px 10px;
+  display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;
+  animation: floatIn .3s ease;
+}
+.risk-inline.warn { background:rgba(255,140,0,.1);color:var(--orange);border:1px solid rgba(255,140,0,.2); }
+.risk-inline.danger{background:rgba(255,59,59,.1);color:var(--red);border:1px solid rgba(255,59,59,.2);}
+.risk-inline.ok   { background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+
+/* Toggle rows */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+  background: rgba(255,255,255,.02); margin-bottom: 8px;
+}
+.toggle-info { flex: 1; }
+.toggle-label { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.toggle-desc  { font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.toggle-switch {
+  width: 44px; height: 24px; border-radius: 12px; cursor: pointer;
+  position: relative; transition: background .2s; flex-shrink: 0;
+}
+.toggle-switch.on  { background: var(--red); }
+.toggle-switch.off { background: rgba(255,255,255,.1); }
+.toggle-knob {
+  width: 18px; height: 18px; border-radius: 50%; background: #fff;
+  position: absolute; top: 3px; transition: left .2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.toggle-switch.on  .toggle-knob { left: 23px; }
+.toggle-switch.off .toggle-knob { left: 3px; }
+
+/* Right panel — Privacy Meter */
+.pm-card {
+  background: linear-gradient(160deg,#110F2A,#0C0A24);
+  border: 1px solid rgba(155,0,255,.2);
+  border-radius: 24px; padding: 22px;
+  position: sticky; top: 24px;
+  animation: popIn .5s .15s both;
+}
+.pm-title { font-family:'Fredoka One',cursive; font-size: 18px; color: var(--text); margin-bottom: 4px; }
+.pm-sub   { font-size: 11px; font-weight: 700; color: var(--text-dim); margin-bottom: 20px; }
+.pm-score {
+  font-family: 'Space Mono', monospace;
+  font-size: 48px; font-weight: 700; text-align: center;
+  margin-bottom: 4px; animation: glitch 6s infinite;
+}
+.pm-score-label { font-size: 11px; font-weight: 800; text-align: center; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+.pm-dim { margin-bottom: 12px; }
+.pm-dim-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.pm-dim-label { font-size: 11px; font-weight: 800; color: var(--text-dim); }
+.pm-dim-val   { font-size: 11px; font-weight: 900; font-family:'Space Mono',monospace; }
+.pm-bar { height: 6px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.pm-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.pm-combo {
+  margin-top: 16px; background: rgba(255,45,107,.08);
+  border: 1px solid rgba(255,45,107,.2); border-radius: 12px; padding: 12px;
+}
+.pm-combo-title { font-size: 11px; font-weight: 900; color: var(--pink); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+.pm-combo-item {
+  font-size: 11px; font-weight: 700; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+}
+.pm-combo-item::before { content: '⚡'; font-size: 12px; }
+
+/* Ted tip bubble */
+.ted-bubble {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: rgba(0,240,255,.05); border: 1px solid rgba(0,240,255,.15);
+  border-radius: 16px; padding: 14px; margin-top: 16px;
+}
+.ted-ava { font-size: 32px; flex-shrink: 0; animation: bobSlow 2s ease-in-out infinite; }
+.ted-body { flex: 1; }
+.ted-name { font-size: 10px; font-weight: 900; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.ted-text { font-size: 12px; font-weight: 700; color: var(--text-dim); line-height: 1.6; }
+.ted-text strong { color: var(--cyan); }
+
+/* =============================================
+   SCREEN 4 — RISK REVEAL (CONSEQUENCE)
+   ============================================= */
+#s4 {
+  background: radial-gradient(ellipse at 50% 60%, #1A0820 0%, #07060F 55%);
+}
+.reveal-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+.reveal-card {
+  border-radius: 20px; padding: 22px;
+  animation: popIn .5s both;
+}
+.reveal-card.dark { background: rgba(255,255,255,.03); border: 1px solid var(--border); }
+.reveal-card.danger { background: rgba(255,59,59,.06); border: 1px solid rgba(255,59,59,.2); }
+.reveal-card.warn  { background: rgba(255,140,0,.06); border: 1px solid rgba(255,140,0,.2); }
+.reveal-card.safe  { background: rgba(0,255,136,.05); border: 1px solid rgba(0,255,136,.2); }
+.reveal-card.full  { grid-column: 1/-1; }
+.reveal-card-icon { font-size: 32px; margin-bottom: 10px; }
+.reveal-card-title { font-family:'Fredoka One',cursive; font-size: 20px; margin-bottom: 8px; }
+.reveal-card-body  { font-size: 13px; font-weight: 700; color: var(--text-dim); line-height: 1.65; }
+.reveal-card-body strong { color: var(--text); }
+
+/* Spam simulation */
+.spam-inbox {
+  background: rgba(0,0,0,.3); border-radius: 12px; padding: 12px;
+  margin-top: 12px; font-family: 'Space Mono', monospace; font-size: 11px;
+}
+.spam-row {
+  display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border);
+  align-items: center; animation: floatIn .4s both;
+}
+.spam-row:last-child { border-bottom: none; }
+.spam-sender { color: var(--red); font-weight: 700; width: 120px; flex-shrink: 0; }
+.spam-subj   { color: var(--text-dim); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.spam-time   { color: var(--text-dim); opacity: .5; flex-shrink: 0; }
+
+/* Data drip visualization */
+.drip-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.drip-chip {
+  font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 50px;
+  animation: popIn .4s both;
+  font-family: 'Space Mono', monospace;
+}
+.drip-id    { background:rgba(0,240,255,.12);color:var(--cyan);  border:1px solid rgba(0,240,255,.25); }
+.drip-loc   { background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.25); }
+.drip-beh   { background:rgba(155,0,255,.12);color:#CC88FF;      border:1px solid rgba(155,0,255,.25); }
+.drip-con   { background:rgba(255,59,59,.12);color:var(--red);   border:1px solid rgba(255,59,59,.25); }
+
+/* Profile reconstruction */
+.recon-profile {
+  background: rgba(0,0,0,.3); border-radius: 12px; padding: 16px; margin-top: 12px;
+  border: 1px solid rgba(255,59,59,.3);
+  font-family: 'Space Mono', monospace;
+}
+.recon-field { display: flex; gap: 12px; margin-bottom: 8px; align-items: center; }
+.recon-key   { font-size: 10px; color: var(--text-dim); width: 110px; flex-shrink: 0; }
+.recon-val   { font-size: 11px; font-weight: 700; color: var(--red); }
+.recon-conf  { font-size: 9px; color: var(--text-dim); margin-left: auto; }
+
+/* =============================================
+   SCREEN 5 — REFLECTION / SCORE
+   ============================================= */
+#s5 {
+  background: radial-gradient(ellipse at 40% 50%, #0D280A 0%, #07060F 55%);
+}
+.reflect-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 8px; }
+.score-card {
+  background: linear-gradient(160deg,#121030,#0E0C26);
+  border: 1px solid rgba(0,255,136,.2);
+  border-radius: 24px; padding: 28px; text-align: center;
+  position: sticky; top: 24px;
+  box-shadow: 0 0 60px rgba(0,255,136,.08);
+}
+.score-grade {
+  width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 16px;
+  background: conic-gradient(var(--green) 0%, var(--green) 70%, rgba(255,255,255,.07) 70%);
+  display: flex; align-items: center; justify-content: center; position: relative;
+}
+.score-grade::before {
+  content: ''; width: 80px; height: 80px; border-radius: 50%;
+  background: #0E0C26; position: absolute;
+}
+.score-grade-inner {
+  position: relative; z-index: 1;
+  font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--green);
+}
+.score-num  { font-family:'Space Mono',monospace; font-size: 52px; font-weight: 700; color: var(--green); margin-bottom: 4px; animation: glowGold 2s ease infinite; }
+.score-label{ font-size: 13px; font-weight: 800; color: var(--text-dim); margin-bottom: 20px; letter-spacing: 1px; }
+.score-rank {
+  background: rgba(0,255,136,.08); border: 1px solid rgba(0,255,136,.2);
+  border-radius: 12px; padding: 12px; margin-bottom: 16px;
+}
+.score-rank-label { font-size: 10px; font-weight: 900; color: var(--green); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.score-rank-title { font-family:'Fredoka One',cursive; font-size: 18px; color: var(--text); }
+.score-breakdown { text-align: left; }
+.score-bd-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 800; }
+.score-bd-row:last-child { border-bottom: none; }
+.score-bd-label { color: var(--text-dim); }
+.score-bd-val   { font-family:'Space Mono',monospace; }
+
+/* Reflection items */
+.reflect-list { display: flex; flex-direction: column; gap: 12px; }
+.reflect-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px;
+  animation: fadeUp .4s both;
+}
+.reflect-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+.reflect-body { flex: 1; }
+.reflect-action { font-size: 13px; font-weight: 900; color: var(--text); margin-bottom: 3px; }
+.reflect-effect { font-size: 12px; font-weight: 700; color: var(--text-dim); margin-bottom: 3px; }
+.reflect-meaning{ font-size: 11px; font-weight: 700; color: var(--cyan); background: rgba(0,240,255,.07); border-radius: 6px; padding: 5px 8px; display: inline-block; }
+.reflect-arrow  {
+  font-size: 11px; font-weight: 900; color: var(--text-dim);
+  margin: 2px 0; display: flex; align-items: center; gap: 4px;
+}
+.reflect-arrow::before { content:'→'; }
+
+/* =============================================
+   SCREEN 6 — NPC / TED DIALOGUE
+   ============================================= */
+#s6 {
+  background: radial-gradient(ellipse at 60% 40%, #1A1202 0%, #07060F 55%);
+}
+.dialogue-scene {
+  max-width: 700px; margin: 0 auto;
+}
+.dialogue-stage {
+  background: linear-gradient(160deg,#1A1730,#100D24);
+  border: 1px solid rgba(255,230,0,.1);
+  border-radius: 28px; padding: 32px; margin-bottom: 20px;
+  text-align: center; position: relative; overflow: hidden;
+  animation: popIn .5s both;
+}
+.dialogue-bg-glow {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,230,0,.08) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.dialogue-chars { display: flex; justify-content: center; align-items: flex-end; gap: 40px; margin-bottom: 24px; position: relative; }
+.d-char { text-align: center; }
+.d-char-ava {
+  font-size: 64px; margin-bottom: 8px; display: block;
+  animation: bob 2.2s ease-in-out infinite;
+}
+.d-char-name { font-family:'Fredoka One',cursive; font-size: 16px; color: var(--text-dim); }
+.d-char-role { font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+.d-char.active .d-char-name { color: var(--gold); }
+.d-char.active .d-char-ava  { filter: drop-shadow(0 0 20px var(--gold)); }
+
+.dialogue-box {
+  background: rgba(0,0,0,.4); border-radius: 16px; padding: 20px 24px;
+  border: 1px solid rgba(255,230,0,.12); position: relative;
+  min-height: 80px;
+}
+.dialogue-speaker {
+  font-size: 11px; font-weight: 900; color: var(--gold); text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 8px;
+}
+.dialogue-text {
+  font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.65;
+}
+.dialogue-cursor { animation: blink 1s step-end infinite; color: var(--gold); }
+
+.dialogue-choices { display: flex; flex-direction: column; gap: 8px; }
+.d-choice {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 18px; cursor: pointer;
+  transition: all .2s; animation: fadeUp .4s both;
+}
+.d-choice:hover { background: rgba(255,230,0,.08); border-color: rgba(255,230,0,.2); }
+.d-choice-letter {
+  font-family:'Fredoka One',cursive; font-size: 16px; color: var(--gold);
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(255,230,0,.1);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.d-choice-text  { font-size: 14px; font-weight: 800; color: var(--text); }
+.d-choice-effect{ font-size: 11px; font-weight: 700; color: var(--text-dim); margin-top: 2px; }
+
+/* =============================================
+   SCREEN 7 — COMBINATORIAL RISK DEMO
+   ============================================= */
+#s7 {
+  background: radial-gradient(ellipse at 50% 70%, #1A0038 0%, #07060F 55%);
+}
+.combo-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+.combo-card {
+  border-radius: 20px; padding: 22px;
+  animation: popIn .5s both;
+}
+.combo-card.dark { background: rgba(255,255,255,.03); border: 1px solid var(--border); }
+.combo-card.full { grid-column: 1/-1; }
+.combo-card-title { font-family:'Fredoka One',cursive; font-size: 18px; margin-bottom: 8px; }
+.combo-card-sub   { font-size: 12px; font-weight: 700; color: var(--text-dim); margin-bottom: 16px; line-height: 1.6; }
+
+/* combo nodes */
+.node-graph { display: flex; flex-direction: column; gap: 16px; }
+.node-row   { display: flex; align-items: center; gap: 8px; }
+.node {
+  padding: 8px 14px; border-radius: 50px; font-size: 12px; font-weight: 800;
+  font-family:'Space Mono',monospace; white-space: nowrap;
+}
+.node-id  { background:rgba(0,240,255,.12);color:var(--cyan);  border:1px solid rgba(0,240,255,.3); }
+.node-loc { background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.3); }
+.node-beh { background:rgba(155,0,255,.12);color:#CC88FF;      border:1px solid rgba(155,0,255,.3); }
+.node-con { background:rgba(255,59,59,.12);color:var(--red);   border:1px solid rgba(255,59,59,.3); }
+.node-sch { background:rgba(255,45,107,.12);color:var(--pink); border:1px solid rgba(255,45,107,.3);}
+.node-arrow { color: var(--text-dim); font-size: 18px; flex-shrink: 0; }
+.node-result {
+  padding: 8px 16px; border-radius: 50px; font-size: 12px; font-weight: 800;
+  font-family:'Space Mono',monospace; animation: pulse 2s ease infinite;
+}
+.node-result.crit { background:rgba(255,59,59,.18);color:var(--red);border:1px solid rgba(255,59,59,.4); }
+.node-result.high { background:rgba(255,45,107,.18);color:var(--pink);border:1px solid rgba(255,45,107,.4); }
+.node-result.med  { background:rgba(255,140,0,.18);color:var(--orange);border:1px solid rgba(255,140,0,.4); }
+
+.risk-meter {
+  display: flex; gap: 3px; margin-top: 8px; height: 8px;
+}
+.risk-seg {
+  flex: 1; border-radius: 2px; background: rgba(255,255,255,.07);
+  transition: background .4s;
+}
+.risk-seg.lit { }
+
+/* info callout */
+.callout {
+  border-radius: 14px; padding: 14px 16px; margin-top: 16px;
+  font-size: 13px; font-weight: 700; line-height: 1.65;
+}
+.callout.cyan   { background:rgba(0,240,255,.07);border:1px solid rgba(0,240,255,.2);color:var(--cyan); }
+.callout.purple { background:rgba(155,0,255,.07);border:1px solid rgba(155,0,255,.2);color:#CC88FF; }
+.callout.gold   { background:rgba(255,230,0,.07);border:1px solid rgba(255,230,0,.2);color:var(--gold); }
+
+/* =============================================
+   MISC SHARED
+   ============================================= */
+h2.section-title {
+  font-family:'Fredoka One',cursive;
+  font-size: clamp(28px, 4vw, 40px);
+  margin-bottom: 8px;
+  animation: fadeUp .5s both;
+}
+p.section-desc {
+  font-size: 14px; font-weight: 700; color: var(--text-dim);
+  line-height: 1.7; max-width: 700px; margin-bottom: 28px;
+  animation: fadeUp .5s .1s both;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 50px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.mono { font-family:'Space Mono',monospace; }
+.text-cyan   { color: var(--cyan); }
+.text-purple { color: #CC88FF; }
+.text-gold   { color: var(--gold); }
+.text-green  { color: var(--green); }
+.text-red    { color: var(--red); }
+.text-orange { color: var(--orange); }
+.text-pink   { color: var(--pink); }
+.text-dim    { color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- ==========================================
+     NAV SIDEBAR
+     ========================================== -->
+<nav class="nav-sidebar">
+  <div class="nav-logo">Privapals</div>
+  <div class="nav-sub">Concept Screens</div>
+
+  <div class="nav-label">Intro</div>
+  <div class="nav-item active" onclick="goTo('s1',this)">
+    <div class="nav-dot"></div> Title Screen
+    <span class="nav-num">01</span>
+  </div>
+  <div class="nav-item" onclick="goTo('s2',this)">
+    <div class="nav-dot"></div> Character Profile
+    <span class="nav-num">02</span>
+  </div>
+
+  <div class="nav-label">Gameplay</div>
+  <div class="nav-item" onclick="goTo('s3',this)">
+    <div class="nav-dot"></div> Signup Form
+    <span class="nav-num">03</span>
+  </div>
+  <div class="nav-item" onclick="goTo('s6',this)">
+    <div class="nav-dot"></div> NPC Dialogue
+    <span class="nav-num">04</span>
+  </div>
+  <div class="nav-item" onclick="goTo('s7',this)">
+    <div class="nav-dot"></div> Combo Risk Map
+    <span class="nav-num">05</span>
+  </div>
+
+  <div class="nav-label">Results</div>
+  <div class="nav-item" onclick="goTo('s4',this)">
+    <div class="nav-dot"></div> Consequence Reveal
+    <span class="nav-num">06</span>
+  </div>
+  <div class="nav-item" onclick="goTo('s5',this)">
+    <div class="nav-dot"></div> Reflection & Score
+    <span class="nav-num">07</span>
+  </div>
+
+  <div class="nav-footer">🔒 Signup Guardian<br>Full Production Spec</div>
+</nav>
+
+<!-- ==========================================
+     MAIN AREA
+     ========================================== -->
+<main class="main">
+
+<!-- ==========================================  S1: TITLE SCREEN -->
+<section class="screen-panel active" id="s1">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 01 — Title / Splash</div>
+    <div class="s1-hero">
+      <div class="s1-left">
+        <div class="s1-eyebrow">Privapals Presents</div>
+        <div class="s1-title">Signup<br>Guardian</div>
+        <div class="s1-tagline">You're not entering your own info — you're protecting someone else's. Every choice reveals more than you think.</div>
+        <div class="s1-badges">
+          <span class="s1-badge badge-cyan">Ages 10–16</span>
+          <span class="s1-badge badge-purple">Data Privacy</span>
+          <span class="s1-badge badge-gold">Decision Making</span>
+          <span class="s1-badge badge-green">Interactive</span>
+        </div>
+        <div class="s1-btns">
+          <button class="btn btn-cyan">▶ Start Mission</button>
+          <button class="btn btn-ghost">📖 How to Play</button>
+        </div>
+      </div>
+
+      <div class="s1-right">
+        <!-- Main character card -->
+        <div class="character-card char-main">
+          <div class="char-avatar" style="background:rgba(0,240,255,.12);border:3px solid var(--cyan);">🦊</div>
+          <div class="char-name" style="background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">T.E.D.</div>
+          <div class="char-role">Your Privacy Guide</div>
+          <div class="char-stat">
+            <div class="char-stat-label text-dim">Wisdom</div>
+            <div class="char-stat-bar"><div class="char-stat-fill" style="width:90%;background:var(--cyan)"></div></div>
+          </div>
+          <div class="char-stat">
+            <div class="char-stat-label text-dim">Speed</div>
+            <div class="char-stat-bar"><div class="char-stat-fill" style="width:55%;background:var(--purple)"></div></div>
+          </div>
+          <div class="char-stat">
+            <div class="char-stat-label text-dim">Stealth</div>
+            <div class="char-stat-bar"><div class="char-stat-fill" style="width:80%;background:var(--green)"></div></div>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="char-mini-text text-dim"><em>"Just because you <strong style="color:var(--cyan)">have</strong> info doesn't mean you should <strong style="color:var(--red)">share</strong> it."</em></div>
+        </div>
+
+        <!-- Floating stat badge 1 -->
+        <div class="character-card char-badge1">
+          <div class="char-emoji">🧑</div>
+          <div class="char-mini-text" style="color:var(--gold);font-weight:900;font-size:13px">PIXEL</div>
+          <div class="char-mini-text">Your Character</div>
+        </div>
+
+        <!-- Floating stat badge 2 -->
+        <div class="character-card char-badge2">
+          <div style="font-size:20px;text-align:center;margin-bottom:6px">🔐</div>
+          <div class="char-mini-text" style="font-size:10px;text-align:center;color:var(--green)">PRIVACY SCORE</div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;color:var(--green);text-align:center;font-weight:700">100</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S2: CHARACTER PROFILE -->
+<section class="screen-panel" id="s2">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 02 — Character Profile Viewer</div>
+    <h2 class="section-title">Meet <span class="text-cyan">Pixel</span> — Your Character</h2>
+    <p class="section-desc">You've been assigned Pixel's profile. You have <em>way</em> more info than you need. Figure out what to use — and what to protect.</p>
+
+    <div class="profile-layout">
+      <!-- Sidebar -->
+      <div class="profile-sidebar">
+        <div class="profile-card">
+          <div class="profile-avatar-ring">🧑</div>
+          <div class="profile-name">Pixel J. Rivera</div>
+          <div class="profile-handle">@pixel_rv · She/Her</div>
+          <div class="profile-tags">
+            <span class="profile-tag badge-cyan">Age 14</span>
+            <span class="profile-tag badge-purple">Grade 9</span>
+            <span class="profile-tag badge-green">Low Risk</span>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="profile-quick">
+            <div class="profile-quick-row"><span>City</span><strong>Maplewood, OH</strong></div>
+            <div class="profile-quick-row"><span>School</span><strong>Westridge MS</strong></div>
+            <div class="profile-quick-row"><span>Fav Game</span><strong>StarForge</strong></div>
+          </div>
+          <div class="profile-divider"></div>
+          <div class="ted-bubble">
+            <div class="ted-ava">🦊</div>
+            <div class="ted-body">
+              <div class="ted-name">T.E.D. says</div>
+              <div class="ted-text">Tap any category to see the data. <strong>Think before you use it.</strong> Some fields look harmless — but together they can give everything away.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data categories -->
+      <div class="data-grid">
+        <!-- BASIC IDENTITY -->
+        <div class="data-category" style="animation-delay:.05s">
+          <div class="data-cat-header" onclick="toggleCat(this)">
+            <div class="data-cat-icon" style="background:rgba(0,240,255,.1)">👤</div>
+            <div class="data-cat-title">Basic Identity</div>
+            <span class="data-cat-badge badge-cyan">6 fields</span>
+            <div class="data-cat-chevron">▼</div>
+          </div>
+          <div class="data-cat-body open">
+            <div class="data-item">
+              <div class="data-item-label">First Name</div>
+              <div class="data-item-value">Pixel</div>
+              <div class="data-item-risk risk-low" title="Low Risk">✓</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Last Name</div>
+              <div class="data-item-value">Rivera</div>
+              <div class="data-item-risk risk-med" title="Medium Risk">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Username Suggestion</div>
+              <div class="data-item-value">pixel_rv_2010</div>
+              <div class="data-item-risk risk-med" title="Encodes birth year">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Date of Birth</div>
+              <div class="data-item-value">May 3, 2010</div>
+              <div class="data-item-risk risk-high" title="High Risk">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Age</div>
+              <div class="data-item-value">14</div>
+              <div class="data-item-risk risk-med">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Gender</div>
+              <div class="data-item-value">She/Her</div>
+              <div class="data-item-risk risk-low">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTACT INFO -->
+        <div class="data-category" style="animation-delay:.1s">
+          <div class="data-cat-header" onclick="toggleCat(this)">
+            <div class="data-cat-icon" style="background:rgba(255,140,0,.1)">📬</div>
+            <div class="data-cat-title">Contact Information</div>
+            <span class="data-cat-badge" style="background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.25)">4 fields · Sensitive</span>
+            <div class="data-cat-chevron">▶</div>
+          </div>
+          <div class="data-cat-body">
+            <div class="data-item">
+              <div class="data-item-label">Email</div>
+              <div class="data-item-value">pixel@mail.me</div>
+              <div class="data-item-risk risk-med">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Phone Number</div>
+              <div class="data-item-value">614-555-0192</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Home Address</div>
+              <div class="data-item-value">742 Elm St, Apt 4B</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Parent/Guardian Email</div>
+              <div class="data-item-value">mrivera@work.io</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOCATION -->
+        <div class="data-category" style="animation-delay:.15s">
+          <div class="data-cat-header" onclick="toggleCat(this)">
+            <div class="data-cat-icon" style="background:rgba(255,45,107,.1)">📍</div>
+            <div class="data-cat-title">Location Data</div>
+            <span class="data-cat-badge badge-pink">5 fields</span>
+            <div class="data-cat-chevron">▶</div>
+          </div>
+          <div class="data-cat-body">
+            <div class="data-item">
+              <div class="data-item-label">City</div>
+              <div class="data-item-value">Maplewood</div>
+              <div class="data-item-risk risk-low">✓</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">State</div>
+              <div class="data-item-value">Ohio</div>
+              <div class="data-item-risk risk-low">✓</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">ZIP Code</div>
+              <div class="data-item-value">44107</div>
+              <div class="data-item-risk risk-med">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Neighborhood</div>
+              <div class="data-item-value">Riverdale Heights</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Frequently Visited Places</div>
+              <div class="data-item-value">Maple Park, GreenMall, Library</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCHOOL INFO -->
+        <div class="data-category" style="animation-delay:.2s">
+          <div class="data-cat-header" onclick="toggleCat(this)">
+            <div class="data-cat-icon" style="background:rgba(155,0,255,.1)">🏫</div>
+            <div class="data-cat-title">School Information</div>
+            <span class="data-cat-badge badge-purple">CRITICAL SENSITIVE</span>
+            <div class="data-cat-chevron">▶</div>
+          </div>
+          <div class="data-cat-body">
+            <div class="data-item">
+              <div class="data-item-label">School Name</div>
+              <div class="data-item-value">Westridge Middle</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Grade Level</div>
+              <div class="data-item-value">9th Grade</div>
+              <div class="data-item-risk risk-med">!</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">Teacher Name</div>
+              <div class="data-item-value">Ms. Okafor</div>
+              <div class="data-item-risk risk-high">⚠</div>
+            </div>
+            <div class="data-item">
+              <div class="data-item-label">School Mascot</div>
+              <div class="data-item-value">Wildcats</div>
+              <div class="data-item-risk risk-med">!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESTRICTED -->
+        <div class="data-category" style="animation-delay:.25s;border-color:rgba(255,45,107,.2);">
+          <div class="data-cat-header" onclick="triggerRestricted(this)" style="background:rgba(255,45,107,.05)">
+            <div class="data-cat-icon" style="background:rgba(255,45,107,.15)">🚫</div>
+            <div class="data-cat-title" style="color:var(--pink)">Highly Sensitive — RESTRICTED</div>
+            <span class="data-cat-badge badge-pink">DO NOT USE</span>
+            <div class="data-cat-chevron" style="color:var(--pink)">▶</div>
+          </div>
+          <div class="data-cat-body" id="restricted-body">
+            <div style="text-align:center;padding:20px 0">
+              <div style="font-size:36px;margin-bottom:8px;animation:glowRed 2s ease infinite;display:inline-block">🔒</div>
+              <div style="font-size:13px;font-weight:800;color:var(--red);margin-bottom:4px">ACCESS BLOCKED</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text-dim)">SSN, Financial Info, Medical IDs — Never use these.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S3: SIGNUP FORM -->
+<section class="screen-panel" id="s3">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 03 — Interactive Signup Form</div>
+    <h2 class="section-title">🎮 Fill Out <span class="text-gold">GameZone</span> Registration</h2>
+    <p class="section-desc">Choose wisely. Required fields are marked ★. Everything else is optional — that means you can skip it.</p>
+
+    <div class="form-layout">
+      <!-- FORM -->
+      <div>
+        <div class="form-card">
+          <div class="form-title-row">
+            <div style="font-size:32px">🎮</div>
+            <div>
+              <div class="form-site-logo">GameZone</div>
+              <div class="form-site-name">Create Your Account</div>
+            </div>
+            <div class="form-site-lock">🔒 Secure</div>
+          </div>
+
+          <div class="form-section-head">★ Required</div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Username ★</label>
+              <input class="form-input safe" value="pixel_gamer" readonly>
+              <div class="risk-inline ok">✓ Good choice — no real name or birth year used.</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Email ★</label>
+              <input class="form-input" placeholder="your@email.com" value="">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Password ★</label>
+            <input class="form-input" type="password" placeholder="Create a strong password" value="••••••••••">
+          </div>
+
+          <div class="form-section-head">Optional Fields</div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">First Name <span class="form-label-optional">Optional</span></label>
+              <input class="form-input risk-flagged" value="Pixel" readonly>
+              <div class="risk-inline danger">⚠ Using real name increases identity exposure.</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Date of Birth <span class="form-label-optional">Optional</span></label>
+              <input class="form-input risk-warn" value="May 3, 2010" readonly>
+              <div class="risk-inline warn">! Exact DOB is rarely needed — try just birth year.</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Location <span class="form-label-optional">Optional</span></label>
+            <input class="form-input" placeholder="City or region (keep it broad)" value="Ohio">
+          </div>
+
+          <div class="form-section-head">Privacy Settings</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Enable Personalized Tracking</div>
+              <div class="toggle-desc">Let GameZone track your play habits for "better recommendations"</div>
+            </div>
+            <div class="toggle-switch on" onclick="toggleSwitch(this)">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Share Data with Partners</div>
+              <div class="toggle-desc">Send your info to "trusted advertising partners"</div>
+            </div>
+            <div class="toggle-switch on" onclick="toggleSwitch(this)">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Public Profile</div>
+              <div class="toggle-desc">Make your username visible to all players</div>
+            </div>
+            <div class="toggle-switch off" onclick="toggleSwitch(this)">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <button class="btn btn-gold" style="width:100%;justify-content:center">Submit & See Results →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRIVACY METER -->
+      <div>
+        <div class="pm-card">
+          <div class="pm-title">🛡️ Privacy Meter</div>
+          <div class="pm-sub">Updates as you fill fields</div>
+          <div class="pm-score text-orange">62</div>
+          <div class="pm-score-label">/ 100 Privacy Score</div>
+
+          <div class="pm-dim">
+            <div class="pm-dim-row">
+              <span class="pm-dim-label">Identity</span>
+              <span class="pm-dim-val text-red">HIGH</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:75%;background:var(--red)"></div></div>
+
+            <div class="pm-dim-row">
+              <span class="pm-dim-label">Contact</span>
+              <span class="pm-dim-val text-orange">MED</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:50%;background:var(--orange)"></div></div>
+
+            <div class="pm-dim-row">
+              <span class="pm-dim-label">Location</span>
+              <span class="pm-dim-val text-green">LOW</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:20%;background:var(--green)"></div></div>
+
+            <div class="pm-dim-row">
+              <span class="pm-dim-label">Behavioral</span>
+              <span class="pm-dim-val text-red">HIGH</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:80%;background:var(--red)"></div></div>
+
+            <div class="pm-dim-row">
+              <span class="pm-dim-label">Security</span>
+              <span class="pm-dim-val text-orange">MED</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:45%;background:var(--orange)"></div></div>
+          </div>
+
+          <div class="pm-combo">
+            <div class="pm-combo-title">⚡ Combo Risk Detected</div>
+            <div class="pm-combo-item">Name + Age = identity linkage</div>
+            <div class="pm-combo-item">Tracking ON = behavior profile</div>
+            <div class="pm-combo-item">Partner sharing = ad targeting</div>
+          </div>
+
+          <div class="ted-bubble">
+            <div class="ted-ava">🦊</div>
+            <div class="ted-body">
+              <div class="ted-name">T.E.D.</div>
+              <div class="ted-text">Those two toggles at the top are both <strong>ON by default</strong>. That's not an accident — turn them off!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S6: NPC DIALOGUE -->
+<section class="screen-panel" id="s6">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 04 — NPC Dialogue System</div>
+    <h2 class="section-title">🦊 Meet <span class="text-gold">T.E.D.</span></h2>
+    <p class="section-desc">The Tracker Evidence Detector. T.E.D. appears throughout gameplay to guide you, warn you, and challenge your thinking with real questions.</p>
+
+    <div class="dialogue-scene">
+      <div class="dialogue-stage">
+        <div class="dialogue-bg-glow"></div>
+        <div class="dialogue-chars">
+          <div class="d-char">
+            <span class="d-char-ava">🧑</span>
+            <div class="d-char-name">Pixel</div>
+            <div class="d-char-role">Player Character</div>
+          </div>
+          <div class="d-char active">
+            <span class="d-char-ava" style="animation-delay:.3s">🦊</span>
+            <div class="d-char-name">T.E.D.</div>
+            <div class="d-char-role">Privacy Guide</div>
+          </div>
+        </div>
+        <div class="dialogue-box" id="dbox">
+          <div class="dialogue-speaker">T.E.D.</div>
+          <div class="dialogue-text" id="dtext">
+            Whoa — hold up! I noticed you typed Pixel's <strong style="color:var(--red)">real last name</strong> into that field. GameZone doesn't need that to let you play. Want to change it to something safer?<span class="dialogue-cursor">█</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialogue-choices">
+        <div class="d-choice" onclick="dChoice(0)" style="animation-delay:.1s">
+          <div class="d-choice-letter">A</div>
+          <div>
+            <div class="d-choice-text">Keep the last name — it's fine.</div>
+            <div class="d-choice-effect">⬆ Identity exposure increases. Risk combo triggered.</div>
+          </div>
+        </div>
+        <div class="d-choice" onclick="dChoice(1)" style="animation-delay:.2s">
+          <div class="d-choice-letter">B</div>
+          <div>
+            <div class="d-choice-text">Delete it — just use "Pixel".</div>
+            <div class="d-choice-effect">✅ Smart! First name only reduces linkage risk.</div>
+          </div>
+        </div>
+        <div class="d-choice" onclick="dChoice(2)" style="animation-delay:.3s">
+          <div class="d-choice-letter">C</div>
+          <div>
+            <div class="d-choice-text">Replace it with a made-up name.</div>
+            <div class="d-choice-effect">✅ Also good — transform real info into fictional data.</div>
+          </div>
+        </div>
+        <div class="d-choice" onclick="dChoice(3)" style="animation-delay:.4s">
+          <div class="d-choice-letter">D</div>
+          <div>
+            <div class="d-choice-text">Why does it matter? It's just a game.</div>
+            <div class="d-choice-effect">🦊 T.E.D. wants to explain. [Triggers lesson]</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="d-response" style="display:none;margin-top:16px" class="callout gold">
+        <strong>T.E.D.:</strong> "<span id="d-resp-text"></span>"
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S7: COMBO RISK -->
+<section class="screen-panel" id="s7">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 05 — Combinatorial Risk Map</div>
+    <h2 class="section-title">🔗 How Data <span class="text-purple">Combines</span></h2>
+    <p class="section-desc">Individually, these facts seem harmless. But connect them — and suddenly someone knows exactly who Pixel is, where to find her, and how to reach her.</p>
+
+    <div class="combo-layout">
+      <!-- Combo graph -->
+      <div class="combo-card dark" style="animation-delay:.05s">
+        <div class="combo-card-title text-cyan">Live Combination Engine</div>
+        <div class="combo-card-sub">Each row shows how data points combine to create higher risk.</div>
+        <div class="node-graph">
+          <div class="node-row">
+            <div class="node node-id">Full Name</div>
+            <div class="node-arrow">+</div>
+            <div class="node node-sch">School Name</div>
+            <div class="node-arrow">→</div>
+            <div class="node node-result crit">Identity Certain</div>
+          </div>
+          <div class="node-row">
+            <div class="node node-loc">City</div>
+            <div class="node-arrow">+</div>
+            <div class="node node-sch">School</div>
+            <div class="node-arrow">→</div>
+            <div class="node node-result high">Precise Location</div>
+          </div>
+          <div class="node-row">
+            <div class="node node-beh">Interests</div>
+            <div class="node-arrow">+</div>
+            <div class="node node-beh">Tracking ON</div>
+            <div class="node-arrow">→</div>
+            <div class="node node-result high">Behavior Profile</div>
+          </div>
+          <div class="node-row">
+            <div class="node node-id">Age</div>
+            <div class="node-arrow">+</div>
+            <div class="node node-con">Phone</div>
+            <div class="node-arrow">+</div>
+            <div class="node node-sch">Grade</div>
+            <div class="node-arrow">→</div>
+            <div class="node node-result crit">Contact Minor</div>
+          </div>
+        </div>
+        <div class="callout purple" style="margin-top:16px">
+          <strong>This is the key insight:</strong> small data points alone seem safe. Together, they create a complete picture that anyone could use to find, contact, or target Pixel.
+        </div>
+      </div>
+
+      <!-- Risk score chart -->
+      <div class="combo-card dark" style="animation-delay:.1s">
+        <div class="combo-card-title text-pink">Cumulative Risk Growth</div>
+        <div class="combo-card-sub">See how each additional field raises total exposure — even "optional" ones.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">Username only</span>
+              <span style="font-size:11px;font-weight:900;color:var(--green);font-family:'Space Mono',monospace">5%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:5%;background:var(--green)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">+ First name</span>
+              <span style="font-size:11px;font-weight:900;color:var(--green);font-family:'Space Mono',monospace">18%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:18%;background:var(--green)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">+ Full name + age</span>
+              <span style="font-size:11px;font-weight:900;color:var(--orange);font-family:'Space Mono',monospace">38%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:38%;background:var(--orange)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">+ School name</span>
+              <span style="font-size:11px;font-weight:900;color:var(--orange);font-family:'Space Mono',monospace">62%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:62%;background:var(--orange)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">+ Phone number</span>
+              <span style="font-size:11px;font-weight:900;color:var(--red);font-family:'Space Mono',monospace">84%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:84%;background:var(--red)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:800;color:var(--text-dim)">+ Tracking enabled</span>
+              <span style="font-size:11px;font-weight:900;color:var(--red);font-family:'Space Mono',monospace">97%</span>
+            </div>
+            <div class="pm-bar"><div class="pm-bar-fill" style="width:97%;background:var(--red)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full width callout -->
+      <div class="combo-card dark full" style="animation-delay:.15s">
+        <div class="combo-card-title text-gold">🧠 The Inference Problem</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px">
+          <div style="background:rgba(0,240,255,.05);border:1px solid rgba(0,240,255,.15);border-radius:14px;padding:16px">
+            <div style="font-size:20px;margin-bottom:8px">🔍</div>
+            <div style="font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:6px">Cross-Referencing</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-dim);line-height:1.6">Advertisers can match Pixel's username across multiple platforms using just a few data points.</div>
+          </div>
+          <div style="background:rgba(155,0,255,.05);border:1px solid rgba(155,0,255,.15);border-radius:14px;padding:16px">
+            <div style="font-size:20px;margin-bottom:8px">🤖</div>
+            <div style="font-size:13px;font-weight:800;color:#CC88FF;margin-bottom:6px">AI Inference</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-dim);line-height:1.6">From interests + location, an algorithm can guess income level, family structure, and more — without being told.</div>
+          </div>
+          <div style="background:rgba(255,45,107,.05);border:1px solid rgba(255,45,107,.15);border-radius:14px;padding:16px">
+            <div style="font-size:20px;margin-bottom:8px">🎯</div>
+            <div style="font-size:13px;font-weight:800;color:var(--pink);margin-bottom:6px">Targeting</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-dim);line-height:1.6">With a complete profile, bad actors or advertisers can target Pixel with precision — even across apps she never signed up for.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S4: CONSEQUENCE REVEAL -->
+<section class="screen-panel" id="s4">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 06 — Consequence Reveal</div>
+    <h2 class="section-title">📬 What Happened <span class="text-red">After</span> You Submitted</h2>
+    <p class="section-desc">Based on your decisions, the system triggered real-world consequence simulations. Here's what Pixel experienced.</p>
+
+    <div class="reveal-layout">
+      <!-- Spam simulation -->
+      <div class="reveal-card danger" style="animation-delay:.05s">
+        <div class="reveal-card-icon">📩</div>
+        <div class="reveal-card-title text-red">Spam Flood</div>
+        <div class="reveal-card-body">Because you shared Pixel's <strong>phone number</strong>, it was sold to marketing lists within 48 hours.</div>
+        <div class="spam-inbox">
+          <div class="spam-row" style="animation-delay:.2s">
+            <div class="spam-sender">WIN-PRIZE-NOW</div>
+            <div class="spam-subj">You've been selected, Pixel!</div>
+            <div class="spam-time">2m ago</div>
+          </div>
+          <div class="spam-row" style="animation-delay:.4s">
+            <div class="spam-sender">GameDeals4U</div>
+            <div class="spam-subj">Based on your age, we have...</div>
+            <div class="spam-time">1h ago</div>
+          </div>
+          <div class="spam-row" style="animation-delay:.6s">
+            <div class="spam-sender">ALERT-VERIFY</div>
+            <div class="spam-subj">Unusual login on your account</div>
+            <div class="spam-time">3h ago</div>
+          </div>
+          <div class="spam-row" style="animation-delay:.8s">
+            <div class="spam-sender">SurveyPal</div>
+            <div class="spam-subj">Teen survey: $10 for 10 mins</div>
+            <div class="spam-time">1d ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking visualization -->
+      <div class="reveal-card warn" style="animation-delay:.1s">
+        <div class="reveal-card-icon">🔭</div>
+        <div class="reveal-card-title text-orange">Behavioral Profiling Active</div>
+        <div class="reveal-card-body">You left <strong>Personalized Tracking ON</strong> by default. Here's what GameZone already knows.</div>
+        <div style="margin-top:12px;background:rgba(0,0,0,.3);border-radius:12px;padding:14px">
+          <div style="font-size:10px;font-weight:900;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">INFERRED PROFILE — 48 HRS</div>
+          <div class="recon-field" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px">
+            <div class="recon-key" style="color:var(--text-dim)">Avg session</div>
+            <div class="recon-val" style="color:var(--orange)">2h 14min</div>
+          </div>
+          <div class="recon-field" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px">
+            <div class="recon-key" style="color:var(--text-dim)">Active hours</div>
+            <div class="recon-val" style="color:var(--orange)">3–9 PM weekdays</div>
+          </div>
+          <div class="recon-field" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px">
+            <div class="recon-key" style="color:var(--text-dim)">Device type</div>
+            <div class="recon-val" style="color:var(--orange)">Mobile / tablet</div>
+          </div>
+          <div class="recon-field">
+            <div class="recon-key" style="color:var(--text-dim)">Ad targeting</div>
+            <div class="recon-val" style="color:var(--red)">ACTIVE ●</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data drip -->
+      <div class="reveal-card dark" style="animation-delay:.15s">
+        <div class="reveal-card-icon">💧</div>
+        <div class="reveal-card-title">Data Drip — What Was Shared</div>
+        <div class="reveal-card-body">This is every piece of info that left Pixel's control after the form was submitted.</div>
+        <div class="drip-wrap">
+          <span class="drip-chip drip-id" style="animation-delay:.1s">First Name</span>
+          <span class="drip-chip drip-id" style="animation-delay:.2s">Last Name</span>
+          <span class="drip-chip drip-id" style="animation-delay:.3s">Date of Birth</span>
+          <span class="drip-chip drip-con" style="animation-delay:.4s">Email</span>
+          <span class="drip-chip drip-loc" style="animation-delay:.5s">City</span>
+          <span class="drip-chip drip-beh" style="animation-delay:.6s">Game Interests</span>
+          <span class="drip-chip drip-beh" style="animation-delay:.7s">Session Times</span>
+          <span class="drip-chip drip-beh" style="animation-delay:.8s">Device Info</span>
+          <span class="drip-chip drip-con" style="animation-delay:.9s">Ad Profile</span>
+        </div>
+      </div>
+
+      <!-- Profile reconstruction -->
+      <div class="reveal-card danger" style="animation-delay:.2s">
+        <div class="reveal-card-icon">🧩</div>
+        <div class="reveal-card-title text-red">Profile Reconstruction</div>
+        <div class="reveal-card-body">Using just what was shared, a third party reconstructed this profile — <strong>without ever asking for it directly.</strong></div>
+        <div class="recon-profile">
+          <div style="font-size:10px;font-weight:900;color:var(--red);letter-spacing:2px;margin-bottom:10px">RECONSTRUCTED — CONFIDENCE: 91%</div>
+          <div class="recon-field">
+            <div class="recon-key">Full name</div>
+            <div class="recon-val">Pixel Rivera</div>
+            <div class="recon-conf">91% conf.</div>
+          </div>
+          <div class="recon-field">
+            <div class="recon-key">Age</div>
+            <div class="recon-val">~14 years</div>
+            <div class="recon-conf">94% conf.</div>
+          </div>
+          <div class="recon-field">
+            <div class="recon-key">Location</div>
+            <div class="recon-val">NE Ohio metro</div>
+            <div class="recon-conf">78% conf.</div>
+          </div>
+          <div class="recon-field">
+            <div class="recon-key">School type</div>
+            <div class="recon-val">Middle/High school</div>
+            <div class="recon-conf">89% conf.</div>
+          </div>
+          <div class="recon-field">
+            <div class="recon-key">Active hours</div>
+            <div class="recon-val">After school</div>
+            <div class="recon-conf">96% conf.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================  S5: REFLECTION + SCORE -->
+<section class="screen-panel" id="s5">
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="panel-inner">
+    <div class="screen-label">Screen 07 — Reflection & Score</div>
+    <h2 class="section-title">🏅 Mission <span class="text-green">Complete</span></h2>
+    <p class="section-desc">Every decision you made is connected to a real-world outcome. Here's what your choices meant — and what you learned.</p>
+
+    <div class="reflect-layout">
+      <!-- Reflections -->
+      <div class="reflect-list">
+        <div class="reflect-item" style="animation-delay:.05s;border-color:rgba(0,255,136,.2)">
+          <div class="reflect-icon">✅</div>
+          <div class="reflect-body">
+            <div class="reflect-action">Created a unique username (not real name)</div>
+            <div class="reflect-arrow">Prevented direct identity linking across platforms</div>
+            <div class="reflect-meaning">Real world: Usernames with real names can be cross-referenced to find full profiles on other sites.</div>
+          </div>
+        </div>
+        <div class="reflect-item" style="animation-delay:.1s;border-color:rgba(255,59,59,.2)">
+          <div class="reflect-icon">⚠️</div>
+          <div class="reflect-body">
+            <div class="reflect-action">Used Pixel's full real name in the Name field</div>
+            <div class="reflect-arrow">Combined with DOB → Identity confidence reached 91%</div>
+            <div class="reflect-meaning">Real world: Full name + age is enough for data brokers to build a complete record on someone.</div>
+          </div>
+        </div>
+        <div class="reflect-item" style="animation-delay:.15s;border-color:rgba(255,140,0,.2)">
+          <div class="reflect-icon">🔄</div>
+          <div class="reflect-body">
+            <div class="reflect-action">Left default tracking toggles ON</div>
+            <div class="reflect-arrow">Behavioral profiling began within 24 hours of signup</div>
+            <div class="reflect-meaning">Real world: Defaults are intentionally set to benefit companies, not users. Always check them.</div>
+          </div>
+        </div>
+        <div class="reflect-item" style="animation-delay:.2s;border-color:rgba(0,240,255,.2)">
+          <div class="reflect-icon">💡</div>
+          <div class="reflect-body">
+            <div class="reflect-action">Used "Ohio" instead of full city/ZIP</div>
+            <div class="reflect-arrow">Location exposure stayed low — data kept broad</div>
+            <div class="reflect-meaning">Real world: Broad location (state) is 10x less identifying than a ZIP code. Use the minimum necessary.</div>
+          </div>
+        </div>
+        <div class="reflect-item" style="animation-delay:.25s;border-color:rgba(155,0,255,.2)">
+          <div class="reflect-icon">🚫</div>
+          <div class="reflect-body">
+            <div class="reflect-action">Left phone number field blank</div>
+            <div class="reflect-arrow">Prevented phone-based spam and phishing attempts</div>
+            <div class="reflect-meaning">Real world: Phone numbers are the #1 way personal data is sold to third-party marketers.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="callout cyan">
+            <strong>The Big Takeaway:</strong> "Just because I have access to information doesn't mean I should use it — and even small decisions can combine to reveal much more than I expect."
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:16px">
+          <button class="btn btn-cyan">🔁 Play Again</button>
+          <button class="btn btn-ghost">🏠 Back to Hub</button>
+        </div>
+      </div>
+
+      <!-- Score card -->
+      <div>
+        <div class="score-card">
+          <div class="score-grade">
+            <div class="score-grade-inner">B+</div>
+          </div>
+          <div class="score-num">74</div>
+          <div class="score-label">PRIVACY SCORE</div>
+
+          <div class="score-rank">
+            <div class="score-rank-label">Rank Achieved</div>
+            <div class="score-rank-title">🛡️ Data Defender</div>
+          </div>
+
+          <div class="score-breakdown">
+            <div class="score-bd-row">
+              <div class="score-bd-label">Identity Exposure</div>
+              <div class="score-bd-val text-orange">-18 pts</div>
+            </div>
+            <div class="score-bd-row">
+              <div class="score-bd-label">Contact Safety</div>
+              <div class="score-bd-val text-green">+12 pts</div>
+            </div>
+            <div class="score-bd-row">
+              <div class="score-bd-label">Location Discipline</div>
+              <div class="score-bd-val text-green">+14 pts</div>
+            </div>
+            <div class="score-bd-row">
+              <div class="score-bd-label">Tracking Defaults</div>
+              <div class="score-bd-val text-red">-22 pts</div>
+            </div>
+            <div class="score-bd-row">
+              <div class="score-bd-label">Omission Bonus</div>
+              <div class="score-bd-val text-cyan">+8 pts</div>
+            </div>
+          </div>
+
+          <div class="profile-divider"></div>
+          <div class="ted-bubble">
+            <div class="ted-ava">🦊</div>
+            <div class="ted-body">
+              <div class="ted-name">T.E.D.</div>
+              <div class="ted-text">Great job leaving phone blank! Next time, <strong>turn off those default tracking toggles</strong> and you'll hit 90+. You've got this, Guardian!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ---- Nav switching ----
+function goTo(id, el) {
+  document.querySelectorAll('.screen-panel').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ---- Data category toggle ----
+function toggleCat(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.data-cat-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.textContent = isOpen ? '▶' : '▼';
+}
+
+// ---- Restricted field ----
+function triggerRestricted(header) {
+  const body = document.getElementById('restricted-body');
+  const isOpen = body.classList.contains('open');
+  if (!isOpen) {
+    body.classList.add('open');
+    header.querySelector('.data-cat-chevron').textContent = '▼';
+    // flash warning
+    header.closest('.data-category').style.animation = 'glowRed .4s ease';
+    setTimeout(() => header.closest('.data-category').style.animation = '', 500);
+  } else {
+    body.classList.remove('open');
+    header.querySelector('.data-cat-chevron').textContent = '▶';
+  }
+}
+
+// ---- Toggle switch ----
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+  el.classList.toggle('off');
+}
+
+// ---- Dialogue choices ----
+const responses = [
+  "I get it — it feels harmless. But your last name, combined with your school name, cuts possible identity matches from millions down to maybe a dozen. That's not harmless anymore. Change it.",
+  "Perfect! 🎉 First name only means less data linking. The site can still call you Pixel — it doesn't need your family name to let you play games.",
+  "Smart move! This is called a Transformation Decision. You took real data and made it fictional, keeping the form happy without exposing the truth. That's exactly what a Guardian does.",
+  "I love the question! Even game accounts get sold, merged, or breached. 73% of data breaches expose info entered on 'just a game' — so everything you type becomes a real-world risk."
+];
+const colors = ['danger','gold','gold','cyan'];
+function dChoice(i) {
+  const r = document.getElementById('d-response');
+  const t = document.getElementById('d-resp-text');
+  r.style.display = 'block';
+  r.className = 'callout ' + colors[i];
+  t.textContent = responses[i];
+  document.querySelectorAll('.d-choice').forEach((c,j) => {
+    c.style.opacity = j === i ? '1' : '.4';
+    c.style.transform = j === i ? 'scale(1.01)' : 'scale(1)';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindHack — The Algorithm Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #07060F;
+  --bg2:       #0E0B1E;
+  --card:      #130F26;
+  --card2:     #1A1535;
+  --cyan:      #00F0FF;
+  --purple:    #9B00FF;
+  --purple-d:  #6200AA;
+  --pink:      #FF2D6B;
+  --gold:      #FFE600;
+  --green:     #00FF88;
+  --orange:    #FF8C00;
+  --red:       #FF3B3B;
+  --text:      #ECE8FF;
+  --text-dim:  #7A72A0;
+  --border:    rgba(255,255,255,0.07);
+  --r:         16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden}
+body{font-family:'Nunito',sans-serif;color:var(--text)}
+
+/* ANIMATIONS */
+@keyframes fadeIn    {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn   {from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse     {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.97)}}
+@keyframes glow      {0%,100%{box-shadow:0 0 8px var(--c,var(--cyan))}50%{box-shadow:0 0 22px var(--c,var(--cyan))}}
+@keyframes scanline  {from{top:-8%}to{top:108%}}
+@keyframes eyePulse  {0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes extreme   {0%,100%{background:var(--card2)}50%{background:#1e0a2e}}
+@keyframes shake     {0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes cardIn    {from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes badgePop  {0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes lockOpen  {0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 100% 0)}}
+@keyframes textFlash {0%,100%{color:var(--text)}50%{color:var(--red)}}
+@keyframes bubbleFill{from{width:0}to{width:var(--target)}}
+@keyframes float     {0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* LAYOUT */
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column}
+.hidden{display:none!important}
+
+/* ── TITLE SCREEN ── */
+#screen-title{
+  background:var(--bg);
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+.title-bg{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.grid-line{
+  position:absolute;background:rgba(0,240,255,.04);
+}
+.grid-line.h{width:100%;height:1px}
+.grid-line.v{height:100%;width:1px}
+.scanline-el{
+  position:absolute;left:0;right:0;height:8px;
+  background:linear-gradient(transparent,rgba(0,240,255,.06),transparent);
+  animation:scanline 4s linear infinite;
+  pointer-events:none;
+}
+.title-lock{
+  font-size:52px;margin-bottom:8px;
+  animation:float 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 16px var(--cyan));
+}
+.title-main{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(38px,8vw,62px);
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:2px;margin-bottom:4px;
+  animation:fadeIn .8s ease both;
+}
+.title-sub{
+  font-size:15px;color:var(--text-dim);letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:32px;animation:fadeIn .8s .2s ease both;
+}
+.title-desc{
+  max-width:440px;text-align:center;font-size:14px;line-height:1.7;
+  color:var(--text-dim);margin-bottom:36px;
+  animation:fadeIn .8s .3s ease both;
+}
+.title-tags{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;
+  animation:fadeIn .8s .4s ease both;
+}
+.tag{
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px;
+  border:1px solid;
+}
+.tag-blue{color:var(--cyan);border-color:var(--cyan);background:rgba(0,240,255,.08)}
+.tag-purple{color:#c084fc;border-color:#c084fc;background:rgba(155,0,255,.08)}
+.tag-pink{color:var(--pink);border-color:var(--pink);background:rgba(255,45,107,.08)}
+.btn-start{
+  padding:16px 44px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#000;font-family:'Fredoka One',cursive;font-size:20px;letter-spacing:1px;
+  transition:transform .15s,box-shadow .15s;
+  animation:fadeIn .8s .5s ease both,glow 2s 1.3s infinite;
+  --c:var(--cyan);
+}
+.btn-start:hover{transform:scale(1.05)}
+.btn-start:active{transform:scale(.97)}
+
+/* ── GAME SCREEN ── */
+#screen-game{
+  background:var(--bg);
+  flex-direction:row;
+  overflow:hidden;
+}
+
+/* LEFT PANEL */
+.panel-left{
+  width:240px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  padding:16px;display:flex;flex-direction:column;gap:14px;
+  overflow-y:auto;
+}
+.panel-title{
+  font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.algo-eye{
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:6px;padding:12px;
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);
+  animation:eyePulse 3s ease-in-out infinite;
+}
+.eye-svg{filter:drop-shadow(0 0 6px var(--cyan))}
+.algo-label{font-size:11px;color:var(--text-dim);text-align:center}
+
+/* BUBBLE METER */
+.bubble-meter{
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);padding:12px;
+}
+.meter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.meter-label{font-size:12px;font-weight:700;color:var(--text-dim)}
+.meter-val{font-size:14px;font-weight:800;color:var(--cyan);font-family:'Fredoka One',cursive}
+.meter-track{height:10px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden}
+.meter-fill{
+  height:100%;border-radius:8px;transition:width .6s ease;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));
+}
+.meter-fill.danger{background:linear-gradient(90deg,var(--orange),var(--red))}
+.meter-warn{
+  font-size:11px;color:var(--orange);margin-top:6px;font-weight:700;
+  animation:pulse 1.5s ease-in-out infinite;
+}
+
+/* CATEGORY BARS */
+.cat-section{
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);padding:12px;
+}
+.cat-row{margin-bottom:8px}
+.cat-row:last-child{margin-bottom:0}
+.cat-header{display:flex;justify-content:space-between;margin-bottom:3px}
+.cat-name{font-size:11px;font-weight:700;color:var(--text-dim)}
+.cat-score{font-size:11px;font-weight:800}
+.cat-bar-track{height:6px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+
+/* PROFILE REVEAL */
+.profile-card{
+  background:var(--card);border-radius:var(--r);
+  border:1px solid rgba(155,0,255,.3);padding:12px;
+}
+.profile-title{font-size:11px;font-weight:800;color:#c084fc;margin-bottom:8px}
+.profile-item{font-size:11px;color:var(--text-dim);margin-bottom:4px;line-height:1.5}
+.profile-item span{color:var(--text);font-weight:700}
+
+/* EXTREMITY WARNING */
+.extreme-warn{
+  background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.3);
+  border-radius:var(--r);padding:10px;
+  font-size:11px;color:var(--red);font-weight:700;text-align:center;
+  animation:pulse 1s ease-in-out infinite;
+}
+
+/* FEED */
+.feed-container{
+  flex:1;overflow-y:auto;padding:16px;
+  scroll-behavior:smooth;
+}
+.feed-container::-webkit-scrollbar{width:4px}
+.feed-container::-webkit-scrollbar-track{background:transparent}
+.feed-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* FEED HEADER */
+.feed-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;padding:10px 14px;
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);
+  position:sticky;top:0;z-index:5;backdrop-filter:blur(8px);
+}
+.feed-logo{font-family:'Fredoka One',cursive;font-size:18px;color:var(--cyan)}
+.feed-post-count{font-size:12px;color:var(--text-dim)}
+
+/* POST CARD */
+.post-card{
+  background:var(--card2);border-radius:var(--r);
+  border:1px solid var(--border);
+  margin-bottom:12px;overflow:hidden;
+  animation:cardIn .35s ease both;
+  transition:border-color .3s;
+}
+.post-card.extreme-1{border-color:rgba(255,140,0,.2)}
+.post-card.extreme-2{border-color:rgba(255,59,59,.3);animation:extreme 3s ease-in-out infinite,cardIn .35s ease both}
+.post-card.extreme-3{border-color:rgba(255,0,0,.5);animation:extreme 1.5s ease-in-out infinite,cardIn .35s ease both}
+
+/* POST BANNER */
+.post-banner{
+  height:120px;display:flex;align-items:center;justify-content:center;
+  font-size:48px;position:relative;overflow:hidden;
+}
+.post-banner::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 40%,var(--card2));
+}
+.post-overlay-text{
+  position:absolute;bottom:8px;left:12px;right:12px;
+  font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  z-index:2;
+}
+
+/* POST CONTENT */
+.post-body{padding:12px}
+.post-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.post-avatar{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;
+}
+.post-user{font-size:12px;font-weight:700}
+.post-time{font-size:11px;color:var(--text-dim)}
+.post-category{
+  margin-left:auto;font-size:10px;font-weight:800;letter-spacing:1px;
+  padding:3px 8px;border-radius:10px;text-transform:uppercase;
+}
+.post-title{font-size:14px;font-weight:800;line-height:1.4;margin-bottom:6px}
+.post-desc{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:12px}
+.post-actions{display:flex;gap:8px}
+.action-btn{
+  flex:1;padding:9px 0;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  transition:transform .12s,opacity .12s;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.action-btn:hover{transform:scale(1.04)}
+.action-btn:active{transform:scale(.96);opacity:.8}
+.btn-engage{background:rgba(0,240,255,.12);color:var(--cyan);border:1px solid rgba(0,240,255,.2)}
+.btn-engage:hover{background:rgba(0,240,255,.2)}
+.btn-skip{background:rgba(255,255,255,.06);color:var(--text-dim);border:1px solid var(--border)}
+.btn-skip:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.btn-report{background:rgba(255,59,59,.1);color:var(--red);border:1px solid rgba(255,59,59,.2)}
+.btn-report:hover{background:rgba(255,59,59,.2)}
+
+/* ALGORITHM NUDGE */
+.algo-nudge{
+  background:rgba(155,0,255,.08);border:1px solid rgba(155,0,255,.2);
+  border-radius:10px;padding:8px 12px;margin-bottom:12px;
+  font-size:11px;color:#c084fc;font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* RIGHT PANEL */
+.panel-right{
+  width:220px;flex-shrink:0;
+  background:var(--bg2);
+  border-left:1px solid var(--border);
+  padding:16px;display:flex;flex-direction:column;gap:14px;
+  overflow-y:auto;
+}
+
+/* ESCAPE ZONE */
+.escape-zone{
+  background:rgba(0,255,136,.05);
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:var(--r);padding:14px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.escape-title{font-size:12px;font-weight:800;color:var(--green)}
+.escape-desc{font-size:11px;color:var(--text-dim);line-height:1.5}
+.escape-progress{display:flex;gap:6px;justify-content:center}
+.escape-dot{
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+  transition:all .3s;
+}
+.escape-dot.filled{background:var(--green);border-color:var(--green);color:#000;font-weight:800}
+.btn-escape{
+  padding:10px;border-radius:10px;border:1px solid rgba(0,255,136,.3);
+  background:rgba(0,255,136,.08);color:var(--green);
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  cursor:pointer;transition:all .15s;
+}
+.btn-escape:hover{background:rgba(0,255,136,.15)}
+.btn-escape:disabled{opacity:.3;cursor:not-allowed}
+
+/* LESSON SIDEBAR */
+.lesson-card{
+  background:var(--card);border-radius:var(--r);
+  border:1px solid var(--border);padding:12px;
+}
+.lesson-heading{font-size:11px;font-weight:800;color:var(--gold);margin-bottom:8px}
+.lesson-item{
+  font-size:11px;color:var(--text-dim);line-height:1.5;margin-bottom:6px;
+  padding-left:12px;position:relative;
+}
+.lesson-item::before{content:'▸';position:absolute;left:0;color:var(--gold)}
+.lesson-item.active::before{color:var(--cyan)}
+.lesson-item.active{color:var(--text)}
+
+/* POST COUNT BADGE */
+.post-count-badge{
+  position:fixed;top:16px;right:240px;z-index:20;
+  background:var(--purple);color:white;border-radius:20px;
+  padding:4px 12px;font-size:12px;font-weight:800;
+  box-shadow:0 0 12px var(--purple);
+  pointer-events:none;
+}
+
+/* ── END SCREENS ── */
+#screen-escape,#screen-trapped{
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  background:var(--bg);
+  overflow-y:auto;padding:32px 20px;
+}
+.end-icon{font-size:64px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+.end-title{
+  font-family:'Fredoka One',cursive;font-size:clamp(28px,6vw,44px);
+  text-align:center;margin-bottom:8px;
+}
+.end-sub{font-size:14px;color:var(--text-dim);text-align:center;margin-bottom:24px;max-width:480px;line-height:1.6}
+.data-profile{
+  width:min(520px,90%);background:var(--card2);
+  border-radius:var(--r);border:1px solid var(--border);
+  padding:20px;margin-bottom:24px;
+}
+.data-profile-title{
+  font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:14px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.data-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:13px;
+}
+.data-key{color:var(--text-dim)}
+.data-val{font-weight:700;font-size:12px;padding:3px 10px;border-radius:8px}
+.data-val.hi{background:rgba(255,59,59,.15);color:var(--red)}
+.data-val.med{background:rgba(255,140,0,.12);color:var(--orange)}
+.data-val.lo{background:rgba(0,255,136,.1);color:var(--green)}
+.insight-block{
+  width:min(520px,90%);
+  background:rgba(0,240,255,.04);border:1px solid rgba(0,240,255,.15);
+  border-radius:var(--r);padding:16px;margin-bottom:24px;
+}
+.insight-title{font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:10px}
+.insight-text{font-size:12px;color:var(--text-dim);line-height:1.7}
+.insight-text strong{color:var(--text)}
+.end-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn-replay{
+  padding:14px 32px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#000;font-family:'Fredoka One',cursive;font-size:18px;
+  transition:transform .15s;
+}
+.btn-replay:hover{transform:scale(1.05)}
+.btn-secondary{
+  padding:14px 32px;border-radius:50px;cursor:pointer;
+  background:transparent;color:var(--text);font-family:'Fredoka One',cursive;font-size:18px;
+  border:1px solid rgba(255,255,255,.15);transition:all .15s;
+}
+.btn-secondary:hover{background:rgba(255,255,255,.06)}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:var(--card2);border:1px solid var(--border);
+  padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;
+  z-index:99;opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+/* INSIGHT FLASH */
+.insight-flash{
+  background:rgba(155,0,255,.12);border:1px solid rgba(155,0,255,.3);
+  border-radius:var(--r);padding:14px;margin-bottom:12px;
+  animation:cardIn .35s ease both;
+}
+.insight-flash-title{font-size:12px;font-weight:800;color:#c084fc;margin-bottom:4px}
+.insight-flash-text{font-size:11px;color:var(--text-dim);line-height:1.5}
+
+@media(max-width:900px){
+  .panel-left{width:180px}
+  .panel-right{width:160px}
+}
+@media(max-width:700px){
+  .panel-right{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ TITLE ═══════════════════════ -->
+<div class="screen" id="screen-title">
+  <div class="title-bg" id="titleBg"></div>
+  <div class="scanline-el"></div>
+  <div class="title-lock">🧠</div>
+  <div class="title-main">MindHack</div>
+  <div class="title-sub">The Algorithm Game</div>
+  <div class="title-desc">
+    You're trapped inside a social media feed. The algorithm is watching everything you click.
+    Can you recognize its tricks — and <strong>break free</strong> before it controls everything you see?
+  </div>
+  <div class="title-tags">
+    <span class="tag tag-blue">Ages 9–13</span>
+    <span class="tag tag-purple">Echo Chambers</span>
+    <span class="tag tag-pink">Algorithmic Bias</span>
+    <span class="tag tag-blue">Filter Bubbles</span>
+  </div>
+  <button class="btn-start" onclick="startGame()">Enter the Feed</button>
+</div>
+
+<!-- ═══════════════════════ GAME ═══════════════════════ -->
+<div class="screen hidden" id="screen-game">
+
+  <!-- LEFT: Algorithm monitor -->
+  <div class="panel-left" id="panelLeft">
+    <div class="panel-title">Algorithm Monitor</div>
+
+    <!-- Eye -->
+    <div class="algo-eye" id="algoEye">
+      <svg class="eye-svg" width="60" height="40" viewBox="0 0 60 40">
+        <ellipse cx="30" cy="20" rx="28" ry="18" fill="none" stroke="#00F0FF" stroke-width="1.5"/>
+        <circle id="eyePupil" cx="30" cy="20" r="8" fill="#00F0FF" opacity=".9"/>
+        <circle id="eyeInner" cx="30" cy="20" r="4" fill="#07060F"/>
+        <circle cx="27" cy="17" r="2" fill="rgba(255,255,255,.3)"/>
+      </svg>
+      <div class="algo-label" id="eyeLabel">Observing…</div>
+    </div>
+
+    <!-- Bubble meter -->
+    <div class="bubble-meter">
+      <div class="meter-header">
+        <span class="meter-label">Algorithm Bubble</span>
+        <span class="meter-val" id="bubbleVal">0%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="bubbleFill" style="width:0%"></div>
+      </div>
+      <div class="meter-warn hidden" id="bubbleWarn">⚠ Bubble forming!</div>
+    </div>
+
+    <!-- Category bars -->
+    <div class="cat-section">
+      <div class="panel-title" style="margin-bottom:10px">Your Interest Profile</div>
+      <div id="catBars"></div>
+    </div>
+
+    <!-- Extremity meter -->
+    <div class="bubble-meter">
+      <div class="meter-header">
+        <span class="meter-label">Content Extremity</span>
+        <span class="meter-val" id="extremeVal" style="color:var(--orange)">Low</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="extremeFill" style="width:0%;background:linear-gradient(90deg,var(--gold),var(--red))"></div>
+      </div>
+    </div>
+
+    <!-- Inferred profile -->
+    <div class="profile-card" id="profileCard" style="display:none">
+      <div class="profile-title">🔍 Algorithm Profile Built</div>
+      <div id="profileItems"></div>
+    </div>
+  </div>
+
+  <!-- CENTER: Feed -->
+  <div class="feed-container" id="feedContainer">
+    <div class="feed-header">
+      <span class="feed-logo">FlowFeed</span>
+      <span class="feed-post-count" id="feedPostCount">Post 1 of ∞</span>
+      <span style="font-size:11px;color:var(--text-dim)" id="algoStatus">Algorithm learning…</span>
+    </div>
+    <div id="feedPosts"></div>
+  </div>
+
+  <!-- RIGHT: Escape + Lessons -->
+  <div class="panel-right">
+    <div class="panel-title">Your Mission</div>
+
+    <!-- Escape zone -->
+    <div class="escape-zone" id="escapeZone">
+      <div class="escape-title">🚀 Break the Bubble</div>
+      <div class="escape-desc">Report <strong>3 posts in a row</strong> to escape the algorithm's control.</div>
+      <div class="escape-progress" id="escapeDots">
+        <div class="escape-dot" id="dot0">1</div>
+        <div class="escape-dot" id="dot1">2</div>
+        <div class="escape-dot" id="dot2">3</div>
+      </div>
+    </div>
+
+    <!-- Score -->
+    <div class="lesson-card">
+      <div class="lesson-heading">Score</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--cyan);text-align:center" id="scoreDisplay">0</div>
+      <div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:2px">Awareness points</div>
+    </div>
+
+    <!-- What you're learning -->
+    <div class="lesson-card">
+      <div class="lesson-heading">What You're Learning</div>
+      <div class="lesson-item" id="lesson1">Algorithms track every click</div>
+      <div class="lesson-item" id="lesson2">Feeds are not random</div>
+      <div class="lesson-item" id="lesson3">Echo chambers form slowly</div>
+      <div class="lesson-item" id="lesson4">Reporting can reset the feed</div>
+      <div class="lesson-item" id="lesson5">You can break free</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="lesson-card">
+      <div class="lesson-heading">Session Stats</div>
+      <div class="data-row"><span class="data-key">Engaged</span><span id="statEngage" style="color:var(--cyan);font-weight:700">0</span></div>
+      <div class="data-row"><span class="data-key">Skipped</span><span id="statSkip" style="color:var(--text-dim);font-weight:700">0</span></div>
+      <div class="data-row"><span class="data-key">Reported</span><span id="statReport" style="color:var(--red);font-weight:700">0</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ESCAPE WIN ═══════════════════════ -->
+<div class="screen hidden" id="screen-escape">
+  <div class="end-icon">🎉</div>
+  <div class="end-title" style="color:var(--green)">You Escaped the Bubble!</div>
+  <div class="end-sub">You reported 3 posts in a row and broke the algorithm's grip. Here's what it learned about you before you got free:</div>
+  <div class="data-profile" id="escapeProfile"></div>
+  <div class="insight-block">
+    <div class="insight-title">What really happened</div>
+    <div class="insight-text" id="escapeInsight"></div>
+  </div>
+  <div class="end-btns">
+    <button class="btn-replay" onclick="location.reload()">Play Again</button>
+    <button class="btn-secondary" onclick="showProposal()">See Design Notes</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TRAPPED END ═══════════════════════ -->
+<div class="screen hidden" id="screen-trapped">
+  <div class="end-icon">🔒</div>
+  <div class="end-title" style="color:var(--red)">The Algorithm Won</div>
+  <div class="end-sub">The feed adapted to your behavior and locked you into a bubble. Here's the profile it built — all from your clicks and scrolls:</div>
+  <div class="data-profile" id="trappedProfile"></div>
+  <div class="insight-block">
+    <div class="insight-title">This happens every day</div>
+    <div class="insight-text" id="trappedInsight"></div>
+  </div>
+  <div class="end-btns">
+    <button class="btn-replay" onclick="location.reload()">Try Again</button>
+    <button class="btn-secondary" onclick="showProposal()">See Design Notes</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   DATA — CONTENT LIBRARY
+   Each category has 3 levels of extremity.
+   Level 0 = neutral, 1 = sensational, 2 = conspiratorial/extreme
+   ════════════════════════════════════════════════════ */
+const CATS = {
+  gaming: {
+    name:'Gaming', color:'#7C3AED', bg:'rgba(124,58,237,.15)',
+    emoji:['🎮','👾','🕹️'],
+    posts:[
+      // Level 0
+      {title:'This speedrun is unbelievable to watch',desc:'A player beats the entire game in under 4 minutes using a glitch.',level:0},
+      {title:'New indie game drops and it\'s actually great',desc:'Tiny 2-person studio releases a puzzle game getting 9/10 reviews.',level:0},
+      {title:'Top 5 games to play this weekend',desc:'From relaxing to high-action — something for every type of gamer.',level:0},
+      // Level 1
+      {title:'This game company is secretly manipulating your playtime 🤯',desc:'Documents show timers, streaks, and dark patterns designed to make you play longer.',level:1},
+      {title:'Pay-to-win is ruining gaming and nobody talks about it',desc:'A breakdown of how loot boxes extract money from kids specifically.',level:1},
+      {title:'PROOF: Match outcomes are rigged to keep you frustrated',desc:'Algorithm analysis shows losses are timed to encourage purchases.',level:1},
+      // Level 2
+      {title:'WAKE UP: Every popular game is a data harvesting machine',desc:'They know your schedule, your emotions, your spending patterns.',level:2},
+      {title:'The gaming industry is TARGETING children — here\'s the proof',desc:'Leaked documents reveal psychological manipulation playbooks.',level:2},
+    ]
+  },
+  sports: {
+    name:'Sports', color:'#0891B2', bg:'rgba(8,145,178,.15)',
+    emoji:['⚽','🏀','🏆'],
+    posts:[
+      {title:'Incredible goal scored in last night\'s match',desc:'Watch the play that won the game with 30 seconds remaining.',level:0},
+      {title:'Young athlete breaks the national record',desc:'17-year-old swimmer posts fastest time in over a decade.',level:0},
+      {title:'Behind the scenes: how pro athletes train',desc:'A day in the life of an Olympic sprinter.',level:0},
+      {title:'Refs keep making calls that hurt this team — coincidence?',desc:'The stats don\'t lie. A breakdown of officiating patterns this season.',level:1},
+      {title:'This trade was NOT about sports — it was about money',desc:'The real reason three star players were moved in one week.',level:1},
+      {title:'EXPOSED: League secretly controls which teams make playoffs',desc:'Former insider claims scheduling is designed to maximize ratings.',level:1},
+      {title:'Sports are 100% rigged. Here is every piece of evidence.',desc:'Every controversial call, trade, and result tied together.',level:2},
+      {title:'The whole thing is fake — athletes are actors following a script',desc:'A community of millions believe every game\'s outcome is predetermined.',level:2},
+    ]
+  },
+  food: {
+    name:'Food', color:'#D97706', bg:'rgba(217,119,6,.15)',
+    emoji:['🍕','🍜','🍣'],
+    posts:[
+      {title:'This homemade pasta recipe will change your life',desc:'Three ingredients. Thirty minutes. Better than any restaurant.',level:0},
+      {title:'Street food tour: the best snacks in 10 cities',desc:'Local favorites from Bangkok to Mexico City.',level:0},
+      {title:'5-minute breakfast ideas that are actually filling',desc:'No coffee required — these meals keep you going all morning.',level:0},
+      {title:'Everything you were told about healthy eating is wrong',desc:'The food pyramid was designed by corporations, not scientists.',level:1},
+      {title:'Your favorite snacks contain a chemical they don\'t list',desc:'One ingredient is in 80% of packaged foods and doesn\'t need disclosure.',level:1},
+      {title:'THEY ARE POISONING YOUR FOOD and nobody is stopping them',desc:'FDA data shows contamination levels "technically legal" but dangerous.',level:1},
+      {title:'The entire food industry runs on addiction science applied to children',desc:'Former lab scientist exposes how flavors are engineered for maximum craving.',level:2},
+      {title:'Do NOT eat this until you\'ve seen what\'s really inside it',desc:'The shocking truth about something in every school cafeteria.',level:2},
+    ]
+  },
+  animals: {
+    name:'Animals', color:'#059669', bg:'rgba(5,150,105,.15)',
+    emoji:['🐶','🐱','🦁'],
+    posts:[
+      {title:'Baby otter learning to swim is the best thing you\'ll see today',desc:'Filmed at a wildlife sanctuary — this will make your whole week.',level:0},
+      {title:'Dog reunites with owner after being lost for 2 years',desc:'A heartwarming video that has 40 million views.',level:0},
+      {title:'Incredible animal friendships that shouldn\'t exist',desc:'A cat and a crow. A hippo and a turtle. Unlikely BFFs.',level:0},
+      {title:'What pet food companies are hiding in their ingredients',desc:'The fourth item on most labels isn\'t what you think it is.',level:1},
+      {title:'Pet industry makes billions keeping your animal sick on purpose',desc:'Vets are allegedly trained to upsell treatments animals don\'t need.',level:1},
+      {title:'ALERT: Popular pet food brand found with dangerous levels of lead',desc:'Tested samples from three major brands — results are alarming.',level:1},
+      {title:'Every major animal shelter is lying to you about adoption statistics',desc:'The real numbers are hidden because the truth would end funding.',level:2},
+      {title:'Pet vaccines are experimental and your vet knows it',desc:'They just won\'t say it because their license depends on compliance.',level:2},
+    ]
+  },
+  science: {
+    name:'Science', color:'#7C3AED', bg:'rgba(124,58,237,.12)',
+    emoji:['🔬','🚀','🌍'],
+    posts:[
+      {title:'How a black hole spaghettifies everything near it',desc:'The physics of the most extreme force in the universe — explained simply.',level:0},
+      {title:'Scientists just discovered why some people don\'t get colds',desc:'A genetic variant in about 3% of humans provides surprising resistance.',level:0},
+      {title:'The engineering behind how bridges don\'t fall down',desc:'Tension, compression, and the math that holds everything together.',level:0},
+      {title:'This climate discovery was buried by energy companies',desc:'A 2019 paper that vanished from search results after one week.',level:1},
+      {title:'Scientists are silenced for challenging the official position',desc:'Grant funding is pulled if your results don\'t match the narrative.',level:1},
+      {title:'They KNOW the cure. They won\'t release it.',desc:'A researcher claims suppressed research could end chronic disease in 5 years.',level:1},
+      {title:'Everything taught in school about this topic is deliberate misinformation',desc:'The real science is classified. Here\'s what they don\'t want you to learn.',level:2},
+      {title:'The entire scientific establishment is controlled by three foundations',desc:'Every major journal, university, and health body — same funders.',level:2},
+    ]
+  },
+  trending: {
+    name:'Trending', color:'#DB2777', bg:'rgba(219,39,119,.15)',
+    emoji:['🔥','✨','📱'],
+    posts:[
+      {title:'The app that everyone switched to this month',desc:'Over 10 million downloads in two weeks — here\'s why.',level:0},
+      {title:'This trend started as a joke and became a movement',desc:'What started on one platform spread to every corner of the internet.',level:0},
+      {title:'The creator economy is changing how teens earn money',desc:'Stories of young people building businesses online from nothing.',level:0},
+      {title:'Social media is deliberately making teenagers anxious — leaked docs prove it',desc:'Internal studies showed harm. Platforms chose engagement over safety.',level:1},
+      {title:'Your phone listens to your conversations and sells what it hears',desc:'Three tests that show ads appear minutes after speaking a topic aloud.',level:1},
+      {title:'The algorithm is designed to make you angry because anger = engagement',desc:'Former employee explains the internal metric that drives content decisions.',level:1},
+      {title:'Everything trending right now is manufactured. None of it is organic.',desc:'Influence operations, coordinated posting, bot armies — at scale.',level:2},
+      {title:'You are a product and every interaction you have is a data transaction',desc:'Nothing online is free. The price is always you.',level:2},
+    ]
+  }
+};
+
+const CAT_KEYS = Object.keys(CATS);
+
+/* ════════════════════════════════════════════════════
+   GAME STATE
+   ════════════════════════════════════════════════════ */
+const state = {
+  scores: {gaming:0, sports:0, food:0, animals:0, science:0, trending:0},
+  postCount: 0,
+  engageCount: 0,
+  skipCount: 0,
+  reportCount: 0,
+  reportStreak: 0,
+  bubbleLevel: 0,    // 0-100
+  extremeLevel: 0,   // 0-100
+  awarenessScore: 0,
+  lessonFlags: [false,false,false,false,false],
+  seenInsights: new Set(),
+  topCat: null,
+};
+
+/* ════════════════════════════════════════════════════
+   TITLE SCREEN: build grid background
+   ════════════════════════════════════════════════════ */
+function buildTitleBg(){
+  const bg = document.getElementById('titleBg');
+  for(let i=0;i<12;i++){
+    const h = document.createElement('div');
+    h.className='grid-line h';
+    h.style.top=(i/11*100)+'%';
+    bg.appendChild(h);
+  }
+  for(let i=0;i<16;i++){
+    const v = document.createElement('div');
+    v.className='grid-line v';
+    v.style.left=(i/15*100)+'%';
+    bg.appendChild(v);
+  }
+}
+buildTitleBg();
+
+/* ════════════════════════════════════════════════════
+   START
+   ════════════════════════════════════════════════════ */
+function startGame(){
+  document.getElementById('screen-title').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  buildCatBars();
+  generatePosts(6);
+}
+
+/* ════════════════════════════════════════════════════
+   CATEGORY BARS
+   ════════════════════════════════════════════════════ */
+function buildCatBars(){
+  const el = document.getElementById('catBars');
+  el.innerHTML = '';
+  for(const k of CAT_KEYS){
+    const c = CATS[k];
+    el.innerHTML += `
+      <div class="cat-row">
+        <div class="cat-header">
+          <span class="cat-name">${c.name}</span>
+          <span class="cat-score" id="cscore-${k}" style="color:${c.color}">0</span>
+        </div>
+        <div class="cat-bar-track">
+          <div class="cat-bar-fill" id="cbar-${k}" style="width:0%;background:${c.color}"></div>
+        </div>
+      </div>`;
+  }
+}
+
+function updateCatBars(){
+  const maxScore = Math.max(1, ...Object.values(state.scores));
+  for(const k of CAT_KEYS){
+    const pct = Math.round((state.scores[k]/maxScore)*100);
+    const bar = document.getElementById('cbar-'+k);
+    const scr = document.getElementById('cscore-'+k);
+    if(bar) bar.style.width = pct+'%';
+    if(scr) scr.textContent = state.scores[k];
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   POST GENERATION
+   ════════════════════════════════════════════════════ */
+function pickCategory(){
+  const total = Object.values(state.scores).reduce((a,b)=>a+b,0);
+  if(total < 5 || state.bubbleLevel < 20){
+    return CAT_KEYS[Math.floor(Math.random()*CAT_KEYS.length)];
+  }
+  // bias toward top categories
+  const bias = state.bubbleLevel / 100;
+  const sorted = [...CAT_KEYS].sort((a,b)=>state.scores[b]-state.scores[a]);
+  const r = Math.random();
+  if(r < bias * 0.8) return sorted[0];
+  if(r < bias * 0.9) return sorted[1] || sorted[0];
+  return CAT_KEYS[Math.floor(Math.random()*CAT_KEYS.length)];
+}
+
+function getExtremeLevel(cat){
+  const s = state.scores[cat] || 0;
+  if(s >= 12) return 2;
+  if(s >= 6)  return 1;
+  return 0;
+}
+
+function pickPost(cat){
+  const level = getExtremeLevel(cat);
+  const pool = CATS[cat].posts.filter(p => p.level <= level);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function generatePosts(n){
+  for(let i=0;i<n;i++){
+    const cat = pickCategory();
+    const post = pickPost(cat);
+    renderPost(cat, post);
+  }
+  // Maybe inject an insight
+  if(state.postCount > 0 && state.postCount % 8 === 0){
+    injectInsight();
+  }
+  // Maybe inject algorithm nudge
+  if(state.bubbleLevel > 30 && Math.random() < 0.3){
+    injectNudge();
+  }
+}
+
+let postIdCounter = 0;
+function renderPost(cat, post){
+  state.postCount++;
+  postIdCounter++;
+  const id = postIdCounter;
+  const c = CATS[cat];
+  const emojiPick = c.emoji[Math.floor(Math.random()*c.emoji.length)];
+  const extremeClass = post.level === 2 ? 'extreme-2' : post.level === 1 ? 'extreme-1' : '';
+  const levelLabel = post.level === 2 ? '⚠️ VIRAL' : post.level === 1 ? '🔥 TRENDING' : '🟢 NEW';
+  const user = randomUser();
+
+  const card = document.createElement('div');
+  card.className = 'post-card ' + extremeClass;
+  card.id = 'post-'+id;
+  card.innerHTML = `
+    <div class="post-banner" style="background:${c.bg}">
+      <span style="font-size:44px">${emojiPick}</span>
+      <span class="post-overlay-text" style="color:${c.color}">${levelLabel}</span>
+    </div>
+    <div class="post-body">
+      <div class="post-meta">
+        <div class="post-avatar" style="background:${c.bg};color:${c.color}">${user.initial}</div>
+        <div>
+          <div class="post-user">${user.name}</div>
+          <div class="post-time">${randomTime()}</div>
+        </div>
+        <span class="post-category" style="background:${c.bg};color:${c.color}">${c.name}</span>
+      </div>
+      <div class="post-title">${post.title}</div>
+      <div class="post-desc">${post.desc}</div>
+      <div class="post-actions">
+        <button class="action-btn btn-engage" onclick="engage(${id},'${cat}')">
+          <span style="font-size:14px">👍</span> Engage
+        </button>
+        <button class="action-btn btn-skip" onclick="skipPost(${id},'${cat}')">
+          <span style="font-size:14px">→</span> Skip
+        </button>
+        <button class="action-btn btn-report" onclick="reportPost(${id},'${cat}')">
+          <span style="font-size:14px">🚩</span> Report
+        </button>
+      </div>
+    </div>`;
+  document.getElementById('feedPosts').appendChild(card);
+  updatePostCount();
+}
+
+function injectInsight(){
+  const insightId = 'insight-'+state.postCount;
+  if(state.seenInsights.has(insightId)) return;
+  state.seenInsights.add(insightId);
+  const insights = [
+    {t:'Algorithm adapting',b:'The feed just adjusted based on what you clicked. It\'s building a model of who you are.'},
+    {t:'Your profile is 40% complete',b:'The system now knows enough to start predicting what you\'ll engage with next.'},
+    {t:'Notice anything?',b:'Look at the last 4 posts. They\'re not as varied as the first 4. That\'s the bubble starting.'},
+    {t:'Engagement = data points',b:'Every like, every skip, every second you spend on a post — all recorded and analyzed.'},
+    {t:'The feed is a mirror',b:'It\'s starting to show you more of what you already believe, not what\'s new or challenging.'},
+  ];
+  const pick = insights[Math.floor(Math.random()*insights.length)];
+  const el = document.createElement('div');
+  el.className = 'insight-flash';
+  el.innerHTML = `<div class="insight-flash-title">💡 ${pick.t}</div><div class="insight-flash-text">${pick.b}</div>`;
+  document.getElementById('feedPosts').appendChild(el);
+}
+
+function injectNudge(){
+  if(Math.random()>.5) return;
+  const nudges = [
+    'Showing you more content like what you engaged with.',
+    'Based on your activity, we think you\'ll love this.',
+    'Curated for you based on your interest pattern.',
+    'You tend to engage with posts like these.',
+    'Recommended because of your recent sessions.',
+  ];
+  const el = document.createElement('div');
+  el.className = 'algo-nudge';
+  el.innerHTML = `<span style="font-size:14px">🤖</span> ${nudges[Math.floor(Math.random()*nudges.length)]}`;
+  document.getElementById('feedPosts').appendChild(el);
+}
+
+/* ════════════════════════════════════════════════════
+   ACTIONS
+   ════════════════════════════════════════════════════ */
+function engage(id, cat){
+  disableCard(id);
+  state.engageCount++;
+  state.reportStreak = 0;
+  state.scores[cat] += 3;
+  state.awarenessScore = Math.max(0, state.awarenessScore - 5);
+  updateBubble(+6);
+  updateExtreme();
+  updateCatBars();
+  updateTopCat();
+  updateEye('engaged');
+  updateStats();
+  unlockLesson(0); // algorithms track clicks
+  if(state.scores[cat] >= 6) unlockLesson(1); // feeds not random
+  showToast('Algorithm noted your engagement 📊', 'cyan');
+  flashCard(id, 'cyan');
+  updateEscapeDots();
+  generatePosts(2);
+  maybeShowProfile();
+  checkEndCondition();
+}
+
+function skipPost(id, cat){
+  disableCard(id);
+  state.skipCount++;
+  state.reportStreak = 0;
+  state.scores[cat] += 0.5;
+  state.awarenessScore += 2;
+  updateBubble(+1);
+  updateStats();
+  updateCatBars();
+  unlockLesson(1);
+  showToast('Skipped — but the algorithm still noted it', 'dim');
+  flashCard(id, 'gray');
+  generatePosts(1);
+  updateEscapeDots();
+}
+
+function reportPost(id, cat){
+  disableCard(id);
+  state.reportCount++;
+  state.reportStreak++;
+  state.scores[cat] = Math.max(0, state.scores[cat] - 1);
+  state.awarenessScore += 15;
+  updateBubble(-8);
+  updateStats();
+  updateCatBars();
+  unlockLesson(3); // reporting can reset
+  document.getElementById('scoreDisplay').textContent = state.awarenessScore;
+  showToast('Reported! Bubble level decreased 📉', 'green');
+  flashCard(id, 'red');
+  updateEscapeDots();
+  if(state.reportStreak >= 3){
+    showEscapeWin();
+    return;
+  }
+  generatePosts(2);
+  checkEndCondition();
+}
+
+function disableCard(id){
+  const card = document.getElementById('post-'+id);
+  if(!card) return;
+  card.querySelectorAll('.action-btn').forEach(b=>b.disabled=true);
+  card.style.opacity = '0.5';
+  card.style.pointerEvents = 'none';
+}
+
+function flashCard(id, color){
+  const card = document.getElementById('post-'+id);
+  if(!card) return;
+  const map = {cyan:'rgba(0,240,255,.15)',green:'rgba(0,255,136,.12)',red:'rgba(255,59,59,.12)',gray:'rgba(255,255,255,.04)'};
+  card.style.background = map[color]||map.gray;
+  setTimeout(()=>{card.style.background=''},800);
+}
+
+/* ════════════════════════════════════════════════════
+   METERS + EYE
+   ════════════════════════════════════════════════════ */
+function updateBubble(delta){
+  state.bubbleLevel = Math.max(0, Math.min(100, state.bubbleLevel + delta));
+  const fill = document.getElementById('bubbleFill');
+  const val  = document.getElementById('bubbleVal');
+  const warn = document.getElementById('bubbleWarn');
+  if(fill) fill.style.width = state.bubbleLevel+'%';
+  if(fill) fill.className = 'meter-fill' + (state.bubbleLevel>60?' danger':'');
+  if(val)  val.textContent = Math.round(state.bubbleLevel)+'%';
+  if(warn) warn.classList.toggle('hidden', state.bubbleLevel < 30);
+  if(state.bubbleLevel > 50) unlockLesson(2); // echo chambers form
+  document.getElementById('scoreDisplay').textContent = state.awarenessScore;
+}
+
+function updateExtreme(){
+  const topScore = Math.max(...Object.values(state.scores));
+  state.extremeLevel = Math.min(100, topScore * 5);
+  const fill = document.getElementById('extremeFill');
+  const val  = document.getElementById('extremeVal');
+  if(fill) fill.style.width = state.extremeLevel+'%';
+  const label = state.extremeLevel<30?'Low':state.extremeLevel<60?'Medium':state.extremeLevel<80?'High':'Extreme';
+  const color = state.extremeLevel<30?'var(--green)':state.extremeLevel<60?'var(--gold)':state.extremeLevel<80?'var(--orange)':'var(--red)';
+  if(val){val.textContent=label;val.style.color=color}
+}
+
+function updateEye(action){
+  const pupil = document.getElementById('eyePupil');
+  const label = document.getElementById('eyeLabel');
+  const r = 8 + Math.min(10, state.engageCount * 0.5);
+  if(pupil) pupil.setAttribute('r', r);
+  const labels = {
+    engaged:'Tracking interest…',
+    start:'Observing…'
+  };
+  if(label) label.textContent = labels[action]||'Analyzing behavior…';
+  if(pupil){
+    if(state.bubbleLevel>70) pupil.setAttribute('fill','var(--red)');
+    else if(state.bubbleLevel>40) pupil.setAttribute('fill','var(--orange)');
+    else pupil.setAttribute('fill','var(--cyan)');
+  }
+}
+
+function updateTopCat(){
+  let top = null, topScore = 0;
+  for(const k of CAT_KEYS){
+    if(state.scores[k] > topScore){topScore=state.scores[k];top=k}
+  }
+  state.topCat = top;
+  const status = document.getElementById('algoStatus');
+  if(status && top) status.textContent = `Optimizing for: ${CATS[top].name}`;
+}
+
+function updateStats(){
+  document.getElementById('statEngage').textContent = state.engageCount;
+  document.getElementById('statSkip').textContent   = state.skipCount;
+  document.getElementById('statReport').textContent = state.reportCount;
+  document.getElementById('scoreDisplay').textContent = state.awarenessScore;
+}
+
+function updatePostCount(){
+  const el = document.getElementById('feedPostCount');
+  if(el) el.textContent = `Post ${state.postCount} of ∞`;
+}
+
+/* ════════════════════════════════════════════════════
+   ESCAPE PROGRESS
+   ════════════════════════════════════════════════════ */
+function updateEscapeDots(){
+  for(let i=0;i<3;i++){
+    const dot = document.getElementById('dot'+i);
+    if(dot) dot.className = 'escape-dot' + (state.reportStreak>i?' filled':'');
+  }
+  if(state.reportStreak>0) unlockLesson(4);
+}
+
+/* ════════════════════════════════════════════════════
+   LESSONS
+   ════════════════════════════════════════════════════ */
+function unlockLesson(idx){
+  if(state.lessonFlags[idx]) return;
+  state.lessonFlags[idx] = true;
+  const el = document.getElementById('lesson'+(idx+1));
+  if(el) el.className = 'lesson-item active';
+}
+
+/* ════════════════════════════════════════════════════
+   PROFILE REVEAL
+   ════════════════════════════════════════════════════ */
+function maybeShowProfile(){
+  if(state.engageCount < 5) return;
+  const card = document.getElementById('profileCard');
+  const items = document.getElementById('profileItems');
+  if(!card||!items) return;
+  card.style.display = 'block';
+  const sorted = [...CAT_KEYS].sort((a,b)=>state.scores[b]-state.scores[a]);
+  const top = sorted.slice(0,3).filter(k=>state.scores[k]>0);
+  items.innerHTML = '';
+  const inferences = {
+    gaming:'Likely plays games daily',
+    sports:'Follows specific sports team',
+    food:'Has strong dietary preferences',
+    animals:'Likely pet owner',
+    science:'Interested in technology',
+    trending:'Highly active on social media',
+  };
+  top.forEach(k=>{
+    items.innerHTML += `<div class="profile-item">${inferences[k]}: <span>${CATS[k].name} ×${state.scores[k]}</span></div>`;
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   END CONDITIONS
+   ════════════════════════════════════════════════════ */
+function checkEndCondition(){
+  if(state.bubbleLevel >= 100 && state.postCount >= 20){
+    showTrapped();
+  }
+}
+
+function buildProfileData(container){
+  const sorted = [...CAT_KEYS].sort((a,b)=>state.scores[b]-state.scores[a]);
+  const top = sorted[0];
+  const totalEngage = state.engageCount;
+  const level = getExtremeLevel(top);
+  const levelLabels = ['Low interest','High interest','Extreme interest'];
+
+  const rows = [
+    {k:'Top category', v: top?CATS[top].name:'None', lvl: top&&state.scores[top]>8?'hi':top&&state.scores[top]>3?'med':'lo'},
+    {k:'Content extremity reached', v: ['Neutral','Sensational','Conspiratorial'][level], lvl: level===2?'hi':level===1?'med':'lo'},
+    {k:'Bubble level at end', v: Math.round(state.bubbleLevel)+'%', lvl: state.bubbleLevel>70?'hi':state.bubbleLevel>40?'med':'lo'},
+    {k:'Times you engaged', v: totalEngage, lvl: totalEngage>10?'hi':totalEngage>5?'med':'lo'},
+    {k:'Times you reported', v: state.reportCount, lvl: state.reportCount>5?'lo':state.reportCount>2?'med':'hi'},
+    {k:'Data points collected', v: (totalEngage*3+state.skipCount+state.reportCount*2)+' events', lvl: 'hi'},
+  ];
+  container.innerHTML = `<div class="data-profile-title">Your Algorithmic Profile</div>`;
+  rows.forEach(r=>{
+    container.innerHTML += `<div class="data-row"><span class="data-key">${r.k}</span><span class="data-val ${r.lvl}">${r.v}</span></div>`;
+  });
+}
+
+function showEscapeWin(){
+  document.getElementById('screen-game').classList.add('hidden');
+  const s = document.getElementById('screen-escape');
+  s.classList.remove('hidden');
+  buildProfileData(document.getElementById('escapeProfile'));
+  const top = state.topCat;
+  document.getElementById('escapeInsight').innerHTML =
+    `By reporting 3 posts in a row, you interrupted the algorithm's feedback loop. 
+    <strong>Real platforms make this very hard</strong> — reporting is buried in menus, 
+    and the feed resets instantly when you engage with anything. You were shown 
+    <strong>${state.postCount} posts</strong>, engaged <strong>${state.engageCount} times</strong>, 
+    and the system built a profile predicting your behavior from those alone. 
+    On real apps, this happens within your <strong>first 5 minutes</strong>.`;
+}
+
+function showTrapped(){
+  document.getElementById('screen-game').classList.add('hidden');
+  const s = document.getElementById('screen-trapped');
+  s.classList.remove('hidden');
+  buildProfileData(document.getElementById('trappedProfile'));
+  document.getElementById('trappedInsight').innerHTML =
+    `The algorithm maxed out your bubble. By the end, <strong>over 80% of posts</strong> 
+    came from your top interest category — and the content got more extreme each time you engaged. 
+    This isn't fiction: researchers have documented TikTok and YouTube pushing increasingly 
+    extreme content within <strong>minutes</strong> of engagement. You had <strong>${state.reportCount} chances</strong> 
+    to report and break the loop. The escape mechanic is real — it just requires awareness.`;
+}
+
+function showProposal(){
+  alert('Design Notes:\n\n• Phase 1 (Posts 1–8): Diverse neutral feed\n• Phase 2 (Posts 9–16): Feed biases 70% toward top category\n• Phase 3 (Posts 17+): Content extremity rises, bubble 80%+\n\nLearning objectives met:\n✓ Algorithmic bias\n✓ Echo chambers\n✓ Filter bubbles\n✓ Report/resist mechanics\n✓ Data profiling visibility');
+}
+
+/* ════════════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════════════ */
+const USERS = [
+  {name:'AlexR99',initial:'A'},{name:'TechKid2012',initial:'T'},
+  {name:'GameMaster',initial:'G'},{name:'ScienceFreak',initial:'S'},
+  {name:'TrendWatcher',initial:'T'},{name:'InfoByte',initial:'I'},
+  {name:'PuppyLover',initial:'P'},{name:'SportsFan',initial:'S'},
+  {name:'FoodieKid',initial:'F'},{name:'CuriousMind',initial:'C'},
+];
+function randomUser(){ return USERS[Math.floor(Math.random()*USERS.length)] }
+function randomTime(){
+  const mins = [1,2,3,5,7,12,18,24,30];
+  const m = mins[Math.floor(Math.random()*mins.length)];
+  return m < 60 ? m+'m ago' : Math.floor(m/60)+'h ago';
+}
+
+let toastTimer;
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  clearTimeout(toastTimer);
+  t.textContent = msg;
+  t.style.color = type==='cyan'?'var(--cyan)':type==='green'?'var(--green)':type==='red'?'var(--red)':'var(--text-dim)';
+  t.style.borderColor = type==='cyan'?'rgba(0,240,255,.2)':type==='green'?'rgba(0,255,136,.2)':type==='red'?'rgba(255,59,59,.2)':'var(--border)';
+  t.classList.add('show');
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// patch the typo above
+function updateDocument(){} // noop — scoreDisplay is updated inline
+
+/* ════════════════════════════════════════════════════
+   SCROLL: auto-load more posts
+   ════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  const fc = document.getElementById('feedContainer');
+  if(fc){
+    fc.addEventListener('scroll',()=>{
+      if(fc.scrollTop + fc.clientHeight >= fc.scrollHeight - 300){
+        if(document.getElementById('screen-game') &&
+           !document.getElementById('screen-game').classList.contains('hidden')){
+          generatePosts(3);
+        }
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

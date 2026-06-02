@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataGuard — Privacy Level Concept</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050a14; overflow: hidden; font-family: 'Courier New', monospace; }
+  #canvas { display: block; }
+
+  #hud {
+    position: absolute; top: 0; left: 0; width: 100%; pointer-events: none;
+  }
+  #top-bar {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 18px 24px;
+  }
+  .hud-panel {
+    background: rgba(0,20,40,0.85);
+    border: 1px solid rgba(0,200,255,0.25);
+    border-radius: 6px;
+    padding: 10px 16px;
+    color: #7ecfee;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .hud-title { font-size: 10px; color: rgba(126,207,238,0.5); margin-bottom: 4px; }
+  .hud-val { font-size: 18px; color: #00e5ff; font-weight: bold; }
+  #health-bar-wrap { width: 160px; }
+  #health-label { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  #health-bar-bg { background: rgba(255,60,60,0.15); border-radius: 3px; height: 8px; overflow: hidden; border: 1px solid rgba(255,60,60,0.3); }
+  #health-bar { height: 100%; background: linear-gradient(90deg, #ff4444, #ff8800); border-radius: 3px; transition: width 0.4s; width: 100%; }
+  #threat-list {
+    position: absolute; right: 24px; top: 90px;
+    background: rgba(0,20,40,0.85);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 6px; padding: 12px 16px; color: #7ecfee; font-size: 11px;
+    min-width: 180px;
+  }
+  .threat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .threat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .threat-name { color: #cce8f4; font-size: 11px; letter-spacing: 0.05em; }
+  .threat-status { margin-left: auto; font-size: 10px; }
+  .status-alive { color: #ff5555; }
+  .status-dead { color: #44cc44; text-decoration: line-through; opacity: 0.5; }
+  #minimap-wrap {
+    position: absolute; bottom: 24px; right: 24px;
+    background: rgba(0,20,40,0.9);
+    border: 1px solid rgba(0,200,255,0.25);
+    border-radius: 6px; padding: 10px;
+  }
+  #minimap { display: block; }
+  #minimap-label { font-size: 10px; color: rgba(126,207,238,0.5); text-align: center; margin-top: 6px; letter-spacing: 0.1em; text-transform: uppercase; }
+  #controls-hint {
+    position: absolute; bottom: 24px; left: 24px;
+    background: rgba(0,20,40,0.85);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 6px; padding: 10px 14px; color: #7ecfee; font-size: 11px;
+  }
+  .key { display: inline-block; background: rgba(0,200,255,0.15); border: 1px solid rgba(0,200,255,0.35); border-radius: 3px; padding: 1px 6px; color: #00e5ff; font-size: 11px; }
+  #controls-hint div { margin-bottom: 4px; }
+
+  #overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(2, 8, 20, 0.88);
+    z-index: 10;
+  }
+  #overlay-box {
+    background: rgba(0,18,38,0.97);
+    border: 1px solid rgba(0,200,255,0.3);
+    border-radius: 12px;
+    padding: 32px 40px;
+    max-width: 520px; width: 90%;
+    color: #c9e8f5;
+    text-align: center;
+    pointer-events: all;
+  }
+  #overlay-title {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(0,220,255,0.6); margin-bottom: 6px;
+  }
+  #overlay-enemy-name {
+    font-size: 26px; font-weight: bold; color: #ff6644;
+    margin-bottom: 4px; letter-spacing: 0.05em;
+  }
+  #overlay-enemy-desc {
+    font-size: 12px; color: rgba(200,230,245,0.6); margin-bottom: 24px; line-height: 1.5;
+  }
+  #overlay-question {
+    font-size: 15px; color: #e8f4ff; margin-bottom: 20px; line-height: 1.55;
+  }
+  .answer-btn {
+    display: block; width: 100%; margin-bottom: 10px;
+    background: rgba(0,200,255,0.06);
+    border: 1px solid rgba(0,200,255,0.25);
+    border-radius: 6px; padding: 11px 16px;
+    color: #b8dff0; font-size: 13px; text-align: left; cursor: pointer;
+    font-family: 'Courier New', monospace; letter-spacing: 0.03em;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .answer-btn:hover { background: rgba(0,200,255,0.14); border-color: rgba(0,200,255,0.5); color: #e8f6ff; }
+  .answer-btn.correct { background: rgba(0,180,80,0.2); border-color: rgba(0,220,100,0.6); color: #88ffb0; pointer-events: none; }
+  .answer-btn.wrong { background: rgba(220,40,40,0.2); border-color: rgba(255,60,60,0.5); color: #ff9988; pointer-events: none; }
+  #overlay-feedback {
+    margin-top: 14px; font-size: 13px; min-height: 20px; line-height: 1.5;
+    display: none;
+  }
+  #overlay-continue {
+    margin-top: 16px; display: none;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.4);
+    border-radius: 6px; padding: 10px 24px;
+    color: #00e5ff; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  #overlay-continue:hover { background: rgba(0,200,255,0.28); }
+
+  #start-screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(2, 6, 16, 0.95); z-index: 20; pointer-events: all;
+  }
+  #start-box {
+    text-align: center; color: #c9e8f5; max-width: 500px; padding: 0 20px;
+  }
+  #start-box h1 {
+    font-size: 42px; letter-spacing: 0.15em; color: #00e5ff; margin-bottom: 6px;
+    text-shadow: 0 0 30px rgba(0,220,255,0.4);
+  }
+  #start-box .sub { font-size: 13px; color: rgba(0,210,255,0.5); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 28px; }
+  #start-box p { font-size: 14px; color: rgba(180,220,240,0.7); line-height: 1.7; margin-bottom: 28px; }
+  #start-btn {
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.5);
+    border-radius: 6px; padding: 13px 40px;
+    color: #00e5ff; font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  #start-btn:hover { background: rgba(0,200,255,0.28); }
+
+  #message-log {
+    position: absolute; bottom: 130px; left: 24px;
+    color: rgba(0,220,255,0.7); font-size: 11px; letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .msg { margin-bottom: 3px; animation: fadeMsg 3s forwards; }
+  @keyframes fadeMsg { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+  #win-screen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(2, 6, 16, 0.95); z-index: 20; pointer-events: all;
+  }
+  #win-box {
+    text-align: center; color: #c9e8f5; max-width: 460px; padding: 0 20px;
+  }
+  #win-box h2 { font-size: 36px; color: #00ff88; letter-spacing: 0.12em; margin-bottom: 10px; }
+  #win-box p { font-size: 14px; color: rgba(180,240,200,0.7); line-height: 1.7; margin-bottom: 24px; }
+  #restart-btn {
+    background: rgba(0,220,120,0.12);
+    border: 1px solid rgba(0,220,120,0.4);
+    border-radius: 6px; padding: 12px 36px;
+    color: #00ff88; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; font-family: 'Courier New', monospace;
+  }
+  #restart-btn:hover { background: rgba(0,220,120,0.25); }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+  <div id="top-bar">
+    <div class="hud-panel">
+      <div class="hud-title">Mission</div>
+      <div style="color:#c9e8f5;font-size:13px;letter-spacing:0.05em;">DataGuard — Sector 7</div>
+    </div>
+    <div class="hud-panel" id="health-bar-wrap">
+      <div class="hud-title" id="health-label">
+        <span>Shield Integrity</span>
+        <span id="hp-text">100%</span>
+      </div>
+      <div id="health-bar-bg"><div id="health-bar"></div></div>
+    </div>
+    <div class="hud-panel">
+      <div class="hud-title">Threats Neutralised</div>
+      <div class="hud-val" id="score">0 / 5</div>
+    </div>
+  </div>
+</div>
+
+<div id="threat-list">
+  <div style="font-size:10px;color:rgba(126,207,238,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Active Threats</div>
+  <div class="threat-row" id="tr-0"><div class="threat-dot" style="background:#ff4444"></div><div class="threat-name">Phishing Bot</div><div class="threat-status status-alive" id="ts-0">ACTIVE</div></div>
+  <div class="threat-row" id="tr-1"><div class="threat-dot" style="background:#ff9900"></div><div class="threat-name">Data Broker</div><div class="threat-status status-alive" id="ts-1">ACTIVE</div></div>
+  <div class="threat-row" id="tr-2"><div class="threat-dot" style="background:#cc44ff"></div><div class="threat-name">Ad Tracker</div><div class="threat-status status-alive" id="ts-2">ACTIVE</div></div>
+  <div class="threat-row" id="tr-3"><div class="threat-dot" style="background:#ff3399"></div><div class="threat-name">Password Cracker</div><div class="threat-status status-alive" id="ts-3">ACTIVE</div></div>
+  <div class="threat-row" id="tr-4"><div class="threat-dot" style="background:#44aaff"></div><div class="threat-name">Public Wi-Fi Spy</div><div class="threat-status status-alive" id="ts-4">ACTIVE</div></div>
+</div>
+
+<div id="minimap-wrap">
+  <canvas id="minimap" width="140" height="140"></canvas>
+  <div id="minimap-label">Radar</div>
+</div>
+
+<div id="controls-hint">
+  <div><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> — Move</div>
+  <div><span class="key">Mouse</span> — Look</div>
+  <div><span class="key">Click</span> — Lock cursor</div>
+</div>
+
+<div id="message-log"></div>
+
+<div id="overlay" style="display:none;">
+  <div id="overlay-box">
+    <div id="overlay-title">Threat Encountered</div>
+    <div id="overlay-enemy-name"></div>
+    <div id="overlay-enemy-desc"></div>
+    <div id="overlay-question"></div>
+    <div id="overlay-answers"></div>
+    <div id="overlay-feedback"></div>
+    <button id="overlay-continue">Continue</button>
+  </div>
+</div>
+
+<div id="start-screen">
+  <div id="start-box">
+    <h1>DATAGUARD</h1>
+    <div class="sub">Privacy Protection — Sector 7</div>
+    <p>You are a digital security agent patrolling a compromised network. Five privacy threats are loose in this sector. Approach each one and use your knowledge of online safety to neutralise them. Wrong answers damage your shield. Good luck.</p>
+    <button id="start-btn">Begin Mission</button>
+  </div>
+</div>
+
+<div id="win-screen">
+  <div id="win-box">
+    <h2>SECTOR SECURED</h2>
+    <p>All threats neutralised. You demonstrated strong knowledge of online privacy and safety protocols. The network has been protected.</p>
+    <button id="restart-btn">Run Again</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const W = window.innerWidth, H = window.innerHeight;
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x050a14);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050a14, 0.04);
+
+const camera = new THREE.PerspectiveCamera(75, W / H, 0.1, 200);
+camera.position.set(0, 1.7, 0);
+
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// Lighting
+const ambient = new THREE.AmbientLight(0x0a1a2e, 1.5);
+scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0x00c8ff, 0.8);
+dirLight.position.set(5, 10, 5);
+dirLight.castShadow = true;
+scene.add(dirLight);
+const hemi = new THREE.HemisphereLight(0x001030, 0x000000, 0.5);
+scene.add(hemi);
+
+// Floor grid
+const gridHelper = new THREE.GridHelper(80, 40, 0x003355, 0x002244);
+scene.add(gridHelper);
+
+// Ground plane
+const groundGeo = new THREE.PlaneGeometry(80, 80);
+const groundMat = new THREE.MeshLambertMaterial({ color: 0x030810 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Building generator
+function makeBuilding(x, z, w, d, h, color) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mat = new THREE.MeshLambertMaterial({ color });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, h / 2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  // Edge glow lines
+  const edges = new THREE.EdgesGeometry(geo);
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x004466, linewidth: 1 });
+  const wireframe = new THREE.LineSegments(edges, lineMat);
+  wireframe.position.copy(mesh.position);
+  scene.add(wireframe);
+  return mesh;
+}
+
+// Scatter buildings
+const buildingDefs = [
+  [-12, -15, 4, 3, 8, 0x0a1520],
+  [10, -10, 3, 5, 12, 0x0d1825],
+  [-8, 12, 5, 3, 6, 0x081218],
+  [16, 14, 4, 4, 10, 0x0a1520],
+  [-18, -5, 3, 6, 14, 0x0d1825],
+  [20, -18, 5, 3, 7, 0x081218],
+  [-5, -22, 4, 4, 9, 0x0a1520],
+  [25, 5, 3, 5, 11, 0x0d1825],
+  [-22, 20, 4, 3, 8, 0x0a1520],
+  [5, 22, 6, 3, 6, 0x081218],
+];
+buildingDefs.forEach(b => makeBuilding(...b));
+
+// Particle stars
+const starGeo = new THREE.BufferGeometry();
+const starCount = 600;
+const starPositions = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  starPositions[i * 3] = (Math.random() - 0.5) * 100;
+  starPositions[i * 3 + 1] = Math.random() * 20 + 5;
+  starPositions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const starMat = new THREE.PointsMaterial({ color: 0x224466, size: 0.15 });
+scene.add(new THREE.Points(starGeo, starMat));
+
+// Enemy data
+const ENEMIES = [
+  {
+    name: "Phishing Bot",
+    color: 0xff3322,
+    glowColor: 0xff5500,
+    pos: [-10, 0, -10],
+    desc: "Disguises itself as a trustworthy site to steal your credentials.",
+    question: "You receive an email from 'paypa1-secure.com' asking you to verify your account. What should you do?",
+    answers: [
+      { text: "A. Click the link and enter your password to verify", correct: false },
+      { text: "B. Check the sender's actual email address and visit the real site directly", correct: true },
+      { text: "C. Reply to the email asking if it's real", correct: false },
+      { text: "D. Ignore it and it will go away on its own", correct: false },
+    ],
+    feedback: "Always verify the sender's domain carefully. Navigate to the real site by typing its address directly. Legitimate companies never ask for your password via email.",
+    wrongFeedback: "Clicking unknown links or trusting mismatched domains is dangerous. Always go directly to the official site.",
+  },
+  {
+    name: "Data Broker",
+    color: 0xff9900,
+    glowColor: 0xffcc00,
+    pos: [12, 0, -8],
+    desc: "Collects and sells your personal data without explicit consent.",
+    question: "A new app requests access to your contacts, location, microphone AND camera — but it's just a flashlight app. What's the right action?",
+    answers: [
+      { text: "A. Accept all permissions so the app works fully", correct: false },
+      { text: "B. Deny all unnecessary permissions and only grant what the app truly needs", correct: true },
+      { text: "C. Delete the app and use your phone's built-in torch instead", correct: true },
+      { text: "D. Grant permissions, then forget about them", correct: false },
+    ],
+    feedback: "Apply the principle of least privilege — only grant permissions an app genuinely needs to function. A flashlight app needs no access to contacts or microphone.",
+    wrongFeedback: "Excessive app permissions are a primary method for data brokers to harvest personal information silently.",
+  },
+  {
+    name: "Ad Tracker",
+    color: 0xaa33ff,
+    glowColor: 0xcc55ff,
+    pos: [-8, 0, 14],
+    desc: "Follows your activity across the web to build a behavioral profile.",
+    question: "Which combination best protects your browsing privacy?",
+    answers: [
+      { text: "A. Use Incognito mode — it hides everything from everyone", correct: false },
+      { text: "B. Use a reputable browser extension that blocks third-party trackers and cookies", correct: true },
+      { text: "C. Only visit websites you trust and it won't be an issue", correct: false },
+      { text: "D. Clear your history every week", correct: false },
+    ],
+    feedback: "Incognito only hides activity from your local browser history. A tracker blocker (like uBlock Origin) actively prevents cross-site tracking at the network level.",
+    wrongFeedback: "Incognito mode does not stop third-party trackers or your ISP from seeing your activity. A dedicated tracking blocker is far more effective.",
+  },
+  {
+    name: "Password Cracker",
+    color: 0xff2288,
+    glowColor: 0xff44aa,
+    pos: [15, 0, 12],
+    desc: "Tries billions of password combinations to break into your accounts.",
+    question: "Which password strategy is the most secure?",
+    answers: [
+      { text: "A. Use the same complex password everywhere so you remember it", correct: false },
+      { text: "B. Use a passphrase like 'crimson-Jupiter-desk-97' unique per site, stored in a password manager", correct: true },
+      { text: "C. Use your pet's name plus your birthday on important accounts", correct: false },
+      { text: "D. Enable 2FA as a substitute for a strong password", correct: false },
+    ],
+    feedback: "Long, unique passphrases stored in a password manager are the gold standard. 2FA adds another layer — but both together is best, not either/or.",
+    wrongFeedback: "Reusing passwords means one breach compromises all your accounts. Password managers make unique passwords effortless.",
+  },
+  {
+    name: "Public Wi-Fi Spy",
+    color: 0x2299ff,
+    glowColor: 0x44bbff,
+    pos: [-15, 0, -18],
+    desc: "Performs man-in-the-middle attacks on unsecured public networks.",
+    question: "You're at a café and need to check your bank account. What's the safest approach?",
+    answers: [
+      { text: "A. Connect to the café Wi-Fi — they're a trusted business", correct: false },
+      { text: "B. Use your mobile data or a trusted VPN before accessing sensitive accounts", correct: true },
+      { text: "C. Make sure the site has HTTPS, that's enough on any network", correct: false },
+      { text: "D. Use a private browsing tab on the public network", correct: false },
+    ],
+    feedback: "Public Wi-Fi can be intercepted or spoofed even with HTTPS. Using mobile data or a reputable VPN encrypts your traffic before it leaves your device.",
+    wrongFeedback: "HTTPS protects data in transit but doesn't stop a malicious hotspot from logging your connections or redirecting traffic. Avoid public Wi-Fi for sensitive tasks.",
+  },
+];
+
+// Build enemy meshes
+const ENEMY_TRIGGER = 4.5;
+const enemyMeshes = [];
+const enemyLights = [];
+ENEMIES.forEach((e, i) => {
+  const group = new THREE.Group();
+  group.position.set(e.pos[0], 1.0, e.pos[2]);
+
+  const bodyGeo = new THREE.OctahedronGeometry(0.75, 0);
+  const bodyMat = new THREE.MeshLambertMaterial({ color: e.color, emissive: e.glowColor, emissiveIntensity: 0.4 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.castShadow = true;
+  group.add(body);
+
+  // Inner core
+  const coreGeo = new THREE.OctahedronGeometry(0.35, 0);
+  const coreMat = new THREE.MeshLambertMaterial({ color: e.glowColor, emissive: e.glowColor, emissiveIntensity: 1 });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  group.add(core);
+
+  // Ring
+  const ringGeo = new THREE.TorusGeometry(1.1, 0.05, 8, 32);
+  const ringMat = new THREE.MeshLambertMaterial({ color: e.glowColor, emissive: e.glowColor, emissiveIntensity: 0.6 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2;
+  group.add(ring);
+
+  const pointLight = new THREE.PointLight(e.glowColor, 1.5, 8);
+  group.add(pointLight);
+  enemyLights.push(pointLight);
+
+  scene.add(group);
+  enemyMeshes.push({ group, body, core, ring, data: e, alive: true, idx: i });
+});
+
+// Player
+const keys = { w: false, a: false, s: false, d: false };
+let yaw = 0, pitch = 0;
+let hp = 100;
+let defeated = 0;
+let locked = false;
+let inEncounter = false;
+
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (k === 'w') keys.w = true;
+  if (k === 'a') keys.a = true;
+  if (k === 's') keys.s = true;
+  if (k === 'd') keys.d = true;
+});
+document.addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  if (k === 'w') keys.w = false;
+  if (k === 'a') keys.a = false;
+  if (k === 's') keys.s = false;
+  if (k === 'd') keys.d = false;
+});
+
+canvas.addEventListener('click', () => {
+  if (!locked && !inEncounter) {
+    canvas.requestPointerLock();
+  }
+});
+document.addEventListener('pointerlockchange', () => {
+  locked = document.pointerLockElement === canvas;
+});
+document.addEventListener('mousemove', e => {
+  if (!locked || inEncounter) return;
+  yaw -= e.movementX * 0.002;
+  pitch -= e.movementY * 0.002;
+  pitch = Math.max(-0.8, Math.min(0.8, pitch));
+});
+
+// Minimap
+const mmCanvas = document.getElementById('minimap');
+const mmCtx = mmCanvas.getContext('2d');
+const MM_SIZE = 140;
+const MM_SCALE = MM_SIZE / 80;
+const MM_OFFSET = MM_SIZE / 2;
+
+function drawMinimap() {
+  mmCtx.clearRect(0, 0, MM_SIZE, MM_SIZE);
+  mmCtx.fillStyle = 'rgba(0,10,20,0.9)';
+  mmCtx.fillRect(0, 0, MM_SIZE, MM_SIZE);
+  mmCtx.strokeStyle = 'rgba(0,150,200,0.2)';
+  mmCtx.lineWidth = 0.5;
+  for (let i = 0; i <= 8; i++) {
+    mmCtx.beginPath(); mmCtx.moveTo(i * MM_SIZE / 8, 0); mmCtx.lineTo(i * MM_SIZE / 8, MM_SIZE); mmCtx.stroke();
+    mmCtx.beginPath(); mmCtx.moveTo(0, i * MM_SIZE / 8); mmCtx.lineTo(MM_SIZE, i * MM_SIZE / 8); mmCtx.stroke();
+  }
+  enemyMeshes.forEach(em => {
+    if (!em.alive) return;
+    const ex = em.group.position.x * MM_SCALE + MM_OFFSET;
+    const ez = em.group.position.z * MM_SCALE + MM_OFFSET;
+    const col = '#' + em.data.color.toString(16).padStart(6, '0');
+    mmCtx.beginPath();
+    mmCtx.arc(ex, ez, 4, 0, Math.PI * 2);
+    mmCtx.fillStyle = col;
+    mmCtx.fill();
+    mmCtx.beginPath();
+    mmCtx.arc(ex, ez, 7, 0, Math.PI * 2);
+    mmCtx.strokeStyle = col;
+    mmCtx.lineWidth = 1;
+    mmCtx.stroke();
+  });
+  const px = camera.position.x * MM_SCALE + MM_OFFSET;
+  const pz = camera.position.z * MM_SCALE + MM_OFFSET;
+  mmCtx.beginPath();
+  mmCtx.arc(px, pz, 4, 0, Math.PI * 2);
+  mmCtx.fillStyle = '#00e5ff';
+  mmCtx.fill();
+  const lookDir = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+  mmCtx.beginPath();
+  mmCtx.moveTo(px, pz);
+  mmCtx.lineTo(px + lookDir.x * 10, pz + lookDir.z * 10);
+  mmCtx.strokeStyle = '#00e5ff';
+  mmCtx.lineWidth = 1.5;
+  mmCtx.stroke();
+}
+
+// Message log
+function logMsg(text, color = '#00e5ff') {
+  const log = document.getElementById('message-log');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.style.color = color;
+  div.textContent = '> ' + text;
+  log.appendChild(div);
+  setTimeout(() => div.remove(), 3200);
+}
+
+// Encounter system
+let currentEnemy = null;
+function showEncounter(em) {
+  inEncounter = true;
+  currentEnemy = em;
+  document.exitPointerLock();
+  locked = false;
+  const e = em.data;
+  document.getElementById('overlay-enemy-name').textContent = e.name;
+  document.getElementById('overlay-enemy-desc').textContent = e.desc;
+  document.getElementById('overlay-question').textContent = e.question;
+  const answersDiv = document.getElementById('overlay-answers');
+  answersDiv.innerHTML = '';
+  e.answers.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = a.text;
+    btn.addEventListener('click', () => handleAnswer(a.correct, i, e));
+    answersDiv.appendChild(btn);
+  });
+  document.getElementById('overlay-feedback').style.display = 'none';
+  document.getElementById('overlay-feedback').textContent = '';
+  document.getElementById('overlay-continue').style.display = 'none';
+  document.getElementById('overlay').style.display = 'flex';
+}
+
+function handleAnswer(correct, idx, e) {
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach((b, i) => {
+    const a = e.answers[i];
+    if (a.correct) b.classList.add('correct');
+    else if (i === idx && !correct) b.classList.add('wrong');
+    b.disabled = true;
+  });
+  const feedback = document.getElementById('overlay-feedback');
+  feedback.style.display = 'block';
+  if (correct) {
+    feedback.textContent = '✓ Correct! ' + e.feedback;
+    feedback.style.color = '#66ff99';
+  } else {
+    feedback.textContent = '✗ Incorrect. ' + e.wrongFeedback;
+    feedback.style.color = '#ff7766';
+    hp = Math.max(0, hp - 25);
+    updateHP();
+  }
+  document.getElementById('overlay-continue').style.display = 'inline-block';
+  document.getElementById('overlay-continue').dataset.correct = correct ? '1' : '0';
+}
+
+document.getElementById('overlay-continue').addEventListener('click', () => {
+  const wasCorrect = document.getElementById('overlay-continue').dataset.correct === '1';
+  document.getElementById('overlay').style.display = 'none';
+  inEncounter = false;
+  if (wasCorrect && currentEnemy) {
+    defeatEnemy(currentEnemy);
+  } else {
+    logMsg('Shield damaged! Find the correct protocol.', '#ff7766');
+  }
+  currentEnemy = null;
+});
+
+function defeatEnemy(em) {
+  em.alive = false;
+  em.group.visible = false;
+  defeated++;
+  document.getElementById('score').textContent = defeated + ' / 5';
+  document.getElementById('ts-' + em.idx).textContent = 'CLEARED';
+  document.getElementById('ts-' + em.idx).className = 'threat-status status-dead';
+  logMsg(em.data.name + ' neutralised.', '#00ff88');
+  if (defeated === 5) {
+    setTimeout(() => {
+      document.getElementById('win-screen').style.display = 'flex';
+    }, 1000);
+  }
+}
+
+function updateHP() {
+  const bar = document.getElementById('health-bar');
+  const txt = document.getElementById('hp-text');
+  bar.style.width = hp + '%';
+  txt.textContent = hp + '%';
+  if (hp <= 25) bar.style.background = 'linear-gradient(90deg, #ff2222, #ff4444)';
+  else if (hp <= 50) bar.style.background = 'linear-gradient(90deg, #ff4444, #ff8800)';
+  else bar.style.background = 'linear-gradient(90deg, #ff4444, #ff8800)';
+}
+
+// Start / restart
+document.getElementById('start-btn').addEventListener('click', () => {
+  document.getElementById('start-screen').style.display = 'none';
+  logMsg('Mission started. Locate and neutralise all threats.', '#00e5ff');
+});
+
+document.getElementById('restart-btn').addEventListener('click', () => {
+  location.reload();
+});
+
+// Proximity detection cooldown
+const encounterCooldown = {};
+
+// Clock
+const clock = new THREE.Clock();
+
+// Movement
+const moveDir = new THREE.Vector3();
+const SPEED = 6;
+
+const alreadyTriggered = new Set();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const t = clock.getElapsedTime();
+
+  if (!inEncounter) {
+    // Camera rotation
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
+
+    // Movement
+    moveDir.set(0, 0, 0);
+    if (keys.w) moveDir.z -= 1;
+    if (keys.s) moveDir.z += 1;
+    if (keys.a) moveDir.x -= 1;
+    if (keys.d) moveDir.x += 1;
+    if (moveDir.length() > 0) {
+      moveDir.normalize();
+      moveDir.applyEuler(new THREE.Euler(0, yaw, 0));
+      const newX = camera.position.x + moveDir.x * SPEED * delta;
+      const newZ = camera.position.z + moveDir.z * SPEED * delta;
+      camera.position.x = Math.max(-35, Math.min(35, newX));
+      camera.position.z = Math.max(-35, Math.min(35, newZ));
+    }
+
+    // Check enemy proximity
+    enemyMeshes.forEach(em => {
+      if (!em.alive || alreadyTriggered.has(em.idx)) return;
+      const dist = camera.position.distanceTo(em.group.position);
+      if (dist < ENEMY_TRIGGER) {
+        alreadyTriggered.add(em.idx);
+        logMsg('WARNING: ' + em.data.name + ' detected!', '#ffaa00');
+        setTimeout(() => {
+          alreadyTriggered.delete(em.idx);
+          if (!em.alive) return;
+          showEncounter(em);
+        }, 400);
+      }
+    });
+  }
+
+  // Animate enemies
+  enemyMeshes.forEach((em, i) => {
+    if (!em.alive) return;
+    em.group.position.y = 1.0 + Math.sin(t * 1.5 + i * 1.2) * 0.3;
+    em.body.rotation.y += delta * 0.8;
+    em.body.rotation.x += delta * 0.4;
+    em.core.rotation.y -= delta * 1.5;
+    em.ring.rotation.y += delta * 0.5;
+    em.ring.rotation.z += delta * 0.3;
+    enemyLights[i].intensity = 1.2 + Math.sin(t * 3 + i) * 0.5;
+  });
+
+  drawMinimap();
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+</body>
+</html>

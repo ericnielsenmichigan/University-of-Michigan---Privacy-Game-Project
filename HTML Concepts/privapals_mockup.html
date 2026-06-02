@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privapals — Privacy Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #5EC8F0;
+    --sky-dark: #3AAED8;
+    --sun: #FFD166;
+    --grass: #4CAF71;
+    --grass-dark: #3A9A5A;
+    --white: #FFFFFF;
+    --card: #FFFDF5;
+    --text: #1A1A2E;
+    --text-light: #5A5A7A;
+    --red: #FF6B6B;
+    --green: #4CAF71;
+    --orange: #FF9F43;
+    --purple: #A29BFE;
+    --shadow: rgba(0,0,0,0.12);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #E8F7FF;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ============ TITLE SCREEN ============ */
+  #screen-title {
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E8F8 40%, #C8EFC0 70%, #4CAF71 100%);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.85;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+  }
+  .cloud1 { width: 120px; height: 40px; top: 12%; left: -140px; animation-duration: 22s; }
+  .cloud1::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+  .cloud1::after { width: 45px; height: 45px; top: -22px; left: 55px; }
+  .cloud2 { width: 80px; height: 28px; top: 25%; left: -100px; animation-duration: 30s; animation-delay: -10s; }
+  .cloud2::before { width: 40px; height: 40px; top: -20px; left: 12px; }
+  .cloud2::after { width: 32px; height: 32px; top: -15px; left: 38px; }
+  .cloud3 { width: 160px; height: 50px; top: 8%; left: -180px; animation-duration: 26s; animation-delay: -5s; }
+  .cloud3::before { width: 80px; height: 80px; top: -40px; left: 25px; }
+  .cloud3::after { width: 60px; height: 60px; top: -30px; left: 80px; }
+
+  @keyframes drift { to { left: 110vw; } }
+
+  .title-content {
+    text-align: center;
+    z-index: 10;
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .privapal-mascot {
+    width: 90px;
+    height: 90px;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  .game-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 72px;
+    color: white;
+    text-shadow: 4px 6px 0 #3A9A5A, 0 0 30px rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+  }
+
+  .game-subtitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--sun);
+    color: var(--text);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 3px 0 #C9991A;
+  }
+
+  .btn-play {
+    font-family: 'Fredoka One', cursive;
+    font-size: 30px;
+    background: var(--sun);
+    color: var(--text);
+    border: none;
+    border-radius: 50px;
+    padding: 16px 64px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #C9991A, 0 8px 20px rgba(0,0,0,0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
+    letter-spacing: 1px;
+  }
+  .btn-play:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #C9991A, 0 10px 24px rgba(0,0,0,0.25); }
+  .btn-play:active { transform: translateY(3px); box-shadow: 0 3px 0 #C9991A; }
+
+  .grass-strip {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--grass);
+    border-radius: 50% 50% 0 0 / 30px 30px 0 0;
+  }
+
+  /* ============ GAME SHELL ============ */
+  #screen-game {
+    background: #F0FAFE;
+    flex-direction: column;
+  }
+
+  .topbar {
+    background: linear-gradient(135deg, #5EC8F0, #3AAED8);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-title { font-family: 'Fredoka One', cursive; font-size: 22px; color: white; text-shadow: 1px 2px 0 rgba(0,0,0,0.2); }
+  .topbar-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600; }
+
+  .privacy-meter-wrap { display: flex; align-items: center; gap: 10px; }
+  .privacy-label { font-size: 12px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 1px; }
+  .privacy-bar-bg {
+    width: 140px; height: 18px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  .privacy-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #FF6B6B, #FF9F43, #4CAF71);
+    background-size: 300% 100%;
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    width: 80%;
+    background-position: 100% 0;
+  }
+
+  .step-dots { display: flex; gap: 8px; }
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    border: 2px solid rgba(255,255,255,0.6);
+    transition: background 0.3s;
+  }
+  .dot.done { background: var(--sun); border-color: #C9991A; }
+  .dot.active { background: white; border-color: white; }
+
+  /* ---- GAME CONTENT AREA ---- */
+  .game-area {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .main-panel {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side-panel {
+    width: 240px;
+    background: white;
+    border-left: 3px solid #E0EEF8;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  /* ---- SCENARIO CARD ---- */
+  .scenario-header {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 2px solid #D4EDFF;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .scenario-tag {
+    display: inline-block;
+    background: #EBF8FF;
+    color: var(--sky-dark);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1.5px solid #B8DDEF;
+  }
+
+  .scenario-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .scenario-desc {
+    font-size: 15px;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+
+  /* ---- MOCK UI ELEMENTS ---- */
+  .mock-browser {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    border: 2px solid #E0E0E0;
+    overflow: hidden;
+    animation: slideIn 0.4s ease 0.1s both;
+  }
+
+  .browser-bar {
+    background: #F0F0F0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid #E0E0E0;
+  }
+  .browser-dots { display: flex; gap: 6px; }
+  .b-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .b-dot.r { background: #FF5F57; }
+  .b-dot.y { background: #FEBC2E; }
+  .b-dot.g { background: #28C840; }
+  .browser-url {
+    flex: 1;
+    background: white;
+    border: 1.5px solid #D0D0D0;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: #666;
+    font-family: monospace;
+    margin-left: 8px;
+  }
+
+  .browser-content { padding: 24px; }
+
+  .signup-form-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .signup-form-sub {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text);
+  }
+  .form-label .required { color: var(--red); }
+  .form-label .optional { color: var(--text-light); font-weight: 600; font-size: 12px; }
+
+  .form-input {
+    width: 100%;
+    border: 2px solid #D0D8E0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Nunito', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    background: white;
+  }
+  .form-input:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(94,200,240,0.2); }
+  .form-input.warn { border-color: var(--orange); }
+  .form-input.danger { border-color: var(--red); }
+  .form-input.safe { border-color: var(--green); }
+
+  .form-hint {
+    font-size: 12px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: none;
+  }
+  .form-hint.warn { display: block; color: #C05A00; background: #FFF3E0; }
+  .form-hint.danger { display: block; color: #B00020; background: #FFEBEE; }
+  .form-hint.safe { display: block; color: #1B6B2E; background: #E8F5E9; }
+
+  .password-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .ps-bar {
+    height: 5px;
+    flex: 1;
+    border-radius: 5px;
+    background: #E0E0E0;
+    transition: background 0.3s;
+  }
+  .ps-label { font-size: 12px; font-weight: 700; margin-top: 3px; color: var(--text-light); }
+
+  .optional-section {
+    border: 2px dashed #D0D8E0;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+    background: #F8FAFC;
+  }
+  .optional-section-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .btn-signup {
+    width: 100%;
+    background: linear-gradient(135deg, #5EC8F0, #3AAED8);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #2A8AAE, 0 6px 16px rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 8px;
+  }
+  .btn-signup:hover { transform: translateY(-2px); }
+  .btn-signup:active { transform: translateY(2px); box-shadow: 0 2px 0 #2A8AAE; }
+
+  /* ---- DATA DRIP ---- */
+  .data-drip-container {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .data-drip-container.show { display: flex; }
+
+  .data-drip-card {
+    background: white;
+    border-radius: 28px;
+    padding: 32px;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  @keyframes bounceIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .drip-drops {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .drip {
+    font-size: 32px;
+    animation: drip-fall 1s ease-in-out infinite alternate;
+  }
+  .drip:nth-child(2) { animation-delay: 0.2s; }
+  .drip:nth-child(3) { animation-delay: 0.4s; }
+  .drip:nth-child(4) { animation-delay: 0.6s; }
+  .drip:nth-child(5) { animation-delay: 0.8s; }
+  @keyframes drip-fall { from { transform: translateY(0); } to { transform: translateY(8px); } }
+
+  .drip-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  .drip-subtitle {
+    font-size: 15px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .data-exposed-list {
+    background: #FFF5F5;
+    border: 2px solid #FFD0D0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .exposed-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #FFE0E0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .exposed-item:last-child { border-bottom: none; }
+  .exposed-icon { font-size: 18px; }
+  .exposed-risk {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .risk-high { background: #FFE0E0; color: var(--red); }
+  .risk-med { background: #FFF3E0; color: var(--orange); }
+
+  .btn-continue {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #2E8B47;
+    transition: transform 0.1s;
+    margin: 4px;
+  }
+  .btn-continue:hover { transform: translateY(-2px); }
+
+  .btn-retry {
+    background: var(--sun);
+    color: var(--text);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #C9991A;
+    transition: transform 0.1s;
+    margin: 4px;
+  }
+  .btn-retry:hover { transform: translateY(-2px); }
+
+  /* ---- TED NPC ---- */
+  .ted-bubble {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: white;
+    border: 2px solid #D4EDFF;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    animation: slideIn 0.4s ease 0.2s both;
+  }
+
+  .ted-avatar {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    animation: bob 2.5s ease-in-out infinite;
+  }
+
+  .ted-text-wrap { flex: 1; }
+  .ted-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--sky-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .ted-msg {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .ted-msg strong { color: var(--sky-dark); }
+
+  /* ---- SIDE PANEL ---- */
+  .side-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .objective-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 0;
+    color: var(--text-light);
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .obj-icon { font-size: 16px; }
+  .objective-item.done { color: var(--green); }
+  .objective-item.done .obj-check { color: var(--green); }
+
+  .privacy-score-box {
+    background: linear-gradient(135deg, #E8F5E9, #C8EDDA);
+    border: 2px solid #A8D8B8;
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+  }
+  .ps-number {
+    font-family: 'Fredoka One', cursive;
+    font-size: 40px;
+    color: var(--green);
+    line-height: 1;
+  }
+  .ps-label-text { font-size: 12px; font-weight: 800; color: var(--text-light); text-transform: uppercase; }
+
+  .tip-box {
+    background: linear-gradient(135deg, #FFF9E6, #FFF3CC);
+    border: 2px solid #FFE08A;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7A5800;
+    line-height: 1.5;
+  }
+  .tip-box-title { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+  /* ---- SUCCESS SCREEN ---- */
+  #screen-win {
+    background: linear-gradient(180deg, #E8F7FF 0%, #C8F0D4 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .win-card {
+    background: white;
+    border-radius: 28px;
+    padding: 40px;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .trophy { font-size: 72px; margin-bottom: 8px; animation: bob 2s ease-in-out infinite; }
+
+  .win-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--grass-dark);
+    margin-bottom: 8px;
+  }
+  .win-sub { font-size: 16px; color: var(--text-light); margin-bottom: 28px; line-height: 1.5; }
+
+  .learned-list {
+    background: #F0FFF5;
+    border: 2px solid #C0EED0;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+  .learned-title { font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--grass-dark); margin-bottom: 12px; }
+  .learned-item {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 0;
+    border-bottom: 1px solid #D0EED8;
+    line-height: 1.4;
+  }
+  .learned-item:last-child { border-bottom: none; }
+
+  .comparison-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .compare-card {
+    border-radius: 14px;
+    padding: 14px;
+    text-align: left;
+  }
+  .compare-card.bad { background: #FFF0F0; border: 2px solid #FFD0D0; }
+  .compare-card.good { background: #F0FFF5; border: 2px solid #C0EED0; }
+  .compare-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .compare-card.bad .compare-title { color: var(--red); }
+  .compare-card.good .compare-title { color: var(--grass-dark); }
+  .compare-item { font-size: 13px; font-weight: 600; padding: 3px 0; display: flex; gap: 6px; }
+
+  .btn-replay {
+    background: var(--sky);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #2A8AAE;
+    transition: transform 0.1s;
+    margin: 4px;
+  }
+  .btn-replay:hover { transform: translateY(-2px); }
+
+  .btn-home {
+    background: #F0F0F0;
+    color: var(--text);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #C0C0C0;
+    transition: transform 0.1s;
+    margin: 4px;
+  }
+  .btn-home:hover { transform: translateY(-2px); }
+
+  /* Checkbox styling */
+  .form-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .form-checkbox-wrap input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--sky); }
+
+  /* Scroll styling */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
+
+  /* Safe submit overlay */
+  #screen-safe-result {
+    background: linear-gradient(180deg, #E8F7FF 0%, #C8F0D4 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .safe-card {
+    background: white;
+    border-radius: 28px;
+    padding: 36px;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    animation: bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .shield { font-size: 72px; margin-bottom: 8px; animation: bob 2s ease-in-out infinite; }
+  .safe-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    color: var(--grass-dark);
+    margin-bottom: 8px;
+  }
+
+  /* Stars */
+  .stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .star { font-size: 36px; opacity: 0.3; transition: opacity 0.3s, transform 0.3s; }
+  .star.lit { opacity: 1; animation: starPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  @keyframes starPop { from { transform: scale(0); } to { transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<!-- ======================== TITLE SCREEN ======================== -->
+<div id="screen-title" class="screen active">
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+  <div class="cloud cloud3"></div>
+
+  <div class="title-content">
+    <div class="logo-wrap">
+      <svg class="privapal-mascot" viewBox="0 0 100 100">
+        <!-- Round pal body -->
+        <circle cx="50" cy="55" r="34" fill="#5EC8F0"/>
+        <circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+        <!-- Eyes -->
+        <circle cx="40" cy="50" r="7" fill="white"/>
+        <circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/>
+        <circle cx="63" cy="50" r="1.5" fill="white"/>
+        <!-- Smile -->
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Shield badge -->
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+        <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Ears/antenna -->
+        <circle cx="22" cy="40" r="8" fill="#5EC8F0"/>
+        <circle cx="78" cy="40" r="8" fill="#5EC8F0"/>
+      </svg>
+    </div>
+
+    <div class="game-title">Privapals</div>
+    <div class="game-subtitle">🔐 Learn Privacy. Stay Safe. Have Fun!</div>
+    <div class="badge">🎓 Ages 9–13 · Free to Play · COPPA Compliant</div>
+
+    <br>
+    <button class="btn-play" onclick="startGame()">▶ Play Now!</button>
+  </div>
+
+  <div class="grass-strip"></div>
+</div>
+
+<!-- ======================== GAME SCREEN ======================== -->
+<div id="screen-game" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <svg width="36" height="36" viewBox="0 0 100 100">
+        <circle cx="50" cy="55" r="34" fill="#5EC8F0"/>
+        <circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+        <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+        <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="topbar-title">Privapals</div>
+        <div class="topbar-subtitle">Mission 1: Account Signup & Data Safety</div>
+      </div>
+    </div>
+
+    <div class="privacy-meter-wrap">
+      <span class="privacy-label">🛡 Privacy</span>
+      <div class="privacy-bar-bg"><div class="privacy-bar-fill" id="privacyBar"></div></div>
+    </div>
+
+    <div class="step-dots">
+      <div class="dot active" id="dot1" title="Setup"></div>
+      <div class="dot" id="dot2" title="Decide"></div>
+      <div class="dot" id="dot3" title="Feedback"></div>
+      <div class="dot" id="dot4" title="Result"></div>
+    </div>
+  </div>
+
+  <div class="game-area">
+    <!-- MAIN PANEL -->
+    <div class="main-panel">
+
+      <!-- Scenario header -->
+      <div class="scenario-header">
+        <div class="scenario-tag">📋 Step 1 of 4 · Context Setup</div>
+        <div class="scenario-title">Help Pixel Sign Up for GameZone! 🎮</div>
+        <div class="scenario-desc">Your Privapal, Pixel, wants to join <strong>GameZone</strong> — a free online game. 
+        The signup form is asking for some information. Help Pixel decide what to share carefully. 
+        Remember: once data is shared online, it can be hard to take back!</div>
+      </div>
+
+      <!-- Ted's tip -->
+      <div class="ted-bubble">
+        <svg class="ted-avatar" viewBox="0 0 100 100">
+          <!-- Dog head -->
+          <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+          <!-- Ears -->
+          <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+          <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+          <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+          <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+          <!-- Face -->
+          <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+          <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+          <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+          <!-- Nose -->
+          <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+          <!-- Mouth -->
+          <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Safety hat -->
+          <rect x="32" y="22" width="36" height="6" rx="3" fill="#FFD166"/>
+          <rect x="36" y="14" width="28" height="12" rx="4" fill="#FFD166"/>
+          <path d="M 46 17 L 50 19 L 54 17" stroke="#C9991A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="ted-text-wrap">
+          <div class="ted-name">🐶 Ted the Safety Dog</div>
+          <div class="ted-msg" id="tedMsg">Hey there! I'm Ted. I'll help you keep Pixel safe online. 
+          Fill out the form below — but be careful! <strong>Some fields are required</strong>, but some collect 
+          extra information that could put Pixel's privacy at risk. Watch for my tips! 🔍</div>
+        </div>
+      </div>
+
+      <!-- Mock signup form -->
+      <div class="mock-browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="b-dot r"></div>
+            <div class="b-dot y"></div>
+            <div class="b-dot g"></div>
+          </div>
+          <div class="browser-url">🔒 gamezone-signup.example.com/register</div>
+        </div>
+        <div class="browser-content">
+          <div class="signup-form-title">🎮 Join GameZone!</div>
+          <div class="signup-form-sub">Create your free account and start playing today!</div>
+
+          <!-- Required fields -->
+          <div class="form-group">
+            <label class="form-label">Username <span class="required">*</span></label>
+            <input type="text" class="form-input" id="field-username" placeholder="Choose a cool username"
+              oninput="checkField(this, 'username')">
+            <div class="form-hint" id="hint-username"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password <span class="required">*</span></label>
+            <input type="password" class="form-input" id="field-password" placeholder="Create a strong password"
+              oninput="checkPassword(this)">
+            <div class="password-strength">
+              <div class="ps-bar" id="ps1"></div>
+              <div class="ps-bar" id="ps2"></div>
+              <div class="ps-bar" id="ps3"></div>
+              <div class="ps-bar" id="ps4"></div>
+            </div>
+            <div class="ps-label" id="ps-label">Strength: enter a password</div>
+            <div class="form-hint" id="hint-password"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="required">*</span></label>
+            <input type="email" class="form-input" id="field-email" placeholder="Your email (ask a parent!)"
+              oninput="checkField(this, 'email')">
+            <div class="form-hint" id="hint-email"></div>
+          </div>
+
+          <!-- Optional section -->
+          <div class="optional-section">
+            <div class="optional-section-title">⚠️ Optional Information — You don't have to fill these out!</div>
+
+            <div class="form-group">
+              <label class="form-label">Full Name <span class="optional">(optional)</span></label>
+              <input type="text" class="form-input" id="field-name" placeholder="First and last name"
+                oninput="checkField(this, 'name')">
+              <div class="form-hint" id="hint-name"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Date of Birth <span class="optional">(optional)</span></label>
+              <input type="date" class="form-input" id="field-dob" onchange="checkField(this, 'dob')">
+              <div class="form-hint" id="hint-dob"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Phone Number <span class="optional">(optional)</span></label>
+              <input type="tel" class="form-input" id="field-phone" placeholder="Your phone number"
+                oninput="checkField(this, 'phone')">
+              <div class="form-hint" id="hint-phone"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Home City <span class="optional">(optional)</span></label>
+              <input type="text" class="form-input" id="field-city" placeholder="What city do you live in?"
+                oninput="checkField(this, 'city')">
+              <div class="form-hint" id="hint-city"></div>
+            </div>
+          </div>
+
+          <!-- Checkboxes -->
+          <label class="form-checkbox-wrap" id="tos-wrap">
+            <input type="checkbox" id="cb-tos"> 
+            I agree to the Terms of Service and Privacy Policy (89 pages)
+          </label>
+          <label class="form-checkbox-wrap">
+            <input type="checkbox" id="cb-marketing" checked>
+            📧 Send me promotional emails, partner offers, and newsletters
+          </label>
+          <label class="form-checkbox-wrap">
+            <input type="checkbox" id="cb-tracking" checked>
+            📊 Share my gameplay data with GameZone's advertising partners to improve my experience
+          </label>
+
+          <button class="btn-signup" onclick="submitForm()">Create My Account →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+
+      <div>
+        <div class="side-title">🎯 Your Objectives</div>
+        <div class="objective-item" id="obj1">
+          <span class="obj-icon">🔒</span>
+          <span>Choose a safe username</span>
+          <span class="obj-check" style="margin-left:auto">⬜</span>
+        </div>
+        <div class="objective-item" id="obj2">
+          <span class="obj-icon">🔑</span>
+          <span>Create a strong password</span>
+          <span class="obj-check" style="margin-left:auto">⬜</span>
+        </div>
+        <div class="objective-item" id="obj3">
+          <span class="obj-icon">📧</span>
+          <span>Handle email carefully</span>
+          <span class="obj-check" style="margin-left:auto">⬜</span>
+        </div>
+        <div class="objective-item" id="obj4">
+          <span class="obj-icon">🚫</span>
+          <span>Protect optional info</span>
+          <span class="obj-check" style="margin-left:auto">⬜</span>
+        </div>
+        <div class="objective-item" id="obj5">
+          <span class="obj-icon">📊</span>
+          <span>Review data checkboxes</span>
+          <span class="obj-check" style="margin-left:auto">⬜</span>
+        </div>
+      </div>
+
+      <div class="privacy-score-box">
+        <div class="ps-label-text">Privacy Score</div>
+        <div class="ps-number" id="scoreDisplay">80</div>
+        <div class="ps-label-text">/ 100</div>
+      </div>
+
+      <div class="tip-box">
+        <div class="tip-box-title">💡 Did You Know?</div>
+        Your username is public! Using your real name or birthday could help strangers figure out who you are.
+      </div>
+
+      <div class="tip-box" style="background: linear-gradient(135deg, #F0F0FF, #E8E8FF); border-color: #C8C0FF;">
+        <div class="tip-box-title" style="color: #5040A0;">🔍 Data Drip Watch</div>
+        Every piece of info you share adds to your <strong>digital footprint</strong>. 
+        Companies can combine small pieces of data to build a detailed profile about you!
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ======================== DATA DRIP OVERLAY ======================== -->
+<div class="data-drip-container" id="dataDrip">
+  <div class="data-drip-card">
+    <div class="drip-drops">
+      <div class="drip">💧</div>
+      <div class="drip">💧</div>
+      <div class="drip">💧</div>
+      <div class="drip">💧</div>
+      <div class="drip">💧</div>
+    </div>
+    <div class="drip-title" id="dripTitle">⚠️ Data Drip!</div>
+    <div class="drip-subtitle" id="dripSubtitle">Pixel shared too much information. Here's what got exposed...</div>
+
+    <div class="data-exposed-list" id="exposedList">
+      <!-- filled dynamically -->
+    </div>
+
+    <div style="font-size:14px; color: var(--text-light); margin-bottom: 16px; line-height:1.5;" id="dripExplain">
+      When companies collect this data, they can share it, sell it, or use it to target you with ads — 
+      and you might not even know it's happening!
+    </div>
+
+    <div>
+      <button class="btn-retry" onclick="retryScenario()">🔄 Try Again</button>
+      <button class="btn-continue" onclick="goToWin()">Next: See What Happened →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SAFE RESULT SCREEN ======================== -->
+<div id="screen-safe-result" class="screen">
+  <div class="safe-card">
+    <div class="shield">🛡️</div>
+    <div class="win-title">Great Job! Pixel Stayed Safe!</div>
+    <div class="win-sub">You made smart choices and protected Pixel's privacy. Let's see how you did!</div>
+
+    <div class="stars" id="safeStars">
+      <div class="star" id="s1">⭐</div>
+      <div class="star" id="s2">⭐</div>
+      <div class="star" id="s3">⭐</div>
+    </div>
+
+    <div class="learned-list">
+      <div class="learned-title">🎓 What You Learned</div>
+      <div class="learned-item"><span>✅</span><span>Optional fields don't need to be filled — companies use them to build profiles on you.</span></div>
+      <div class="learned-item"><span>✅</span><span>Strong passwords with numbers and symbols are harder for hackers to guess.</span></div>
+      <div class="learned-item"><span>✅</span><span>Unchecking data-sharing boxes limits what companies can do with your information.</span></div>
+      <div class="learned-item"><span>✅</span><span>Usernames should never include your real name or personal details.</span></div>
+    </div>
+
+    <div>
+      <button class="btn-replay" onclick="retryScenario()">🔄 Play Again</button>
+      <button class="btn-home" onclick="goHome()">🏠 Home</button>
+    </div>
+    <div style="margin-top:16px; font-size:13px; color: var(--text-light);">Mission 2: App Permissions & Tracking — Coming Soon!</div>
+  </div>
+</div>
+
+<!-- ======================== WIN SCREEN ======================== -->
+<div id="screen-win" class="screen">
+  <div class="win-card">
+    <div class="trophy">🏆</div>
+    <div class="win-title">Scenario Complete!</div>
+    <div class="win-sub">You've finished Mission 1. Here's what happened with Pixel's data — and what you could do differently.</div>
+
+    <div class="comparison-box">
+      <div class="compare-card bad">
+        <div class="compare-title">⚠️ Oversharing Path</div>
+        <div class="compare-item"><span>😬</span> Real name exposed</div>
+        <div class="compare-item"><span>📍</span> Location known</div>
+        <div class="compare-item"><span>📞</span> Phone number sold</div>
+        <div class="compare-item"><span>📊</span> Tracked by advertisers</div>
+        <div class="compare-item"><span>📧</span> Inbox filled with spam</div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">✅ Safe Path</div>
+        <div class="compare-item"><span>😎</span> Anonymous username</div>
+        <div class="compare-item"><span>🔒</span> Strong password</div>
+        <div class="compare-item"><span>🚫</span> No optional data given</div>
+        <div class="compare-item"><span>📵</span> Ads opt-out selected</div>
+        <div class="compare-item"><span>📨</span> No spam emails!</div>
+      </div>
+    </div>
+
+    <div class="learned-list">
+      <div class="learned-title">🎓 Key Takeaways</div>
+      <div class="learned-item"><span>💡</span><span>Privacy harms are often <strong>delayed</strong> — you might not notice them right away, but they build up over time.</span></div>
+      <div class="learned-item"><span>💡</span><span>Websites are designed to make oversharing feel <strong>normal and easy</strong>. Watch out for pre-checked boxes!</span></div>
+      <div class="learned-item"><span>💡</span><span>You have the <strong>right to say no</strong> to optional data requests — always look for skip or decline options.</span></div>
+    </div>
+
+    <div>
+      <button class="btn-replay" onclick="retryScenario()">🔄 Try Again</button>
+      <button class="btn-home" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== JAVASCRIPT ======================== -->
+<script>
+  // State
+  let privacyScore = 80;
+  let fieldsStatus = {};
+  let objStatus = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startGame() {
+    showScreen('screen-game');
+  }
+
+  // ---- FIELD CHECKS ----
+  const fieldConfig = {
+    username: {
+      safe: (v) => v.length > 2 && !/real|name|home|school/i.test(v) && !/[0-9]{4}/.test(v),
+      safeMsg: '✅ Great! This username looks safe — it doesn\'t reveal personal info.',
+      warnMsg: '⚠️ Hmm, this username might give away personal details. Try something more anonymous!',
+      objective: 1
+    },
+    email: {
+      safe: (v) => v.includes('@'),
+      safeMsg: '✅ Email added. Tip: Ask a parent/guardian before using a personal email.',
+      warnMsg: '✉️ Make sure to use a valid email address.',
+      objective: 3
+    },
+    name: {
+      safe: (v) => v.length === 0,
+      safeMsg: '🚫 You left this blank — smart! Full names don\'t need to be shared here.',
+      dangerMsg: '⚠️ Careful! Your full real name is personal. You don\'t have to share it to play!',
+      objective: 4
+    },
+    dob: {
+      safe: (v) => v.length === 0,
+      safeMsg: '',
+      dangerMsg: '⚠️ Your birthdate is sensitive info! Combined with other data, it can be used to identify you.',
+      objective: 4
+    },
+    phone: {
+      safe: (v) => v.length === 0,
+      safeMsg: '',
+      dangerMsg: '🚨 Phone numbers are very personal! You don\'t need to give this to play a game.',
+      objective: 4
+    },
+    city: {
+      safe: (v) => v.length === 0,
+      safeMsg: '',
+      dangerMsg: '📍 Location info helps companies track where you are. Skip this if you can!',
+      objective: 4
+    }
+  };
+
+  function checkField(input, type) {
+    const config = fieldConfig[type];
+    if (!config) return;
+    const v = input.value.trim();
+    const hint = document.getElementById('hint-' + type);
+
+    if (type === 'name' || type === 'dob' || type === 'phone' || type === 'city') {
+      if (v.length === 0) {
+        input.className = 'form-input safe';
+        hint.className = 'form-hint safe';
+        hint.textContent = type === 'name' ? config.safeMsg : '✅ Left blank — great choice!';
+        adjustScore(type, 5);
+        fieldsStatus[type] = 'safe';
+      } else {
+        input.className = 'form-input danger';
+        hint.className = 'form-hint danger';
+        hint.textContent = config.dangerMsg;
+        adjustScore(type, -5);
+        fieldsStatus[type] = 'danger';
+      }
+      checkObj(4, ['name','dob','phone','city'].every(k => !fieldsStatus[k] || fieldsStatus[k] === 'safe'));
+    } else if (type === 'username') {
+      if (v.length === 0) {
+        input.className = 'form-input';
+        hint.className = 'form-hint';
+        return;
+      }
+      if (config.safe(v)) {
+        input.className = 'form-input safe';
+        hint.className = 'form-hint safe';
+        hint.textContent = config.safeMsg;
+        adjustScore(type, 8);
+        fieldsStatus[type] = 'safe';
+        checkObj(1, true);
+      } else {
+        input.className = 'form-input warn';
+        hint.className = 'form-hint warn';
+        hint.textContent = config.warnMsg;
+        adjustScore(type, -5);
+        fieldsStatus[type] = 'warn';
+        checkObj(1, false);
+      }
+    } else if (type === 'email') {
+      if (v.length === 0) return;
+      if (config.safe(v)) {
+        input.className = 'form-input safe';
+        hint.className = 'form-hint safe';
+        hint.textContent = config.safeMsg;
+        fieldsStatus[type] = 'safe';
+        checkObj(3, true);
+      } else {
+        input.className = 'form-input warn';
+        hint.className = 'form-hint warn';
+        hint.textContent = config.warnMsg;
+      }
+    }
+
+    updateTed(type, fieldsStatus[type]);
+  }
+
+  let scoreChanges = {};
+  function adjustScore(key, delta) {
+    if (scoreChanges[key] === delta) return;
+    if (scoreChanges[key]) privacyScore -= scoreChanges[key];
+    scoreChanges[key] = delta;
+    privacyScore += delta;
+    privacyScore = Math.max(0, Math.min(100, privacyScore));
+    updateScoreDisplay();
+  }
+
+  function updateScoreDisplay() {
+    document.getElementById('scoreDisplay').textContent = privacyScore;
+    const bar = document.getElementById('privacyBar');
+    bar.style.width = privacyScore + '%';
+    // Color: low = red side, high = green side
+    const pos = (privacyScore / 100) * 100;
+    bar.style.backgroundPosition = (100 - pos) + '% 0';
+  }
+
+  function checkPassword(input) {
+    const v = input.value;
+    const hint = document.getElementById('hint-password');
+    const bars = [document.getElementById('ps1'), document.getElementById('ps2'),
+                  document.getElementById('ps3'), document.getElementById('ps4')];
+    const label = document.getElementById('ps-label');
+
+    let strength = 0;
+    if (v.length >= 8) strength++;
+    if (/[A-Z]/.test(v)) strength++;
+    if (/[0-9]/.test(v)) strength++;
+    if (/[^A-Za-z0-9]/.test(v)) strength++;
+
+    const colors = ['#FF6B6B', '#FF9F43', '#FFD166', '#4CAF71'];
+    const labels = ['Weak', 'Fair', 'Good', 'Strong! 💪'];
+    bars.forEach((b, i) => {
+      b.style.background = i < strength ? colors[strength - 1] : '#E0E0E0';
+    });
+    label.textContent = v.length === 0 ? 'Strength: enter a password' : 'Strength: ' + (labels[strength - 1] || 'Very Weak');
+
+    if (strength >= 3) {
+      input.className = 'form-input safe';
+      hint.className = 'form-hint safe';
+      hint.textContent = '✅ Strong password! Hard for others to guess.';
+      adjustScore('password', 10);
+      fieldsStatus['password'] = 'safe';
+      checkObj(2, true);
+    } else if (v.length > 0) {
+      input.className = 'form-input warn';
+      hint.className = 'form-hint warn';
+      hint.textContent = '⚠️ Weak password! Try adding numbers, capitals, and symbols.';
+      adjustScore('password', -8);
+      fieldsStatus['password'] = 'weak';
+      checkObj(2, false);
+    }
+  }
+
+  function checkObj(num, done) {
+    objStatus[num] = done;
+    const el = document.getElementById('obj' + num);
+    const check = el.querySelector('.obj-check');
+    if (done) {
+      el.classList.add('done');
+      check.textContent = '✅';
+    } else {
+      el.classList.remove('done');
+      check.textContent = '⬜';
+    }
+  }
+
+  const tedMessages = {
+    username_safe: "Nice username! It doesn't reveal your real identity. That's exactly what we want! 🎉",
+    username_warn: "Hmm, I'd be careful with that username. Can you make it less personal? Try something fun and random!",
+    password_safe: "Wow, that's a really strong password! 💪 Long passwords with mixed characters are much harder to crack.",
+    name_danger: "Oh no! Your full real name is very personal. You definitely don't need to share it just to play a game!",
+    phone_danger: "🚨 Phone numbers are super sensitive! Companies can use them to contact you or sell to others. Skip it!",
+    city_danger: "📍 Location info can help companies (or strangers) figure out where you live. Leave it blank when you can!",
+    dob_danger: "Your birthdate combined with your name can be used to identify you online. Best to keep it private!"
+  };
+
+  function updateTed(type, status) {
+    const key = type + '_' + status;
+    const msg = tedMessages[key];
+    if (msg) {
+      const el = document.getElementById('tedMsg');
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.textContent = msg;
+        el.style.opacity = '1';
+        el.style.transition = 'opacity 0.3s';
+      }, 150);
+    }
+  }
+
+  // ---- SUBMIT ----
+  function submitForm() {
+    // Check checkboxes for objective 5
+    const marketing = document.getElementById('cb-marketing').checked;
+    const tracking = document.getElementById('cb-tracking').checked;
+    checkObj(5, !marketing && !tracking);
+
+    const dangerFields = [];
+    const dangerous = {
+      name: document.getElementById('field-name').value,
+      dob: document.getElementById('field-dob').value,
+      phone: document.getElementById('field-phone').value,
+      city: document.getElementById('field-city').value
+    };
+
+    const fieldLabels = { name: '👤 Full Real Name', dob: '🎂 Date of Birth', phone: '📞 Phone Number', city: '📍 Home City' };
+    const risks = { name: 'high', dob: 'high', phone: 'high', city: 'med' };
+
+    Object.entries(dangerous).forEach(([k, v]) => {
+      if (v.trim().length > 0) dangerFields.push(k);
+    });
+
+    const list = document.getElementById('exposedList');
+
+    // Also check if marketing / tracking checked
+    if (marketing) dangerFields.push('marketing');
+    if (tracking) dangerFields.push('tracking');
+
+    if (dangerFields.length > 0) {
+      // Show data drip
+      list.innerHTML = '';
+
+      if (dangerous.name?.trim()) list.innerHTML += makeExposed('👤', 'Full Real Name', 'risk-high', 'High');
+      if (dangerous.dob?.trim()) list.innerHTML += makeExposed('🎂', 'Date of Birth', 'risk-high', 'High');
+      if (dangerous.phone?.trim()) list.innerHTML += makeExposed('📞', 'Phone Number', 'risk-high', 'High');
+      if (dangerous.city?.trim()) list.innerHTML += makeExposed('📍', 'Home City', 'risk-med', 'Medium');
+      if (marketing) list.innerHTML += makeExposed('📧', 'Opted into marketing emails', 'risk-med', 'Medium');
+      if (tracking) list.innerHTML += makeExposed('📊', 'Gameplay data shared with advertisers', 'risk-high', 'High');
+
+      document.getElementById('dataDrip').classList.add('show');
+    } else {
+      // All safe!
+      showScreen('screen-safe-result');
+      setTimeout(() => {
+        ['s1','s2','s3'].forEach((id, i) => {
+          setTimeout(() => {
+            const s = document.getElementById(id);
+            s.classList.add('lit');
+          }, i * 300);
+        });
+      }, 300);
+    }
+  }
+
+  function makeExposed(icon, label, riskClass, riskLabel) {
+    return `<div class="exposed-item">
+      <span class="exposed-icon">${icon}</span>
+      <span>${label}</span>
+      <span class="exposed-risk ${riskClass}">${riskLabel} Risk</span>
+    </div>`;
+  }
+
+  function retryScenario() {
+    document.getElementById('dataDrip').classList.remove('show');
+    // Reset form
+    document.querySelectorAll('.form-input').forEach(inp => {
+      inp.value = '';
+      inp.className = 'form-input';
+    });
+    document.querySelectorAll('.form-hint').forEach(h => { h.className = 'form-hint'; h.textContent = ''; });
+    document.getElementById('cb-marketing').checked = true;
+    document.getElementById('cb-tracking').checked = true;
+    fieldsStatus = {};
+    scoreChanges = {};
+    privacyScore = 80;
+    updateScoreDisplay();
+    for (let i = 1; i <= 5; i++) checkObj(i, false);
+
+    const psLabel = document.getElementById('ps-label');
+    psLabel.textContent = 'Strength: enter a password';
+    ['ps1','ps2','ps3','ps4'].forEach(id => document.getElementById(id).style.background = '#E0E0E0');
+
+    document.getElementById('tedMsg').textContent = "Hey there! I'm Ted. Let's try again! Remember: optional fields are OPTIONAL for a reason. Leave blank anything you don't have to fill in. 🔍";
+
+    showScreen('screen-game');
+  }
+
+  function goToWin() {
+    document.getElementById('dataDrip').classList.remove('show');
+    showScreen('screen-win');
+  }
+
+  function goHome() {
+    retryScenario();
+    showScreen('screen-title');
+  }
+</script>
+
+</body>
+</html>

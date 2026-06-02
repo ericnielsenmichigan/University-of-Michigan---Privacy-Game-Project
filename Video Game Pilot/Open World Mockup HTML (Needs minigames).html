@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Privapals — Privacy Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky:#5EC8F0;--sun:#FFD166;--green:#4CAF71;--green-d:#2E8B47;
+  --blue:#3AAED8;--blue-d:#1A6888;--purple:#7C6FCD;--purple-d:#4A3880;
+  --coral:#FF6B9D;--coral-d:#A82060;--orange:#FF9F43;--orange-d:#C05A00;
+  --red:#FF6B6B;--text:#1A1A2E;--light:#5A5A7A;--white:#fff;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;overflow:hidden;background:#0A0520;color:var(--text);}
+canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%;}
+
+/* ====== SHARED ====== */
+.screen{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;}
+.screen.hidden{display:none;}
+.card{background:white;border-radius:28px;padding:32px;max-width:540px;width:92%;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);animation:popIn .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.55);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes drift{to{left:110vw}}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.04)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes starPop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.btn{font-family:'Fredoka One',cursive;cursor:pointer;border:none;border-radius:50px;
+  transition:transform .12s,box-shadow .12s;}
+.btn:hover{transform:translateY(-3px);}
+.btn:active{transform:translateY(2px);}
+.btn-primary{background:linear-gradient(135deg,#7C6FCD,#5A4FA0);color:white;
+  padding:14px 48px;font-size:20px;box-shadow:0 6px 0 #3A2F80,0 8px 22px rgba(0,0,0,.25);}
+.btn-sun{background:var(--sun);color:var(--text);padding:12px 32px;font-size:18px;
+  box-shadow:0 5px 0 #C9991A;}
+.btn-ghost{background:#F0F0F4;color:var(--text);padding:12px 28px;font-size:17px;
+  box-shadow:0 4px 0 #C0C0CC;}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:4px 13px;
+  border-radius:20px;text-transform:uppercase;letter-spacing:1px;}
+
+/* ====== TITLE SCREEN ====== */
+#screen-title{background:linear-gradient(160deg,#0A0520 0%,#18085A 50%,#050F38 100%);flex-direction:column;}
+.title-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.tp{position:absolute;border-radius:50%;animation:float linear infinite;}
+.title-content{text-align:center;z-index:5;animation:fadeUp .8s ease both;}
+.title-mascot{width:110px;height:110px;animation:bob 2.2s ease-in-out infinite;margin:0 auto 12px;display:block;}
+.title-logo{font-family:'Fredoka One',cursive;font-size:80px;color:white;
+  text-shadow:5px 7px 0 #3A2F80,0 0 40px rgba(124,111,205,.6);letter-spacing:2px;margin-bottom:4px;}
+.title-sub{font-size:18px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:8px;letter-spacing:1px;}
+.title-badge{display:inline-block;background:var(--sun);color:var(--text);font-weight:800;
+  font-size:13px;padding:5px 18px;border-radius:20px;margin-bottom:36px;box-shadow:0 3px 0 #C9991A;}
+.title-clouds{position:absolute;top:0;left:0;right:0;height:100%;pointer-events:none;overflow:hidden;}
+.cloud{position:absolute;background:rgba(255,255,255,.07);border-radius:50px;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:rgba(255,255,255,.07);border-radius:50%;}
+.c1{width:130px;height:40px;top:15%;left:-150px;animation:drift 28s linear infinite;}
+.c1::before{width:65px;height:65px;top:-32px;left:22px;}
+.c1::after{width:48px;height:48px;top:-24px;left:62px;}
+.c2{width:90px;height:28px;top:35%;left:-110px;animation:drift 36s linear infinite;animation-delay:-12s;}
+.c2::before{width:44px;height:44px;top:-22px;left:14px;}
+.c2::after{width:36px;height:36px;top:-17px;left:42px;}
+.c3{width:160px;height:48px;top:10%;left:-180px;animation:drift 22s linear infinite;animation-delay:-6s;}
+.c3::before{width:80px;height:80px;top:-40px;left:26px;}
+.c3::after{width:62px;height:62px;top:-32px;left:82px;}
+
+/* ====== LEARN SCREEN ====== */
+#screen-learn{background:linear-gradient(160deg,#0A0520,#1A0840,#050F28);}
+.learn-card{text-align:center;max-height:90vh;overflow-y:auto;position:relative;}
+.learn-slide{display:none;animation:fadeUp .4s ease both;}
+.learn-slide.active{display:block;}
+.slide-visual{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:46px;margin:0 auto 16px;box-shadow:0 6px 24px rgba(0,0,0,.18);}
+.slide-num{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--light);margin-bottom:12px;}
+.slide-title{font-family:'Fredoka One',cursive;font-size:26px;color:var(--text);margin-bottom:10px;}
+.slide-body{font-size:14px;color:var(--light);line-height:1.7;margin-bottom:14px;}
+.slide-fact{border-radius:14px;padding:14px;font-size:13px;font-weight:700;line-height:1.55;text-align:left;}
+.slide-ted{display:flex;gap:10px;background:#F5F2FF;border:2px solid #C8BFEE;border-radius:14px;
+  padding:12px;margin:14px 0;text-align:left;}
+.st-name{font-size:11px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.st-msg{font-size:13px;font-weight:700;color:var(--text);line-height:1.55;}
+.st-msg strong{color:var(--purple);}
+.slide-dots{display:flex;gap:8px;justify-content:center;margin:18px 0 8px;}
+.sdot{width:10px;height:10px;border-radius:50%;background:#E0E0E0;transition:background .3s,transform .3s;}
+.sdot.active{background:var(--purple);transform:scale(1.3);}
+.sdot.done{background:var(--green);}
+.slide-nav{display:flex;gap:10px;justify-content:center;}
+
+/* ====== GAME HUD ====== */
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;}
+#hud-top{position:absolute;top:0;left:0;right:0;padding:12px 18px;
+  background:linear-gradient(180deg,rgba(5,2,20,.72) 0%,transparent 100%);
+  display:flex;align-items:center;justify-content:space-between;}
+.hud-brand{display:flex;align-items:center;gap:10px;}
+.hud-title{font-family:'Fredoka One',cursive;font-size:20px;color:white;text-shadow:2px 3px 0 rgba(0,0,0,.4);}
+.hud-sub{font-size:12px;color:rgba(255,255,255,.8);font-weight:700;}
+.hud-pill{background:rgba(0,0,0,.52);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.18);
+  border-radius:22px;padding:7px 16px;display:flex;align-items:center;gap:10px;}
+.hud-score-n{font-family:'Fredoka One',cursive;font-size:26px;color:var(--sun);}
+.hud-score-l{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px;}
+.h-dot{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.22);
+  border:2px solid rgba(255,255,255,.38);transition:background .5s,border-color .5s;}
+.h-dot.done{background:var(--green);border-color:#2E8B47;}
+.zone-pill{background:rgba(0,0,0,.52);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.18);
+  border-radius:22px;padding:7px 14px;font-size:13px;font-weight:800;color:white;
+  text-align:center;transition:all .4s;}
+#interact-prompt{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
+  display:none;animation:float 1.4s ease-in-out infinite;}
+.int-card{background:rgba(255,255,255,.95);border-radius:22px;padding:10px 22px;
+  display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.28);
+  border:2.5px solid var(--sun);}
+.int-key{background:var(--sun);color:var(--text);font-family:'Fredoka One',cursive;
+  font-size:14px;min-width:30px;height:30px;border-radius:8px;display:flex;
+  align-items:center;justify-content:center;box-shadow:0 3px 0 #C9991A;padding:0 8px;}
+.int-label{font-size:14px;font-weight:800;color:var(--text);}
+#minimap-wrap{position:absolute;bottom:18px;right:18px;}
+#minimap{border-radius:12px;border:2px solid rgba(255,255,255,.26);
+  box-shadow:0 4px 16px rgba(0,0,0,.45);display:block;}
+#ctrl-hint{position:absolute;bottom:18px;left:18px;background:rgba(0,0,0,.48);
+  backdrop-filter:blur(6px);border-radius:12px;padding:10px 14px;
+  color:rgba(255,255,255,.78);font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.14);line-height:2;}
+#ted-bubble{position:absolute;z-index:25;pointer-events:none;display:none;}
+.ted-b-inner{background:white;border-radius:18px 18px 18px 4px;padding:10px 14px;
+  max-width:220px;box-shadow:0 6px 20px rgba(0,0,0,.28);border:2px solid #D4CAFF;
+  font-size:13px;font-weight:700;color:var(--text);line-height:1.5;}
+.ted-b-inner strong{color:var(--purple);}
+#zone-labels{position:absolute;inset:0;pointer-events:none;}
+.zlabel{position:absolute;transform:translateX(-50%) translateY(-50%);text-align:center;}
+.zl-inner{background:rgba(5,2,20,.68);backdrop-filter:blur(5px);color:white;
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:800;
+  border:1.5px solid rgba(255,255,255,.2);white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.3);}
+.zlabel.done .zl-inner{background:rgba(20,80,40,.85);border-color:#4CAF71;}
+
+/* ====== MOBILE DPAD ====== */
+#dpad{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:none;}
+.dpgrid{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;}
+.dp{background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:2px solid rgba(255,255,255,.32);
+  border-radius:14px;color:white;font-size:20px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;user-select:none;}
+.dp:active{background:rgba(255,255,255,.38);}
+.dp-e{background:rgba(255,209,102,.72);color:var(--text);font-family:'Fredoka One',cursive;
+  font-size:13px;font-weight:800;border-color:rgba(255,209,102,.6);}
+
+/* ====== MISSION POPUP ====== */
+#mission-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;
+  justify-content:center;background:rgba(5,2,18,.78);backdrop-filter:blur(7px);padding:16px;}
+#mission-overlay.show{display:flex;}
+#mission-card{background:white;border-radius:28px;padding:26px 26px 22px;max-width:520px;
+  width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.45);}
+.mc-icon{font-size:56px;display:block;text-align:center;margin-bottom:8px;animation:bob 2s ease-in-out infinite;}
+.mc-tag{display:block;text-align:center;margin-bottom:10px;}
+.mc-title{font-family:'Fredoka One',cursive;font-size:23px;color:var(--text);margin-bottom:8px;text-align:center;}
+.mc-desc{font-size:14px;color:var(--light);line-height:1.65;margin-bottom:16px;}
+.mc-ted{display:flex;gap:10px;border-radius:14px;padding:12px;margin-bottom:16px;}
+.mc-ted-purple{background:#F5F2FF;border:2px solid #C8BFEE;}
+.mc-ted-blue{background:#EBF8FF;border:2px solid #B8DDEF;}
+.mc-ted-coral{background:#FFF0F5;border:2px solid #FFD0E4;}
+.mc-ted-orange{background:#FFF8F0;border:2px solid #FFD8A0;}
+.mc-ted-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.mc-ted-msg{font-size:13px;font-weight:700;color:var(--text);line-height:1.55;}
+.mc-ted-msg strong{color:var(--purple-d);}
+
+/* Form styles (M1) */
+.form-group{margin-bottom:12px;position:relative;}
+.form-lbl{display:block;font-size:12px;font-weight:800;margin-bottom:4px;color:var(--text);}
+.req{color:var(--red);}.opt{color:var(--light);font-weight:600;font-size:11px;}
+.form-inp{width:100%;border:2px solid #D0D8E0;border-radius:10px;padding:9px 13px;
+  font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;}
+.form-inp:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(94,200,240,.18);}
+.form-inp.safe{border-color:var(--green);}
+.form-inp.warn{border-color:var(--orange);}
+.form-inp.danger{border-color:var(--red);}
+.form-hint{font-size:12px;margin-top:3px;padding:3px 8px;border-radius:6px;display:none;font-weight:700;}
+.fh-safe{display:block;background:#E8F5E9;color:#1B6B2E;}
+.fh-warn{display:block;background:#FFF3E0;color:#8B5000;}
+.fh-danger{display:block;background:#FFEBEE;color:#B00020;}
+.ps-bars{display:flex;gap:4px;margin-top:5px;}
+.ps-b{height:5px;flex:1;border-radius:5px;background:#E0E0E0;transition:background .3s;}
+.ps-lbl{font-size:11px;font-weight:700;color:var(--light);margin-top:2px;}
+.optional-box{border:2px dashed #D0D8E0;border-radius:12px;padding:12px;margin-bottom:12px;background:#F8FAFC;}
+.optional-title{font-size:11px;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;}
+.checkbox-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--light);margin-bottom:7px;cursor:pointer;font-weight:700;}
+.checkbox-row input{width:17px;height:17px;cursor:pointer;accent-color:var(--sky);}
+.mock-browser{border:2px solid #E0E0E0;border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}
+.mb-bar{background:#F0F0F0;padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:2px solid #E0E0E0;}
+.mb-dots{display:flex;gap:5px;}
+.mb-dot{width:11px;height:11px;border-radius:50%;}
+.mb-url{flex:1;background:white;border:1.5px solid #D0D0D0;border-radius:7px;padding:4px 11px;font-size:12px;color:#666;font-family:monospace;margin-left:7px;}
+.mb-body{padding:20px;}
+.mb-form-title{font-family:'Fredoka One',cursive;font-size:21px;text-align:center;margin-bottom:4px;}
+.mb-form-sub{text-align:center;font-size:13px;color:var(--light);margin-bottom:16px;}
+
+/* Permission toggles (M2) */
+.phone-frame{background:#1A1028;border-radius:40px;padding:12px 9px;width:290px;
+  margin:0 auto;box-shadow:0 16px 50px rgba(0,0,0,.4),inset 0 0 0 2px #3A2A58;}
+.phone-notch{width:80px;height:20px;background:#1A1028;border-radius:0 0 12px 12px;margin:0 auto 8px;}
+.phone-screen{background:#F8F6FF;border-radius:26px;overflow:hidden;}
+.phone-sb{background:white;padding:7px 14px 5px;display:flex;justify-content:space-between;
+  font-size:10px;font-weight:800;color:#333;border-bottom:1px solid #eee;}
+.phone-app-hdr{background:linear-gradient(135deg,#7C6FCD,#5A4FA0);padding:18px 18px 14px;text-align:center;}
+.phone-app-ico{width:58px;height:58px;background:white;border-radius:14px;margin:0 auto 8px;
+  display:flex;align-items:center;justify-content:center;font-size:30px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);}
+.phone-app-nm{font-family:'Fredoka One',cursive;font-size:18px;color:white;}
+.phone-app-tg{font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-top:2px;}
+.perms-area{padding:12px 12px 8px;}
+.perms-hdr{font-size:11px;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;}
+.prow{display:flex;align-items:center;gap:9px;background:white;border-radius:12px;
+  padding:10px 11px;margin-bottom:7px;border:2px solid #E8E4F8;transition:border-color .3s,background .3s;cursor:pointer;}
+.prow.granted{border-color:#FF9F43;background:#FFF8F0;}
+.prow.denied{border-color:#C8BFEE;background:#F8F6FF;}
+.prow-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.prow-text{flex:1;}
+.prow-name{font-size:12px;font-weight:800;color:var(--text);}
+.prow-reason{font-size:10px;color:var(--light);font-weight:600;margin-top:1px;}
+.toggle{position:relative;width:42px;height:23px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.tslider{position:absolute;inset:0;background:#D0D0D0;border-radius:23px;cursor:pointer;transition:background .3s;}
+.tslider::before{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:white;left:3px;top:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle input:checked+.tslider{background:#FF9F43;}
+.toggle input:checked+.tslider::before{transform:translateX(19px);}
+.phone-install{margin:6px 12px 12px;width:calc(100% - 24px);background:linear-gradient(135deg,#7C6FCD,#5A4FA0);
+  color:white;border:none;border-radius:12px;padding:12px;font-family:'Fredoka One',cursive;
+  font-size:15px;cursor:pointer;box-shadow:0 4px 0 #3A2F80;transition:transform .1s;}
+.phone-install:hover{transform:translateY(-2px);}
+
+/* Profile editor (M3) */
+.social-top{background:linear-gradient(135deg,var(--coral),var(--coral-d));padding:11px 16px;
+  display:flex;align-items:center;gap:10px;}
+.social-logo{font-family:'Fredoka One',cursive;font-size:18px;color:white;}
+.social-banner{height:80px;background:linear-gradient(135deg,#FFB3CC,#FF8AB8,var(--sun));
+  position:relative;display:flex;align-items:flex-end;padding:0 16px;}
+.s-avatar{width:66px;height:66px;border-radius:50%;border:4px solid white;
+  background:linear-gradient(135deg,var(--coral),var(--sun));display:flex;
+  align-items:center;justify-content:center;font-size:28px;transform:translateY(33px);
+  box-shadow:0 4px 12px rgba(0,0,0,.15);flex-shrink:0;}
+.profile-body{padding:40px 16px 16px;}
+.pf-row{display:flex;align-items:center;background:#FAFAFA;border-radius:11px;
+  border:2px solid #F0E0E8;margin-bottom:9px;overflow:hidden;transition:border-color .3s;}
+.pf-row:focus-within{border-color:var(--coral);}
+.pf-lbl{font-size:11px;font-weight:800;color:var(--light);padding:9px 11px;min-width:96px;
+  background:#F5EEF1;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;border-right:2px solid #F0E0E8;}
+.pf-inp{flex:1;border:none;outline:none;padding:9px 11px;font-size:13px;font-family:'Nunito',sans-serif;background:transparent;}
+.vis-sel{border:none;outline:none;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;
+  padding:7px 9px;cursor:pointer;flex-shrink:0;border-left:2px solid #F0E0E8;background:transparent;
+  appearance:none;-webkit-appearance:none;padding-right:22px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;}
+.vis-pub{color:#C05A00;background-color:#FFF3E0;}
+.vis-fri{color:#006898;background-color:#E0F4FF;}
+.vis-prv{color:#1B6B2E;background-color:#E8F5E9;}
+.btn-preview{width:100%;background:linear-gradient(135deg,var(--coral),var(--coral-d));color:white;
+  border:none;border-radius:12px;padding:12px;font-family:'Fredoka One',cursive;font-size:16px;
+  cursor:pointer;box-shadow:0 4px 0 #A82060;transition:transform .1s;margin-top:12px;}
+.btn-preview:hover{transform:translateY(-2px);}
+.stranger-view{background:#1A0820;border-radius:18px;padding:14px;margin-bottom:14px;}
+.sv-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sv-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--sun));
+  display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid rgba(255,255,255,.2);}
+.sv-name{font-family:'Fredoka One',cursive;font-size:15px;color:white;}
+.sv-handle{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;}
+.sv-field{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:12px;}
+.sv-field:last-child{border-bottom:none;}
+.sv-key{color:rgba(255,255,255,.45);font-weight:700;min-width:65px;font-size:10px;text-transform:uppercase;}
+.sv-val{color:white;font-weight:700;}
+.sv-badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:12px;flex-shrink:0;}
+.sbh{background:#FFEBEE;color:#B00020;}.sbm{background:#FFF3E0;color:#8B5000;}.sbs{background:#E8F5E9;color:#1B6B2E;}
+.mosaic-box{background:#2A0F28;border:2px solid var(--coral);border-radius:14px;padding:13px;margin-bottom:14px;}
+.mosaic-title{font-family:'Fredoka One',cursive;color:var(--coral);font-size:17px;margin-bottom:6px;}
+.mosaic-item{display:flex;gap:8px;font-size:12px;color:rgba(255,255,255,.85);padding:4px 0;font-weight:600;}
+
+/* M4 guided tour */
+.m4-progress{display:flex;gap:6px;justify-content:center;margin-bottom:16px;}
+.m4-dot{width:11px;height:11px;border-radius:50%;background:#E0E0E0;border:2px solid #C8C8C8;transition:all .3s;}
+.m4-dot.active{background:var(--orange);border-color:var(--orange-d);}
+.m4-dot.done{background:var(--green);border-color:var(--green-d);}
+.m4-scenario-title{font-family:'Fredoka One',cursive;font-size:19px;color:var(--text);margin-bottom:8px;}
+.m4-scene-desc{font-size:14px;color:var(--light);line-height:1.6;margin-bottom:14px;}
+
+/* Choice buttons */
+.choice-btn{width:100%;border:2.5px solid;border-radius:13px;padding:12px 14px;margin-bottom:8px;
+  cursor:pointer;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+  text-align:left;display:flex;align-items:center;gap:11px;transition:transform .15s,box-shadow .15s;background:white;}
+.choice-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.12);}
+.choice-btn:last-child{margin-bottom:0;}
+.cbad{border-color:#FFB0B0;background:#FFF5F5;color:#8B0000;}
+.cgood{border-color:#A8D8B8;background:#F0FFF6;color:#1B4D2E;}
+.cntr{border-color:#C0BAFF;background:#F5F3FF;color:#3A2A7A;}
+.ch-ico{font-size:20px;flex-shrink:0;}
+.ch-lbl{font-size:14px;font-weight:800;}
+.ch-sub{font-size:11px;font-weight:600;opacity:.7;margin-top:1px;}
+
+/* Consequence boxes */
+.con-box{border-radius:15px;padding:15px;margin-bottom:14px;}
+.con-bad{background:#FFF0F0;border:2px solid #FFB8B8;}
+.con-good{background:#F0FFF6;border:2px solid #A8D8B8;}
+.con-title{font-family:'Fredoka One',cursive;font-size:17px;margin-bottom:9px;}
+.con-bad .con-title{color:#CC3333;}.con-good .con-title{color:#2E7B47;}
+.con-item{display:flex;gap:8px;font-size:13px;font-weight:700;padding:5px 0;
+  border-bottom:1px solid rgba(0,0,0,.07);line-height:1.4;}
+.con-item:last-child{border-bottom:none;}
+
+/* Data exposed list */
+.exposed-list{background:#FFF5F5;border:2px solid #FFD0D0;border-radius:13px;padding:14px;margin-bottom:14px;}
+.exp-item{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #FFE0E0;font-size:13px;font-weight:700;}
+.exp-item:last-child{border-bottom:none;}
+.exp-risk{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:12px;}
+.rh{background:#FFEBEE;color:#B00020;}.rm{background:#FFF3E0;color:#8B5000;}.rl{background:#E8F5E9;color:#1B6B2E;}
+
+/* Success result */
+.success-box{background:#E8F5E9;border:2px solid #A8D8B8;border-radius:14px;padding:14px;margin-bottom:14px;}
+.success-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--green-d);margin-bottom:9px;}
+.success-item{display:flex;gap:8px;font-size:13px;font-weight:700;padding:5px 0;border-bottom:1px solid #C0EED0;line-height:1.4;}
+.success-item:last-child{border-bottom:none;}
+.stars{display:flex;justify-content:center;gap:6px;margin:12px 0;}
+.star{font-size:34px;opacity:.2;transition:opacity .3s;}
+.star.lit{opacity:1;animation:starPop .4s cubic-bezier(.34,1.56,.64,1) forwards;}
+
+/* Action buttons in popup */
+.popup-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.btn-continue{background:linear-gradient(135deg,#7C6FCD,#5A4FA0);color:white;border:none;
+  border-radius:12px;padding:12px 30px;font-family:'Fredoka One',cursive;font-size:17px;
+  cursor:pointer;box-shadow:0 4px 0 #3A2F80;transition:transform .1s;margin:4px;}
+.btn-continue:hover{transform:translateY(-2px);}
+.btn-again{background:var(--sun);color:var(--text);border:none;border-radius:12px;
+  padding:12px 26px;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;
+  box-shadow:0 4px 0 #C9991A;transition:transform .1s;margin:4px;}
+.btn-again:hover{transform:translateY(-2px);}
+.btn-submit{width:100%;background:linear-gradient(135deg,var(--sky),#3AAED8);color:white;
+  border:none;border-radius:12px;padding:13px;font-family:'Fredoka One',cursive;font-size:17px;
+  cursor:pointer;box-shadow:0 4px 0 #2A8AAE;transition:transform .1s;margin-top:8px;}
+.btn-submit:hover{transform:translateY(-2px);}
+
+/* ====== END SCREEN ====== */
+#screen-end{background:linear-gradient(160deg,#0E0520,#1A0A35,#050F28);display:none;}
+#screen-end.show{display:flex;}
+.end-card{text-align:center;max-height:92vh;overflow-y:auto;}
+.end-icon{font-size:70px;display:block;animation:bob 2s ease-in-out infinite;margin-bottom:8px;}
+.end-title{font-family:'Fredoka One',cursive;font-size:30px;margin-bottom:6px;}
+.score-big{font-family:'Fredoka One',cursive;font-size:78px;line-height:1;margin-bottom:2px;}
+.score-sub{font-size:11px;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;}
+.end-results{text-align:left;background:#F8F8FF;border-radius:16px;padding:14px;margin-bottom:18px;}
+.end-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid #EEEEFF;font-size:14px;font-weight:700;}
+.end-row:last-child{border-bottom:none;}
+.er-icon{font-size:22px;}
+.er-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;margin-left:auto;}
+.bs{background:#E8F5E9;color:#1B6B2E;}.bu{background:#FFEBEE;color:#B00020;}.bn{background:#FFF3E0;color:#8B5000;}
+.end-takeaway{background:#F0EEFF;border:2px solid #C8BFEE;border-radius:14px;padding:14px;margin-bottom:18px;}
+.et-title{font-family:'Fredoka One',cursive;font-size:15px;color:var(--purple);margin-bottom:6px;}
+.et-body{font-size:13px;font-weight:700;color:#3A2A7A;line-height:1.6;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:10px;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- ===================== TITLE ===================== -->
+<div id="screen-title" class="screen">
+  <div class="title-clouds">
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  </div>
+  <div class="title-particles" id="tp-container"></div>
+  <div class="title-content">
+    <svg class="title-mascot" viewBox="0 0 100 100">
+      <circle cx="50" cy="55" r="34" fill="#5EC8F0"/>
+      <circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+      <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+      <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+      <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+      <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+      <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="22" cy="40" r="8" fill="#5EC8F0"/><circle cx="78" cy="40" r="8" fill="#5EC8F0"/>
+    </svg>
+    <div class="title-logo">Privapals</div>
+    <div class="title-sub">🔐 The Privacy Adventure Game</div>
+    <div class="title-badge">🎓 Ages 9–13 · Free · COPPA Compliant · No Data Collected</div>
+    <br>
+    <button class="btn btn-primary" onclick="startLearn()">▶ Start Adventure!</button>
+  </div>
+</div>
+
+<!-- ===================== LEARN ===================== -->
+<div id="screen-learn" class="screen hidden">
+  <div class="card learn-card" style="max-width:560px;">
+    <div id="learn-slides"></div>
+    <div class="slide-dots" id="learn-dots"></div>
+    <div class="slide-nav">
+      <button class="btn btn-ghost" id="learn-back" onclick="learnNav(-1)" style="display:none;">← Back</button>
+      <button class="btn btn-primary" id="learn-next" onclick="learnNav(1)" style="font-size:17px;padding:12px 36px;">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== HUD ===================== -->
+<div id="hud" class="hidden">
+  <div id="hud-top">
+    <div class="hud-brand">
+      <svg width="34" height="34" viewBox="0 0 100 100">
+        <circle cx="50" cy="55" r="34" fill="#5EC8F0"/><circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+        <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+      </svg>
+      <div><div class="hud-title">Privapals</div><div class="hud-sub" id="hud-zone">Data Town — Your Privacy Adventure</div></div>
+    </div>
+    <div class="hud-pill">
+      <span class="hud-score-l">🛡 Privacy</span>
+      <span class="hud-score-n" id="hud-score">100</span>
+      <span style="font-size:11px;font-weight:800;color:rgba(255,255,255,.55)">/100</span>
+    </div>
+    <div class="hud-pill" style="gap:8px;">
+      <span class="hud-score-l">Missions</span>
+      <div class="h-dot" id="hd0"></div><div class="h-dot" id="hd1"></div>
+      <div class="h-dot" id="hd2"></div><div class="h-dot" id="hd3"></div>
+    </div>
+  </div>
+  <div id="interact-prompt">
+    <div class="int-card">
+      <div class="int-key">E</div>
+      <div class="int-label" id="int-text">Interact</div>
+    </div>
+  </div>
+  <div id="zone-labels"></div>
+  <div id="ted-bubble"><div class="ted-b-inner" id="ted-b-text">Hi! I'm Ted. Explore town and visit each glowing station!</div></div>
+  <canvas id="minimap" width="120" height="120"></canvas>
+  <div id="minimap-wrap"><canvas id="minimap2" width="120" height="120" style="border-radius:12px;border:2px solid rgba(255,255,255,.26);box-shadow:0 4px 16px rgba(0,0,0,.45);display:block;"></canvas></div>
+  <div id="ctrl-hint">WASD / Arrows — Move<br>E — Interact with station<br>🗺 Visit all 4 zones!</div>
+  <div id="dpad">
+    <div class="dpgrid">
+      <div></div>
+      <div class="dp" ontouchstart="dk('w',true)" ontouchend="dk('w',false)">▲</div>
+      <div></div>
+      <div class="dp" ontouchstart="dk('a',true)" ontouchend="dk('a',false)">◀</div>
+      <div class="dp dp-e" ontouchstart="doInteract()">E</div>
+      <div class="dp" ontouchstart="dk('d',true)" ontouchend="dk('d',false)">▶</div>
+      <div></div>
+      <div class="dp" ontouchstart="dk('s',true)" ontouchend="dk('s',false)">▼</div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MISSION POPUP ===================== -->
+<div id="mission-overlay">
+  <div id="mission-card"></div>
+</div>
+
+<!-- ===================== END SCREEN ===================== -->
+<div id="screen-end" class="screen">
+  <div class="card end-card" id="end-card"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============================================================
+// EDUCATIONAL SLIDES
+// ============================================================
+const SLIDES = [
+  {
+    icon:'🗂️', bg:'linear-gradient(135deg,#E8F4FD,#C8E8F8)', iconBg:'#3AAED8',
+    title:'What Is Personal Data?',
+    body:'Personal data is <strong>any information that can identify you</strong> — your name, where you live, your birthday, photos, what websites you visit, who you talk to, and even how long you look at something on a screen.',
+    fact:{bg:'#EBF8FF',border:'#B8DDEF',color:'#1A5F7A',text:'📊 The average person generates <strong>1.7 megabytes of data every second</strong>. In one day, that\'s about 147 gigabytes — enough to fill two full laptop hard drives.'},
+    ted:'Even small things add up. Your name alone seems harmless. But your name + school + birthday + city = someone knows exactly who you are and where to find you. This is called the <strong>Mosaic Effect</strong>.'
+  },
+  {
+    icon:'🕸️', bg:'linear-gradient(135deg,#F0EEFF,#E0D8FF)', iconBg:'#7C6FCD',
+    title:'How Is Your Data Collected?',
+    body:'Data collection happens in many ways, most of them <strong>invisible</strong>: forms you fill out, cookies that track your clicks across websites, apps that access your camera or location, and loyalty cards that log your purchases.',
+    fact:{bg:'#F0EEFF',border:'#C8BFEE',color:'#3A2A7A',text:'🍪 Most websites you visit drop <strong>tracking cookies</strong> on your browser. These follow you to other sites — like a sticky note companies pass between each other about your habits.'},
+    ted:'Think "free" apps are free? <strong>If you\'re not paying, you\'re often the product.</strong> Free apps earn money by collecting and selling your data to advertisers. That\'s the real price of "free."'
+  },
+  {
+    icon:'👁️', bg:'linear-gradient(135deg,#FFF5F8,#FFE8EF)', iconBg:'#FF6B9D',
+    title:'Surveillance: The Invisible Watcher',
+    body:'Surveillance means <strong>being watched and tracked without always knowing it</strong>. It\'s not just governments — companies track everything: which ads you hover over, how fast you scroll, where you go physically, and who your friends are.',
+    fact:{bg:'#FFF0F5',border:'#FFB8D4',color:'#880040',text:'📍 Apps with "always on" location permission track your movements 24/7 — even when you\'re not using them. This data reveals your home, school, doctors, and friends.'},
+    ted:'<strong>Behavioral advertising</strong> is when companies use your tracked behavior to build a profile and show ads tailored to you. It\'s designed to feel helpful — but it\'s really a system that learns to predict and influence your decisions.'
+  },
+  {
+    icon:'⚠️', bg:'linear-gradient(135deg,#FFF8F0,#FFE8C8)', iconBg:'#FF9F43',
+    title:'Why Does It Matter?',
+    body:'When strangers know your name, school, city, and age together, they can find you in real life. Privacy harms are often <strong>delayed</strong> — you might not notice right away, but data shared today can affect you for years.',
+    fact:{bg:'#FFF3E0',border:'#FFD8A0',color:'#8B5000',text:'🎯 Data brokers sell profiles on millions of people. One company, Acxiom, has <strong>over 1,500 data points</strong> on the average American — including children — combining hundreds of sources.'},
+    ted:'The <strong>Mosaic Effect</strong> is real: individually harmless pieces of data combine into a detailed picture. Name alone? Fine. Name + school + city + age + photo + daily routine? That\'s a complete profile of a child.'
+  },
+  {
+    icon:'🦸', bg:'linear-gradient(135deg,#F0FFF6,#C8EED8)', iconBg:'#4CAF71',
+    title:'Your Privacy Superpowers',
+    body:'You have <strong>more control than you think</strong>. You can use strong passwords, limit app permissions, question "free" offers, set profiles to private, skip optional fields, and uncheck pre-ticked boxes. Skepticism is your best tool.',
+    fact:{bg:'#E8F5E9',border:'#A8D8B8',color:'#1B4D2E',text:'🔒 A strong password with 12+ characters including uppercase, numbers, and symbols would take a computer <strong>billions of years</strong> to crack. Three random words (e.g. "PizzaCloudBook7!") works great.'},
+    ted:'Now you\'re ready! In Data Town, you\'ll face <strong>real privacy decisions</strong> that kids encounter online every day. There\'s no "wrong" answer — but your choices have consequences. Watch for them! 🔍'
+  }
+];
+
+let learnSlide = 0;
+function buildLearnSlides() {
+  const cont = document.getElementById('learn-slides');
+  const dotsEl = document.getElementById('learn-dots');
+  cont.innerHTML = '';
+  dotsEl.innerHTML = '';
+  SLIDES.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'learn-slide' + (i===0?' active':'');
+    d.id = 'ls'+i;
+    d.innerHTML = `
+      <div class="slide-num">Lesson ${i+1} of ${SLIDES.length}</div>
+      <div class="slide-visual" style="background:${s.iconBg}">${s.icon}</div>
+      <div class="slide-title">${s.title}</div>
+      <div class="slide-body">${s.body}</div>
+      <div class="slide-fact" style="background:${s.fact.bg};border:2px solid ${s.fact.border};color:${s.fact.color}">${s.fact.text}</div>
+      <div class="slide-ted">
+        ${tedSVGSmall()}
+        <div><div class="st-name">🐶 Ted the Safety Dog</div><div class="st-msg">${s.ted}</div></div>
+      </div>`;
+    cont.appendChild(d);
+    const dot = document.createElement('div');
+    dot.className = 'sdot' + (i===0?' active':'');
+    dot.id = 'sd'+i;
+    dotsEl.appendChild(dot);
+  });
+}
+function learnNav(dir) {
+  document.getElementById('ls'+learnSlide).classList.remove('active');
+  document.getElementById('sd'+learnSlide).classList.remove('active');
+  document.getElementById('sd'+learnSlide).classList.add('done');
+  learnSlide = Math.max(0, Math.min(SLIDES.length-1, learnSlide+dir));
+  const el = document.getElementById('ls'+learnSlide);
+  el.classList.add('active');
+  document.getElementById('sd'+learnSlide).classList.add('active');
+  document.getElementById('learn-back').style.display = learnSlide>0?'block':'none';
+  const nextBtn = document.getElementById('learn-next');
+  if(learnSlide === SLIDES.length-1) {
+    nextBtn.textContent = "🗺 Enter Data Town!";
+    nextBtn.onclick = startGame;
+  } else { nextBtn.textContent = "Next →"; nextBtn.onclick = ()=>learnNav(1); }
+}
+function startLearn() {
+  document.getElementById('screen-title').classList.add('hidden');
+  buildLearnSlides();
+  document.getElementById('screen-learn').classList.remove('hidden');
+}
+function tedSVGSmall(size=38) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="flex-shrink:0;margin-top:3px">
+    <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+    <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+    <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+    <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+    <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+    <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+    <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+    <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+    <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+    <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <rect x="32" y="22" width="36" height="6" rx="3" fill="#7C6FCD"/>
+    <rect x="36" y="14" width="28" height="12" rx="4" fill="#7C6FCD"/>
+    <path d="M 46 17 L 50 19 L 54 17" stroke="#4A3880" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ============================================================
+// THREE.JS SCENE
+// ============================================================
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0xB8E0F0, 40, 72);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 200);
+camera.position.set(0, 17, 15);
+
+// Lights
+const amb = new THREE.AmbientLight(0xfff5e8, 0.52);
+scene.add(amb);
+const sun = new THREE.DirectionalLight(0xffeecc, 1.15);
+sun.position.set(20,30,14);
+sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-35;sun.shadow.camera.right=35;
+sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;
+sun.shadow.camera.far=100;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xaadcff,0.32);
+fill.position.set(-12,10,-8);
+scene.add(fill);
+
+// Helpers
+const mats = {};
+function mat(hex,opts={}) {
+  const k=hex+'_'+(opts.emissive||0)+'_'+(opts.transparent||0);
+  if(!mats[k]) mats[k]=new THREE.MeshLambertMaterial({color:hex,...opts});
+  return mats[k];
+}
+function box(w,h,d,color,x=0,y=0,z=0,sh=true,opts={}) {
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color,opts));
+  m.position.set(x,y+h/2,z);if(sh){m.castShadow=m.receiveShadow=true;}
+  scene.add(m);return m;
+}
+function cyl(rT,rB,h,seg,color,x=0,y=0,z=0,sh=true) {
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(rT,rB,h,seg),mat(color));
+  m.position.set(x,y+h/2,z);if(sh){m.castShadow=m.receiveShadow=true;}
+  scene.add(m);return m;
+}
+function sph(r,color,x,y,z,sh=true) {
+  const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,8),mat(color));
+  m.position.set(x,y,z);if(sh){m.castShadow=m.receiveShadow=true;}
+  scene.add(m);return m;
+}
+function plane(w,d,color,x=0,y=0,z=0) {
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat(color));
+  m.rotation.x=-Math.PI/2;m.position.set(x,y,z);m.receiveShadow=true;
+  scene.add(m);return m;
+}
+
+// ============================================================
+// GROUND & ROADS
+// ============================================================
+plane(80,80,0x7BC47A);
+
+// Zone-tinted ground patches
+plane(28,28,0xB8E8F8,0,0.01,-24);   // North - blue
+plane(28,28,0xD8D0FF,24,0.01,0);    // East - purple
+plane(28,28,0xFFD0E4,0,0.01,24);    // South - coral
+plane(28,28,0xD8D0C0,-24,0.01,0);   // West - gray
+
+// Hub plaza
+plane(14,14,0xE8E0D0,0,0.01,0);
+
+// Roads (cross + diagonals to zones)
+plane(4,56,0xC0B8A8,0,0.015,0);
+plane(56,4,0xC0B8A8,0,0.015,0);
+plane(4,20,0xC0B8A8,0,0.015,-12);
+plane(4,20,0xC0B8A8,0,0.015,12);
+plane(20,4,0xC0B8A8,12,0.015,0);
+plane(20,4,0xC0B8A8,-12,0.015,0);
+
+// Road dashes
+for(let i=-12;i<=12;i+=3) {
+  const d=new THREE.Mesh(new THREE.PlaneGeometry(.28,1.4),mat(0xEEE8D0));
+  d.rotation.x=-Math.PI/2;d.position.set(0,0.03,i);scene.add(d);
+  const d2=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.28),mat(0xEEE8D0));
+  d2.rotation.x=-Math.PI/2;d2.position.set(i,0.03,0);scene.add(d2);
+}
+
+// ============================================================
+// HUB
+// ============================================================
+// Fountain
+cyl(2.3,2.5,.45,16,0xE0D8C8,0,0,0);
+const waterMesh=new THREE.Mesh(new THREE.CylinderGeometry(2,2,.18,16),mat(0x5EC8F0,{transparent:true,opacity:.85}));
+waterMesh.position.set(0,.52,0);scene.add(waterMesh);
+cyl(.22,.26,1.9,8,0xE0D8C8,0,.45,0);
+cyl(.75,.5,.32,12,0xE0D8C8,0,2.35,0);
+
+// Benches around fountain
+[0,90,180,270].forEach(a=>{
+  const r=(a*Math.PI/180);
+  const bx=Math.cos(r)*3.6,bz=Math.sin(r)*3.6;
+  const b=box(1.6,.2,.5,0xA0784A,bx,.38,bz,false);b.rotation.y=r;
+});
+
+// Hub pathway arches (pointing to 4 zones)
+const archColors={N:0x3AAED8,E:0x7C6FCD,S:0xFF6B9D,W:0xFF9F43};
+[{x:0,z:-8,c:0x3AAED8},{x:8,z:0,c:0x7C6FCD,ry:Math.PI/2},{x:0,z:8,c:0xFF6B9D},{x:-8,z:0,c:0xFF9F43,ry:Math.PI/2}].forEach(a=>{
+  const grp=new THREE.Group();
+  const lp=new THREE.Mesh(new THREE.BoxGeometry(.4,3.8,.4),mat(a.c));
+  lp.position.set(-.9,1.9,0);grp.add(lp);
+  const rp=lp.clone();rp.position.set(.9,1.9,0);grp.add(rp);
+  const top=new THREE.Mesh(new THREE.BoxGeometry(2.2,.4,1),mat(a.c));
+  top.position.set(0,3.8,0);grp.add(top);
+  grp.position.set(a.x,0,a.z);
+  if(a.ry) grp.rotation.y=a.ry;
+  scene.add(grp);
+});
+
+// TED NPC
+const tedGroup = new THREE.Group();
+// Body
+const tedBody=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),mat(0xC8A06A));
+tedBody.position.y=.55;tedGroup.add(tedBody);
+// Head
+const tedHead=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),mat(0xC8A06A));
+tedHead.position.y=1.38;tedGroup.add(tedHead);
+// Snout
+const snout=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),mat(0xD4906A));
+snout.position.set(0,1.3,.4);tedGroup.add(snout);
+// Ears
+const earGeo=new THREE.SphereGeometry(.32,10,8);
+const lEar=new THREE.Mesh(earGeo,mat(0xA0784A));lEar.position.set(-.45,1.82,.05);lEar.scale.set(1,1.4,.7);tedGroup.add(lEar);
+const rEar=lEar.clone();rEar.position.set(.45,1.82,.05);tedGroup.add(rEar);
+// Eyes
+const eyeGeo=new THREE.SphereGeometry(.08,6,6);const eyeMat=mat(0x1A1A2E);
+const le=new THREE.Mesh(eyeGeo,eyeMat);le.position.set(-.18,1.44,.44);tedGroup.add(le);
+const re=le.clone();re.position.set(.18,1.44,.44);tedGroup.add(re);
+// Nose
+const nose=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),mat(0x3A2010));
+nose.position.set(0,1.28,.56);tedGroup.add(nose);
+// Hat
+const hatBrim=new THREE.Mesh(new THREE.CylinderGeometry(.65,.65,.1,16),mat(0xFFD166));
+hatBrim.position.set(0,1.88,0);tedGroup.add(hatBrim);
+const hatTop=new THREE.Mesh(new THREE.CylinderGeometry(.44,.52,.55,16),mat(0xFFD166));
+hatTop.position.set(0,2.22,0);tedGroup.add(hatTop);
+// Shield on hat
+const hatShield=new THREE.Mesh(new THREE.BoxGeometry(.22,.26,.06),mat(0xFFD166));
+hatShield.position.set(0,2.12,.48);tedGroup.add(hatShield);
+
+tedGroup.position.set(2.5,0,2.5);
+tedGroup.rotation.y=-Math.PI/4;
+scene.add(tedGroup);
+
+// ============================================================
+// ZONE BUILDINGS
+// ============================================================
+
+// ---- NORTH: Sign-Up Alley (blue) ----
+[{x:-9,z:-24,w:6,h:5.5,d:6,c:0x3AAED8,rc:0x2A8AAE},
+ {x:-1,z:-26,w:7,h:6.5,d:5,c:0x5EC8F0,rc:0x3A9AC0},
+ {x:8,z:-24,w:6,h:5,d:6,c:0x1A7898,rc:0x0E5068}].forEach(b=>{
+  box(b.w,b.h,b.d,b.c,b.x,0,b.z);
+  box(b.w+.8,.5,b.d+.8,b.rc,b.x,b.h,b.z);
+  // Windows
+  for(let wi=-1;wi<=1;wi+=2) {
+    const wn=box(.9,1,.15,0xDDEEFF,b.x+wi*(b.w/4),b.h/2,b.z-b.d/2-.08,false);
+  }
+});
+// Neon sign strip on main building
+box(7,.5,.25,0xFFD166,-1,7,-21.55,false);
+box(6.5,.15,.2,0xFFFFFF,-1,7.2,-21.55,false,{emissive:0xFFFFFF,emissiveIntensity:.3});
+// Terminal (M1 trigger)
+const m1Terminal=new THREE.Group();
+box(1.2,1.8,0.9,0x2A2A3E,0,0,0,true);
+const screen1=new THREE.Mesh(new THREE.BoxGeometry(0.85,1.1,0.05),mat(0x3AAED8,{emissive:0x3AAED8,emissiveIntensity:.4}));
+screen1.position.set(0,.65,.48);m1Terminal.add(screen1);
+const kboard=box(.9,.12,.6,0x444444,0,-.35,.15,false);m1Terminal.add(kboard);
+m1Terminal.position.set(-1,0,-21);scene.add(m1Terminal);
+
+// ---- EAST: App Market (purple) ----
+[{x:22,z:-8,w:6,h:5,d:6,c:0x7C6FCD,rc:0x5A4FA0},
+ {x:24,z:2,w:8,h:6,d:6,c:0x9488DD,rc:0x6A5AB0},
+ {x:22,z:10,w:6,h:4.5,d:6,c:0x5A4FA0,rc:0x3A2F80}].forEach(b=>{
+  box(b.w,b.h,b.d,b.c,b.x,0,b.z);
+  box(b.w+.8,.5,b.d+.8,b.rc,b.x,b.h,b.z);
+  for(let wi=-1;wi<=1;wi+=2) box(.9,1,.15,0xEEDDFF,b.x-b.w/2-.08,b.h/2,b.z+wi*(b.d/4),false);
+});
+// Floating app icons
+const appIcons=[];
+[[22,8.5,-6,0xFF6B6B],[24,9.5,1,0xFFD166],[22,8,8,0x4CAF71]].forEach(([x,y,z,c])=>{
+  const ico=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),mat(c,{emissive:c,emissiveIntensity:.15}));
+  ico.position.set(x,y,z);ico.castShadow=true;scene.add(ico);appIcons.push(ico);
+});
+// Phone kiosk (M2 trigger)
+const m2Kiosk=new THREE.Group();
+box(1.4,2.4,.9,0x7C6FCD,0,0,0,true);
+const ks=new THREE.Mesh(new THREE.BoxGeometry(.9,1.5,.05),mat(0xA89EEE,{emissive:0x7C6FCD,emissiveIntensity:.35}));
+ks.position.set(0,.6,.48);m2Kiosk.add(ks);
+m2Kiosk.position.set(20,0,0);scene.add(m2Kiosk);
+
+// ---- SOUTH: Social Square (coral/pink) ----
+[{x:-9,z:24,w:6,h:5,d:6,c:0xFF6B9D,rc:0xD4407A},
+ {x:0,z:26,w:7,h:6,d:5,c:0xFF99BB,rc:0xE45A8A},
+ {x:8,z:24,w:6,h:5.5,d:6,c:0xFFAACC,rc:0xCC5588}].forEach(b=>{
+  box(b.w,b.h,b.d,b.c,b.x,0,b.z);
+  box(b.w+.8,.5,b.d+.8,b.rc,b.x,b.h,b.z);
+  for(let wi=-1;wi<=1;wi+=2) box(.9,1,.15,0xFFEEF5,b.x+wi*(b.w/4),b.h/2,b.z-b.d/2-.08,false);
+});
+// Social billboard
+const sbpole=cyl(.15,.18,6.5,8,0xAA6688,0,0,22,false);
+const sbboard=box(5,.1,3,0xFF4488,0,6.5,22,false);
+const sbface=new THREE.Mesh(new THREE.BoxGeometry(4.6,2.7,.08),mat(0xFFB3CC,{emissive:0xFF6B9D,emissiveIntensity:.15}));
+sbface.position.set(0,6.5,22.12);scene.add(sbface);
+// Profile station (M3 trigger)
+const m3Station=new THREE.Group();
+box(1.8,1.6,1,0xFF6B9D,0,0,0,true);
+const ps3=new THREE.Mesh(new THREE.BoxGeometry(1.2,1,.05),mat(0xFFD0E8,{emissive:0xFF6B9D,emissiveIntensity:.3}));
+ps3.position.set(0,.55,.53);m3Station.add(ps3);
+// Heart icon on screen
+const hrt=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),mat(0xFF4444,{emissive:0xFF2222,emissiveIntensity:.4}));
+hrt.position.set(0,.55,.6);m3Station.add(hrt);
+m3Station.position.set(0,0,20);scene.add(m3Station);
+
+// ---- WEST: Data Town (gray/orange, surveillance feel) ----
+// Café
+box(7,4.5,7,0x888888,-24,0,-8);
+box(7.8,.5,7.8,0x666666,-24,4.5,-8);
+box(5.5,.3,5.5,0xCC6600,-24,4.9,-8,false,{emissive:0xFF8800,emissiveIntensity:.12});
+// Mall/kiosk
+box(6,5,6,0x999999,-24,0,2);
+box(6.8,.5,6.8,0x777777,-24,5,2);
+// Billboard poles
+cyl(.22,.26,8,8,0x555555,-26,0,10);
+cyl(.22,.26,8,8,0x555555,-20,0,10);
+box(7.2,3.6,.3,0x444444,-23,6.5,10,false);
+const bface=new THREE.Mesh(new THREE.BoxGeometry(6.6,3,.15),mat(0xFF8C00,{emissive:0xFF6600,emissiveIntensity:.25}));
+bface.position.set(-23,6.5,10.18);scene.add(bface);
+// Photo booth
+box(5,4.5,5,0x777777,-24,0,16);
+box(5.5,.4,5.5,0xCC4466,-24,4.5,16);
+cyl(.65,.65,.25,12,0xCC4466,-24,4.9,16,false);
+// Surveillance cameras
+[[-20,-4],[-20,0],[-20,4],[-28,-4],[-28,4]].forEach(([x,z])=>{
+  cyl(.06,.07,3.5,6,0x444444,x,0,z,false);
+  box(.35,.2,.4,0x222222,x,3.5,z,false);
+  const lens=new THREE.Mesh(new THREE.CylinderGeometry(.07,.04,.22,8),mat(0x111111));
+  lens.rotation.z=Math.PI/2;lens.position.set(x+.28,3.55,z);scene.add(lens);
+});
+// Data Town station (M4 trigger)
+const m4Station=new THREE.Group();
+box(2,2.2,1,0xCC5500,0,0,0,true);
+const ws4=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.6,.06),mat(0xFF9F43,{emissive:0xFF6600,emissiveIntensity:.3}));
+ws4.position.set(0,.8,.54);m4Station.add(ws4);
+m4Station.position.set(-22,0,0);scene.add(m4Station);
+
+// ============================================================
+// TREES, LAMPPOSTS, DECOR
+// ============================================================
+const treePts=[
+  [6,-6],[-6,6],[-6,-6],[6,6],
+  [3,-17],[-3,-17],[3,17],[-3,17],
+  [17,-3],[17,3],[-17,-3],[-17,3],
+  [-11,-11],[11,-11],[11,11],[-11,11],
+  [0,-19],[0,19],[19,0],[-19,0],
+  [-8,-19],[8,-19],[-8,19],[8,19],
+  [-19,-8],[19,-8],[-19,8],[19,8],
+  [14,-14],[14,14],[-14,-14],[-14,14],
+];
+treePts.forEach(([tx,tz])=>{
+  const s=.75+Math.random()*.5;
+  cyl(.18*s,.22*s,1.5*s,7,0x7A4B1E,tx,0,tz);
+  sph(1.1*s,0x4CAF71,tx,1.5*s+1.1*s*.7,tz);
+});
+// Lampposts
+[[-4,-5],[4,-5],[-4,5],[4,5],[-5,0],[5,0],[0,-5],[0,5],
+ [-14,-5],[14,-5],[-14,5],[14,5]].forEach(([lx,lz])=>{
+  cyl(.07,.09,4,6,0x555555,lx,0,lz,false);
+  const lb=new THREE.Mesh(new THREE.SphereGeometry(.2,8,6),mat(0xFFF5AA,{emissive:0xFFEE88,emissiveIntensity:.5}));
+  lb.position.set(lx,4.3,lz);scene.add(lb);
+});
+// World boundary hedges
+for(let i=-19;i<=19;i+=2.4) {
+  box(2.2,2,2.2,0x2E7B33,i,0,-20,false);
+  box(2.2,2,2.2,0x2E7B33,i,0,20,false);
+  box(2.2,2,2.2,0x2E7B33,-20,0,i,false);
+  box(2.2,2,2.2,0x2E7B33,20,0,i,false);
+}
+
+// ============================================================
+// MISSION BEACONS
+// ============================================================
+const MISSIONS = [
+  {id:'m1',idx:0,name:'Sign-Up Alley',icon:'📋',pos:{x:-1,z:-21},col:0x3AAED8,radius:5,done:false},
+  {id:'m2',idx:1,name:'App Market',icon:'📱',pos:{x:20,z:0},col:0x7C6FCD,radius:5,done:false},
+  {id:'m3',idx:2,name:'Social Square',icon:'👤',pos:{x:0,z:20},col:0xFF6B9D,radius:5,done:false},
+  {id:'m4',idx:3,name:'Data Town',icon:'🏙️',pos:{x:-22,z:0},col:0xFF9F43,radius:5.5,done:false},
+];
+const beacons=[];
+MISSIONS.forEach(m=>{
+  const g=new THREE.Group();
+  const beamM=new THREE.MeshBasicMaterial({color:m.col,transparent:true,opacity:.5});
+  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.12,.22,10,6),beamM);
+  beam.position.y=9;g.add(beam);
+  const orbM=new THREE.MeshBasicMaterial({color:m.col,transparent:true,opacity:.9});
+  const orb=new THREE.Mesh(new THREE.SphereGeometry(.4,10,8),orbM);
+  orb.position.y=14.2;g.add(orb);
+  const ringM=new THREE.MeshBasicMaterial({color:m.col,transparent:true,opacity:.4});
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,.12,8,32),ringM);
+  ring.rotation.x=-Math.PI/2;ring.position.y=.08;g.add(ring);
+  g.position.set(m.pos.x,0,m.pos.z);
+  scene.add(g);
+  beacons.push({g,beamM,orbM,ringM,orb,ring,m});
+});
+
+// Zone name labels (HTML projected)
+const ZONE_LABELS=[
+  {id:'zl0',text:'📋 Sign-Up Alley',world:{x:-1,y:8.5,z:-24}},
+  {id:'zl1',text:'📱 App Market',world:{x:24,y:8.5,z:0}},
+  {id:'zl2',text:'👤 Social Square',world:{x:0,y:8.5,z:24}},
+  {id:'zl3',text:'🏙️ Data Town',world:{x:-24,y:8.5,z:0}},
+];
+ZONE_LABELS.forEach(l=>{
+  const el=document.createElement('div');
+  el.className='zlabel';el.id=l.id;
+  el.innerHTML=`<div class="zl-inner">${l.text}</div>`;
+  document.getElementById('zone-labels').appendChild(el);
+});
+
+// ============================================================
+// PARTICLES
+// ============================================================
+// Data particles (floating up in Data Town)
+const dataPts=[];
+for(let i=0;i<60;i++){
+  const g=new THREE.Group();
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(.07,6,6),
+    mat([0xFF9F43,0xFF6B6B,0x4CAF71,0x5EC8F0][Math.floor(Math.random()*4)],{transparent:true,opacity:.8}));
+  dot.position.set(0,0,0);g.add(dot);
+  g.position.set(-20+Math.random()*10-5,Math.random()*6,Math.random()*16-8);
+  g._vy=.015+Math.random()*.025;
+  g._maxY=6+Math.random()*4;
+  scene.add(g);dataPts.push(g);
+}
+// Heart particles in Social Square
+const heartPts=[];
+for(let i=0;i<30;i++){
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(.09,6,6),mat(0xFF6B9D,{transparent:true,opacity:.7}));
+  dot.position.set(Math.random()*18-9,Math.random()*5,20+Math.random()*10-5);
+  dot._vy=.02+Math.random()*.02;dot._maxY=dot.position.y+4+Math.random()*4;
+  scene.add(dot);heartPts.push(dot);
+}
+
+// ============================================================
+// PLAYER
+// ============================================================
+const playerGroup=new THREE.Group();
+// Body
+const pbody=new THREE.Mesh(new THREE.CylinderGeometry(.44,.5,1.15,12),mat(0x5EC8F0));
+pbody.position.y=.575;pbody.castShadow=true;playerGroup.add(pbody);
+// Head
+const phead=new THREE.Mesh(new THREE.SphereGeometry(.46,14,10),mat(0x87DEFF));
+phead.position.y=1.4;phead.castShadow=true;playerGroup.add(phead);
+// Eyes
+const peyeM=mat(0x1A1A2E);
+const ple=new THREE.Mesh(new THREE.SphereGeometry(.08,6,6),peyeM);ple.position.set(-.16,1.46,.38);playerGroup.add(ple);
+const pre=ple.clone();pre.position.set(.16,1.46,.38);playerGroup.add(pre);
+// Shield
+const pshield=new THREE.Mesh(new THREE.BoxGeometry(.3,.36,.08),mat(0xFFD166,{emissive:0xFFCC00,emissiveIntensity:.15}));
+pshield.position.set(0,.72,.46);playerGroup.add(pshield);
+// Drop shadow
+const dshadow=new THREE.Mesh(new THREE.CircleGeometry(.5,14),mat(0x000000,{transparent:true,opacity:.16}));
+dshadow.rotation.x=-Math.PI/2;dshadow.position.y=.02;playerGroup.add(dshadow);
+
+playerGroup.position.set(0,0,6);
+scene.add(playerGroup);
+
+// ============================================================
+// COLLISION
+// ============================================================
+const colliders=[
+  // Hub fountain
+  {minX:-2.5,maxX:2.5,minZ:-2.5,maxZ:2.5},
+  // North zone buildings
+  {minX:-13,maxX:-5,minZ:-28,maxZ:-20},
+  {minX:-5.5,maxX:3.5,minZ:-29,maxZ:-23},
+  {minX:4,maxX:12,minZ:-28,maxZ:-21},
+  // East zone buildings
+  {minX:18,maxX:26,minZ:-11,maxZ:-5},
+  {minX:19,maxX:29,minZ:-2,maxZ:5},
+  {minX:18,maxX:26,minZ:7,maxZ:13},
+  // South zone buildings
+  {minX:-13,maxX:-5,minZ:20,maxZ:28},
+  {minX:-4.5,maxX:4.5,minZ:23,maxZ:29},
+  {minX:4,maxX:12,minZ:20,maxZ:28},
+  // West zone buildings
+  {minX:-28,maxX:-20,minZ:-12,maxZ:-4},
+  {minX:-28,maxX:-19,minZ:-2,maxZ:5},
+  {minX:-28,maxX:-19,minZ:7,maxZ:13},
+  {minX:-27,maxX:-20,minZ:13,maxZ:19},
+];
+const WBOUND=19.5,PR=.7;
+function canMove(nx,nz){
+  if(Math.abs(nx)>WBOUND||Math.abs(nz)>WBOUND) return false;
+  for(const c of colliders)
+    if(nx-PR<c.maxX&&nx+PR>c.minX&&nz-PR<c.maxZ&&nz+PR>c.minZ) return false;
+  return true;
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+const keys={w:false,a:false,s:false,d:false,e:false};
+let eDown=false;
+document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(k==='w'||k==='arrowup') keys.w=true;
+  if(k==='s'||k==='arrowdown') keys.s=true;
+  if(k==='a'||k==='arrowleft') keys.a=true;
+  if(k==='d'||k==='arrowright') keys.d=true;
+  if(k==='e'&&!eDown){eDown=true;doInteract();}
+});
+document.addEventListener('keyup',e=>{
+  const k=e.key.toLowerCase();
+  if(k==='w'||k==='arrowup') keys.w=false;
+  if(k==='s'||k==='arrowdown') keys.s=false;
+  if(k==='a'||k==='arrowleft') keys.a=false;
+  if(k==='d'||k==='arrowright') keys.d=false;
+  if(k==='e'){keys.e=false;eDown=false;}
+});
+function dk(k,v){keys[k]=v;}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let playing=false, paused=false;
+let privScore=100;
+let nearMission=null;
+const missionChoices={};
+const tedMessages=[
+  "Explore Data Town! Each glowing station has a privacy lesson waiting for you.",
+  "✅ Great job at Sign-Up Alley! Real websites use these same tricks to collect your data.",
+  "✅ Excellent! App permissions are one of the most common ways data gets collected on phones.",
+  "✅ Well done at Social Square! Your public profile is visible to everyone — always check your settings.",
+  "✅ You finished Data Town! You've learned how surveillance works in real everyday situations.",
+];
+let tedMsgIdx=0;
+
+// Camera smooth follow
+const cam={x:0,y:17,z:15};
+
+function setTedMsg(idx){
+  tedMsgIdx=idx;
+  document.getElementById('ted-b-text').innerHTML=tedMessages[idx];
+}
+
+// ============================================================
+// MISSION POPUP SYSTEM
+// ============================================================
+function closeMission(){
+  document.getElementById('mission-overlay').classList.remove('show');
+  paused=false;
+}
+
+function openMission(m){
+  if(m.done) return;
+  paused=true;
+  document.getElementById('mission-overlay').classList.add('show');
+  if(m.id==='m1') renderM1();
+  else if(m.id==='m2') renderM2();
+  else if(m.id==='m3') renderM3();
+  else if(m.id==='m4') renderM4(0);
+}
+
+function completeMission(id, safe, penalty=22){
+  const m=MISSIONS.find(x=>x.id===id);
+  m.done=true;
+  if(!safe) { privScore=Math.max(0,privScore-penalty); document.getElementById('hud-score').textContent=privScore; }
+  missionChoices[id]=safe;
+  document.getElementById('hd'+m.idx).classList.add('done');
+  // Beacon turns green
+  const b=beacons.find(x=>x.m.id===id);
+  if(b){b.beamM.color.setHex(0x4CAF71);b.orbM.color.setHex(0x4CAF71);b.ringM.color.setHex(0x4CAF71);}
+  // Ted message
+  const doneCount=MISSIONS.filter(x=>x.done).length;
+  setTedMsg(doneCount);
+  if(doneCount===4) setTimeout(showEnd,1200);
+}
+
+// ============================================================
+// MISSION 1: SIGN-UP FORM
+// ============================================================
+let m1State={username:'',password:'',email:'',name:'',dob:'',phone:'',city:'',mkt:true,trk:true};
+let m1Phase=0; // 0=form, 1=consequence
+
+function renderM1(){
+  m1Phase=0;
+  const el=document.getElementById('mission-card');
+  el.innerHTML=`
+    <span class="mc-icon">📋</span>
+    <div class="mc-tag"><span class="tag" style="background:#EBF8FF;color:#3AAED8;">📋 Mission 1 · Sign-Up Alley</span></div>
+    <div class="mc-title">Help Pixel Sign Up for GameZone!</div>
+    <div class="mc-desc">Pixel wants to join <strong>GameZone</strong> — a free online game. 
+    The form is asking for information. Decide what to share. <strong>Once data is online, it's hard to take back!</strong></div>
+    <div class="mc-ted mc-ted-blue">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#3AAED8">🐶 Ted</div>
+      <div class="mc-ted-msg">Watch carefully! <strong>Some fields are required, but optional fields are traps.</strong> 
+      Also look out for pre-checked boxes at the bottom — companies hide data collection there!</div></div></div>
+    <div class="mock-browser">
+      <div class="mb-bar">
+        <div class="mb-dots"><div class="mb-dot" style="background:#FF5F57"></div>
+          <div class="mb-dot" style="background:#FEBC2E"></div><div class="mb-dot" style="background:#28C840"></div></div>
+        <div class="mb-url">🔒 gamezone-signup.example.com/register</div>
+      </div>
+      <div class="mb-body">
+        <div class="mb-form-title">🎮 Join GameZone!</div>
+        <div class="mb-form-sub">Create your free account and start playing today!</div>
+        <div class="form-group">
+          <label class="form-lbl">Username <span class="req">*</span></label>
+          <input class="form-inp" id="f-user" placeholder="Choose a cool username" oninput="m1Check(this,'user')">
+          <div class="form-hint" id="fh-user"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">Password <span class="req">*</span></label>
+          <input class="form-inp" id="f-pass" type="password" placeholder="Create a strong password" oninput="m1Pass(this)">
+          <div class="ps-bars"><div class="ps-b" id="pb0"></div><div class="ps-b" id="pb1"></div>
+            <div class="ps-b" id="pb2"></div><div class="ps-b" id="pb3"></div></div>
+          <div class="ps-lbl" id="ps-lbl">Strength: enter a password</div>
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">Email <span class="req">*</span></label>
+          <input class="form-inp" id="f-email" type="email" placeholder="Your email (ask a parent!)" oninput="m1Check(this,'email')">
+          <div class="form-hint" id="fh-email"></div>
+        </div>
+        <div class="optional-box">
+          <div class="optional-title">⚠️ Optional — you don't have to fill these out!</div>
+          <div class="form-group"><label class="form-lbl">Full Name <span class="opt">(optional)</span></label>
+            <input class="form-inp" id="f-name" placeholder="First and last name" oninput="m1Check(this,'name')">
+            <div class="form-hint" id="fh-name"></div></div>
+          <div class="form-group"><label class="form-lbl">Date of Birth <span class="opt">(optional)</span></label>
+            <input class="form-inp" id="f-dob" type="date" onchange="m1Check(this,'dob')">
+            <div class="form-hint" id="fh-dob"></div></div>
+          <div class="form-group"><label class="form-lbl">Phone Number <span class="opt">(optional)</span></label>
+            <input class="form-inp" id="f-phone" type="tel" placeholder="Your phone number" oninput="m1Check(this,'phone')">
+            <div class="form-hint" id="fh-phone"></div></div>
+          <div class="form-group"><label class="form-lbl">Home City <span class="opt">(optional)</span></label>
+            <input class="form-inp" id="f-city" placeholder="City you live in" oninput="m1Check(this,'city')">
+            <div class="form-hint" id="fh-city"></div></div>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="cb-mkt" checked>
+          📧 Send me promotional emails and partner offers</label>
+        <label class="checkbox-row"><input type="checkbox" id="cb-trk" checked>
+          📊 Share my gameplay data with advertising partners to improve my experience</label>
+        <button class="btn-submit" onclick="m1Submit()">Create My Account →</button>
+      </div>
+    </div>
+    <div class="popup-btns"><button class="btn btn-ghost" onclick="closeMission()">← Back to Town</button></div>`;
+}
+
+const m1Hints={
+  user:{safe:(v)=>v.length>2&&!/\d{4}/.test(v),
+    sMsg:'✅ Safe username — no personal info visible.',
+    wMsg:'⚠️ This username might reveal personal details. Try something anonymous!'},
+  email:{safe:(v)=>v.includes('@'),sMsg:'✅ Email entered. Tip: use a parent\'s email or a safe address.',wMsg:'⚠️ Enter a valid email.'},
+  name:{safe:(v)=>v.length===0,sMsg:'✅ Left blank — smart! Real names aren\'t needed to play.',dMsg:'⚠️ Your full real name is personal. Leave this blank!'},
+  dob:{safe:(v)=>v.length===0,sMsg:'',dMsg:'⚠️ Your birthdate + other info can identify you. Leave blank!'},
+  phone:{safe:(v)=>v.length===0,sMsg:'',dMsg:'🚨 Phone numbers are very sensitive. Skip this field!'},
+  city:{safe:(v)=>v.length===0,sMsg:'',dMsg:'📍 Location info helps companies track you. Leave blank!'},
+};
+let m1scores={};
+
+function m1Check(inp,field){
+  const cfg=m1Hints[field];if(!cfg) return;
+  const v=inp.value.trim();
+  const hintEl=document.getElementById('fh-'+field);
+  const isOptional=['name','dob','phone','city'].includes(field);
+  if(isOptional){
+    if(v.length===0){
+      inp.className='form-inp safe';
+      if(cfg.sMsg){hintEl.className='form-hint fh-safe';hintEl.textContent=cfg.sMsg;}else hintEl.className='form-hint';
+      m1scores[field]=5;
+    } else {
+      inp.className='form-inp danger';
+      hintEl.className='form-hint fh-danger';hintEl.textContent=cfg.dMsg;
+      m1scores[field]=-8;
+    }
+  } else if(field==='user') {
+    if(!v){inp.className='form-inp';hintEl.className='form-hint';return;}
+    if(cfg.safe(v)){inp.className='form-inp safe';hintEl.className='form-hint fh-safe';hintEl.textContent=cfg.sMsg;m1scores[field]=5;}
+    else{inp.className='form-inp warn';hintEl.className='form-hint fh-warn';hintEl.textContent=cfg.wMsg;m1scores[field]=-4;}
+  } else if(field==='email') {
+    if(!v) return;
+    if(cfg.safe(v)){inp.className='form-inp safe';hintEl.className='form-hint fh-safe';hintEl.textContent=cfg.sMsg;}
+    else{inp.className='form-inp warn';hintEl.className='form-hint fh-warn';hintEl.textContent=cfg.wMsg;}
+  }
+}
+
+function m1Pass(inp){
+  const v=inp.value;
+  let s=0;
+  if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const cols=['#FF6B6B','#FF9F43','#FFD166','#4CAF71'];
+  const lbls=['Weak','Fair','Good','Strong! 💪'];
+  [0,1,2,3].forEach(i=>{
+    document.getElementById('pb'+i).style.background=i<s?cols[s-1]:'#E0E0E0';
+  });
+  document.getElementById('ps-lbl').textContent=v?'Strength: '+(lbls[s-1]||'Very Weak'):'Strength: enter a password';
+  m1scores['pass']=s>=3?8:-6;
+}
+
+function m1Submit(){
+  const dangerFields=[];
+  const fields=['name','dob','phone','city'];
+  fields.forEach(f=>{
+    const el=document.getElementById('f-'+f);
+    if(el&&el.value.trim()) dangerFields.push(f);
+  });
+  const mkt=document.getElementById('cb-mkt').checked;
+  const trk=document.getElementById('cb-trk').checked;
+  if(mkt) dangerFields.push('marketing');
+  if(trk) dangerFields.push('tracking');
+
+  const safe=dangerFields.length===0;
+  m1Phase=1;
+  const card=document.getElementById('mission-card');
+
+  if(safe){
+    card.innerHTML=`
+      <span class="mc-icon">🛡️</span>
+      <div class="mc-title">Pixel Stayed Safe!</div>
+      <div class="success-box">
+        <div class="success-title">✅ What You Did Right</div>
+        <div class="success-item"><span>🔒</span><span>Optional fields left blank — companies can't collect what you don't give</span></div>
+        <div class="success-item"><span>📵</span><span>Unchecked marketing & tracking boxes — limits data sharing</span></div>
+        <div class="success-item"><span>🎭</span><span>Anonymous username — no real identity revealed</span></div>
+        <div class="success-item"><span>🔑</span><span>Strong password protects your account from hackers</span></div>
+      </div>
+      <div class="stars" id="s1-stars"><span class="star" id="st0">⭐</span><span class="star" id="st1">⭐</span><span class="star" id="st2">⭐</span></div>
+      <div class="mc-ted mc-ted-blue">${tedSVGSmall()}<div>
+        <div class="mc-ted-name" style="color:#3AAED8">🐶 Ted</div>
+        <div class="mc-ted-msg">Excellent! In real life, <strong>always skip optional fields and uncheck pre-ticked boxes</strong>. 
+        Those boxes are often how companies collect the most data. Look for them everywhere!</div></div></div>
+      <div class="popup-btns"><button class="btn-continue" onclick="m1Done(true)">Continue Exploring →</button></div>`;
+    setTimeout(()=>[0,1,2].forEach((i,j)=>setTimeout(()=>document.getElementById('st'+i).classList.add('lit'),j*300)),200);
+  } else {
+    const fieldLabels={name:'👤 Full Real Name',dob:'🎂 Date of Birth',phone:'📞 Phone Number',city:'📍 Home City',
+      marketing:'📧 Marketing Emails',tracking:'📊 Gameplay Data Shared'};
+    const riskLevel={name:'rh',dob:'rh',phone:'rh',city:'rm',marketing:'rm',tracking:'rh'};
+    const riskTxt={rh:'High Risk',rm:'Med Risk'};
+    let listHTML='';
+    dangerFields.forEach(f=>{
+      const rl=riskLevel[f]||'rm';
+      listHTML+=`<div class="exp-item"><span>${fieldLabels[f]||f}</span><span class="exp-risk ${rl}">${riskTxt[rl]}</span></div>`;
+    });
+    card.innerHTML=`
+      <span class="mc-icon">⚠️</span>
+      <div class="mc-title">Data Drip! Pixel Overshared</div>
+      <div class="mc-desc">Here's what GameZone now has — and what they can do with it:</div>
+      <div class="exposed-list">${listHTML}</div>
+      <div class="con-box con-bad">
+        <div class="con-title">⚠️ What Happens Next</div>
+        <div class="con-item"><span>🔄</span><span>This data gets sold to data brokers within days of signup</span></div>
+        <div class="con-item"><span>🎯</span><span>Name + birthday + city = enough to identify Pixel on other platforms</span></div>
+        <div class="con-item"><span>📧</span><span>Opted into marketing means a flooded inbox with spam and ads</span></div>
+      </div>
+      <div class="mc-ted mc-ted-blue">${tedSVGSmall()}<div>
+        <div class="mc-ted-name" style="color:#3AAED8">🐶 Ted</div>
+        <div class="mc-ted-msg">Remember: <strong>optional really means optional!</strong> You never have to fill in fields not marked with a red asterisk (*). 
+        And always look for pre-checked boxes — uncheck them!</div></div></div>
+      <div class="popup-btns">
+        <button class="btn-again" onclick="renderM1()">🔄 Try Again</button>
+        <button class="btn-continue" onclick="m1Done(false)">Continue Anyway →</button></div>`;
+  }
+}
+
+function m1Done(safe){ completeMission('m1',safe); closeMission(); }
+
+// ============================================================
+// MISSION 2: APP PERMISSIONS
+// ============================================================
+const m2Perms=[
+  {id:'camera',icon:'📷',name:'Camera',reason:'"To power the flashlight"',bg:'#F0EEFF',needed:true,
+    badTed:'✅ Camera IS needed for the flashlight — this one is okay to allow.',
+    goodTed:'Note: camera is actually needed here! The flashlight won\'t work without it.',
+    penalty:0},
+  {id:'location',icon:'📍',name:'Location (Always On)',reason:'"To find nearby light settings"',bg:'#FFF3E0',needed:false,
+    badTed:'⚠️ A flashlight has ZERO reason to know your location 24/7! This data gets sold to advertisers.',
+    goodTed:'✅ Correct! Location "always on" lets apps track everywhere you go, even when you\'re not using them.',
+    penalty:20},
+  {id:'microphone',icon:'🎙️',name:'Microphone',reason:'"For voice-activated flashlight"',bg:'#FFEBEE',needed:false,
+    badTed:'🎙️ Microphone access lets apps listen through your phone anytime. A flashlight never needs this!',
+    goodTed:'✅ Smart! Microphone access on a flashlight app is a major red flag. Always deny it.',
+    penalty:20},
+  {id:'contacts',icon:'👥',name:'Contacts',reason:'"To share the app with friends"',bg:'#E8F4FD',needed:false,
+    badTed:'👥 Contacts contains other people\'s private info too. A flashlight has no reason to need this!',
+    goodTed:'✅ Well done! Contacts access gives apps everyone in your phone\'s address book — not just your info.',
+    penalty:18},
+  {id:'storage',icon:'💾',name:'Photos & Storage',reason:'"To save your settings"',bg:'#E8F5E9',needed:false,
+    badTed:'💾 Storage lets apps read all your photos. A flashlight can\'t justify needing your photo library!',
+    goodTed:'✅ Right! Photo storage access lets apps scan and upload your photo library. A flashlight never needs it.',
+    penalty:10},
+];
+let m2States={};
+
+function renderM2(){
+  m2States={camera:false,location:false,microphone:false,contacts:false,storage:false};
+  const card=document.getElementById('mission-card');
+  card.innerHTML=`
+    <span class="mc-icon">📱</span>
+    <div class="mc-tag"><span class="tag" style="background:#F0EEFF;color:#7C6FCD;">📱 Mission 2 · App Market</span></div>
+    <div class="mc-title">The App That Wanted Too Much</div>
+    <div class="mc-desc">Pixel found <strong>LumiLight</strong> — a free flashlight app. Before installing, it asks for several permissions. 
+    <strong>A flashlight only needs one thing</strong> — can you figure out which permission it actually needs?</div>
+    <div class="mc-ted mc-ted-purple">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#7C6FCD">🐶 Ted</div>
+      <div class="mc-ted-msg" id="m2-ted">Toggle each permission to allow or deny it. 
+      Think: <strong>does a flashlight actually need this?</strong> Real fact: in 2014, a popular flashlight app was caught secretly sending location data to advertisers! 🔍</div>
+    </div></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-sb"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="phone-app-hdr">
+          <div class="phone-app-ico">🔦</div>
+          <div class="phone-app-nm">LumiLight</div>
+          <div class="phone-app-tg">Free Flashlight · 50M+ Downloads ⭐⭐⭐⭐⭐</div>
+        </div>
+        <div class="perms-area">
+          <div class="perms-hdr">This app wants access to:</div>
+          ${m2Perms.map(p=>`
+            <div class="prow" id="pr-${p.id}" onclick="m2Toggle('${p.id}')">
+              <div class="prow-ico" style="background:${p.bg}">${p.icon}</div>
+              <div class="prow-text">
+                <div class="prow-name">${p.name}</div>
+                <div class="prow-reason">${p.reason}</div>
+              </div>
+              <label class="toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" id="pt-${p.id}" onchange="m2Update('${p.id}')">
+                <span class="tslider"></span>
+              </label>
+            </div>`).join('')}
+        </div>
+        <button class="phone-install" onclick="m2Submit()">Install LumiLight →</button>
+      </div>
+    </div>
+    <div class="popup-btns"><button class="btn btn-ghost" onclick="closeMission()">← Back to Town</button></div>`;
+}
+
+function m2Toggle(id){
+  const cb=document.getElementById('pt-'+id);
+  cb.checked=!cb.checked;m2Update(id);
+}
+function m2Update(id){
+  const cb=document.getElementById('pt-'+id);
+  const row=document.getElementById('pr-'+id);
+  const granted=cb.checked;
+  m2States[id]=granted;
+  row.className='prow '+(granted?'granted':'denied');
+  const p=m2Perms.find(x=>x.id===id);
+  const msg=granted?p.badTed:p.goodTed;
+  const ted=document.getElementById('m2-ted');
+  if(ted){ted.style.opacity='.3';setTimeout(()=>{ted.innerHTML=msg;ted.style.opacity='1';ted.style.transition='opacity .3s';},150);}
+}
+
+function m2Submit(){
+  const badGranted=m2Perms.filter(p=>!p.needed&&m2States[p.id]);
+  const goodGranted=m2Perms.filter(p=>p.needed&&m2States[p.id]);
+  const safe=badGranted.length===0;
+  const penalty=badGranted.reduce((a,b)=>a+b.penalty,0);
+  const card=document.getElementById('mission-card');
+
+  if(safe){
+    card.innerHTML=`
+      <span class="mc-icon">🛡️</span>
+      <div class="mc-title">Pixel's Privacy Protected!</div>
+      <div class="success-box">
+        <div class="success-title">✅ Minimum Access Granted</div>
+        <div class="success-item"><span>📷</span><span>Camera allowed — this is the only permission a flashlight actually needs</span></div>
+        <div class="success-item"><span>📵</span><span>Location denied — flashlight never needs your GPS</span></div>
+        <div class="success-item"><span>🚫</span><span>Microphone, contacts, and storage all denied — zero legitimate need</span></div>
+      </div>
+      <div class="stars"><span class="star m2s lit">⭐</span><span class="star m2s lit">⭐</span><span class="star m2s lit">⭐</span></div>
+      <div class="mc-ted mc-ted-purple">${tedSVGSmall()}<div>
+        <div class="mc-ted-name" style="color:#7C6FCD">🐶 Ted</div>
+        <div class="mc-ted-msg">The <strong>rule of minimum access</strong>: every app should only get the permissions it actually needs to function. 
+        Anything extra is a data collection attempt. Apply this to every app you install!</div></div></div>
+      <div class="popup-btns"><button class="btn-continue" onclick="m2Done(true)">Continue Exploring →</button></div>`;
+  } else {
+    let listHTML='';
+    badGranted.forEach(p=>{
+      listHTML+=`<div class="exp-item"><span>${p.icon} ${p.name}</span><span class="exp-risk rh">High Risk</span></div>`;
+    });
+    card.innerHTML=`
+      <span class="mc-icon">⚠️</span>
+      <div class="mc-title">LumiLight Got Too Much Access!</div>
+      <div class="exposed-list">${listHTML}</div>
+      <div class="con-box con-bad">
+        <div class="con-title">⚠️ What These Permissions Enable</div>
+        ${m2States.location?'<div class="con-item"><span>📍</span><span>Location "always on" tracks everywhere Pixel goes 24/7 — sold to data brokers</span></div>':''}
+        ${m2States.microphone?'<div class="con-item"><span>🎙️</span><span>Microphone can record audio at any time — not just when the app is open</span></div>':''}
+        ${m2States.contacts?'<div class="con-item"><span>👥</span><span>Entire contact list uploaded — everyone in Pixel\'s phone is now exposed</span></div>':''}
+        ${m2States.storage?'<div class="con-item"><span>💾</span><span>Photo library can be scanned — personal images and metadata extracted</span></div>':''}
+        <div class="con-item"><span>💸</span><span>LumiLight is free because it earns money selling this data — you paid with privacy</span></div>
+      </div>
+      <div class="popup-btns">
+        <button class="btn-again" onclick="renderM2()">🔄 Try Again</button>
+        <button class="btn-continue" onclick="m2Done(false)">Continue Anyway →</button></div>`;
+  }
+  completeMission('m2',safe,penalty);
+}
+function m2Done(safe){ closeMission(); }
+
+// ============================================================
+// MISSION 3: SOCIAL PROFILE
+// ============================================================
+let m3Avatar='🐱';
+function renderM3(){
+  const card=document.getElementById('mission-card');
+  card.innerHTML=`
+    <span class="mc-icon">👤</span>
+    <div class="mc-tag"><span class="tag" style="background:#FFF0F5;color:#FF6B9D;">👤 Mission 3 · Social Square</span></div>
+    <div class="mc-title">Building Pixel's ZoneBook Profile</div>
+    <div class="mc-desc">ZoneBook is a new social platform. Help Pixel set up their profile — but use the 
+    <strong>visibility dropdowns carefully</strong>! When done, hit <em>Preview as Stranger</em> to see what someone you don't know can find.</div>
+    <div class="mc-ted mc-ted-coral">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#FF6B9D">🐶 Ted</div>
+      <div class="mc-ted-msg" id="m3-ted"><strong>Anything set to Public is visible to every person on the internet</strong> — 
+      not just friends. Use the dropdowns to control who sees each piece of info. Think about the Mosaic Effect!</div>
+    </div></div>
+    <div class="mock-browser">
+      <div class="social-top">
+        <div class="social-logo">📘 ZoneBook</div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <span class="tag" style="background:rgba(255,255,255,.2);color:white;font-size:11px;">Edit Profile</span>
+        </div>
+      </div>
+      <div class="social-banner">
+        <div class="s-avatar" id="m3-av">${m3Avatar}</div>
+      </div>
+      <div class="profile-body">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          ${['🐱','🦊','🐸','🦁','🐼','🐧'].map(e=>`<span onclick="m3SetAv(this,'${e}')" style="font-size:26px;cursor:pointer;padding:5px;border-radius:9px;border:2px solid transparent;transition:border-color .2s" class="av-opt">${e}</span>`).join('')}
+        </div>
+        ${[
+          ['display','Display Name','Use a fun username, not your real name!'],
+          ['realname','Real Name','Your actual first & last name'],
+          ['school','School','Your school name'],
+          ['age','Age / Grade','e.g. 11 or 6th grade'],
+          ['city','City / Town','Where you live'],
+          ['bio','Bio','About you!'],
+        ].map(([id,lbl,ph])=>`
+          <div class="pf-row">
+            <div class="pf-lbl">${lbl}</div>
+            <input class="pf-inp" id="pf-${id}" placeholder="${ph}" oninput="m3FieldUpdate('${id}')">
+            <select class="vis-sel vis-pub" id="vs-${id}" onchange="m3VisChange('${id}',this)">
+              <option value="pub">🌍 Public</option>
+              <option value="fri">👥 Friends</option>
+              <option value="prv">🔒 Private</option>
+            </select>
+          </div>`).join('')}
+        <button class="btn-preview" onclick="m3Preview()">👁 Preview as a Stranger →</button>
+      </div>
+    </div>
+    <div class="popup-btns"><button class="btn btn-ghost" onclick="closeMission()">← Back to Town</button></div>`;
+}
+
+function m3SetAv(el,e){
+  document.querySelectorAll('.av-opt').forEach(a=>a.style.borderColor='transparent');
+  el.style.borderColor='var(--coral)';m3Avatar=e;
+  document.getElementById('m3-av').textContent=e;
+}
+
+function m3VisChange(field,sel){
+  const v=sel.value;
+  sel.className='vis-sel vis-'+v;
+  const sensitive=['realname','school','age','city'];
+  const isSensitive=sensitive.includes(field);
+  const isPublic=v==='pub';
+  const ted=document.getElementById('m3-ted');
+  if(!ted) return;
+  let msg='';
+  if(isSensitive&&isPublic) msg=`⚠️ <strong>${field==='realname'?'Real name':field.charAt(0).toUpperCase()+field.slice(1)} set to Public</strong> — strangers can see this! Consider setting to Private or Friends Only.`;
+  else if(isSensitive) msg=`✅ Good choice! Keeping <strong>${field}</strong> ${v==='fri'?'for friends only':'private'} limits who can see this sensitive info.`;
+  if(msg){ted.style.opacity='.3';setTimeout(()=>{ted.innerHTML=msg;ted.style.opacity='1';ted.style.transition='opacity .3s';},150);}
+}
+function m3FieldUpdate(field){}
+
+function m3Preview(){
+  const fieldDefs=[
+    {id:'display',label:'Display Name',sensitive:false},
+    {id:'realname',label:'Real Name',sensitive:true},
+    {id:'school',label:'School',sensitive:true},
+    {id:'age',label:'Age',sensitive:true},
+    {id:'city',label:'City',sensitive:true},
+    {id:'bio',label:'Bio',sensitive:false},
+  ];
+  const publicSensitive=[];
+  const allPublic=[];
+  fieldDefs.forEach(f=>{
+    const vis=document.getElementById('vs-'+f.id)?.value;
+    const val=document.getElementById('pf-'+f.id)?.value?.trim();
+    if(vis==='pub'&&val){
+      allPublic.push({...f,val});
+      if(f.sensitive) publicSensitive.push({...f,val});
+    }
+  });
+  const displayName=document.getElementById('pf-display')?.value||'PrivaPal_User';
+  const safe=publicSensitive.length===0;
+  
+  let svRows=allPublic.length===0
+    ?'<div style="text-align:center;padding:12px;color:rgba(255,255,255,.5);font-weight:700;font-size:13px;">🔒 Nothing sensitive visible to strangers!</div>'
+    :allPublic.map(f=>`<div class="sv-field">
+      <span class="sv-key">${f.label}</span>
+      <span class="sv-val">${f.val}</span>
+      ${f.sensitive?'<span class="sv-badge sbh">⚠️ Risk</span>':'<span class="sv-badge sbs">OK</span>'}
+    </div>`).join('');
+
+  let mosaicHTML='';
+  if(publicSensitive.length>=2){
+    const combo=publicSensitive.map(f=>f.label.toLowerCase()).join(', ');
+    mosaicHTML=`<div class="mosaic-box">
+      <div class="mosaic-title">🔍 The Mosaic Effect</div>
+      <div class="mosaic-item"><span>⚠️</span><span>A stranger can see Pixel's <strong>${combo}</strong>. Together, these paint a detailed picture of who Pixel is and where to find them in real life.</span></div>
+      <div class="mosaic-item"><span>🌐</span><span>Public info can be screenshotted, searched, and used forever — even after it's deleted.</span></div>
+    </div>`;
+  }
+
+  const card=document.getElementById('mission-card');
+  card.innerHTML=`
+    <span class="mc-icon">${safe?'🛡️':'👁️'}</span>
+    <div class="mc-title">${safe?'Pixel Is Almost Invisible!':'This Is What a Stranger Sees'}</div>
+    <div class="stranger-view">
+      <div class="sv-hdr">
+        <div class="sv-avatar">${m3Avatar}</div>
+        <div><div class="sv-name">${displayName}</div>
+          <div class="sv-handle">@zonebook.example · 👁 Public Profile</div></div>
+      </div>
+      ${svRows}
+    </div>
+    ${mosaicHTML}
+    ${safe?`<div class="success-box"><div class="success-title">✅ Great Privacy Settings!</div>
+      <div class="success-item"><span>🔒</span><span>Sensitive info kept private or friends-only</span></div>
+      <div class="success-item"><span>👤</span><span>Strangers can't identify or locate Pixel from this profile</span></div>
+    </div>`:''}
+    <div class="mc-ted mc-ted-coral">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#FF6B9D">🐶 Ted</div>
+      <div class="mc-ted-msg">${safe?'Excellent settings! Always review your privacy settings on real social platforms — they often default to Public and change without warning.':
+        'Remember: <strong>Public means the entire internet</strong>, not just people you know. Go through real social media settings and switch sensitive info to Private or Friends Only!'}</div>
+    </div></div>
+    <div class="popup-btns">
+      ${!safe?'<button class="btn-again" onclick="renderM3()">🔄 Try Again</button>':''}
+      <button class="btn-continue" onclick="m3Done(${safe})">Continue Exploring →</button>
+    </div>`;
+  completeMission('m3',safe,publicSensitive.length*12);
+}
+function m3Done(safe){ closeMission(); }
+
+// ============================================================
+// MISSION 4: DATA TOWN GUIDED TOUR
+// ============================================================
+const m4Scenarios=[
+  {
+    idx:0,icon:'☕',title:'Free WiFi Trap',
+    desc:'Pixel is at a café. There\'s free WiFi with no password, and Pixel\'s phone is asking to connect.',
+    ted:'<strong>No password = no encryption.</strong> Anyone nearby with the right software can see which websites you visit and capture login info on unencrypted pages.',
+    choices:[
+      {icon:'📶',label:'Connect to FreeZone_Café WiFi',sub:'Save mobile data',cls:'cbad',safe:false},
+      {icon:'📵',label:'Use my own mobile data instead',sub:'Privacy over convenience',cls:'cgood',safe:true},
+    ],
+    badCons:['Anyone on the same network can monitor your web traffic','Hackers create fake hotspots called "honey traps" to steal data','Login info typed on non-HTTPS sites is visible in plain text'],
+    goodCons:['Mobile data is encrypted between your phone and your carrier','No one nearby can intercept your browsing','If you must use public WiFi, only visit HTTPS sites and consider a VPN'],
+  },
+  {
+    idx:1,icon:'🏷️',title:'The 10% Off Deal',
+    desc:'A rewards kiosk offers Pixel 10% off every purchase forever — if Pixel provides full name, home address, birthday, email, and phone number.',
+    ted:'<strong>Is 10% really worth all that?</strong> Loyalty programs are primarily data collection systems. Stores sell this information to data brokers — companies that combine it with other sources to build detailed profiles.',
+    choices:[
+      {icon:'📋',label:'Sign up! 10% off sounds great',sub:'Provide all personal info',cls:'cbad',safe:false},
+      {icon:'🚫',label:'No thanks, I\'ll pay full price',sub:'My data is worth more',cls:'cgood',safe:true},
+      {icon:'🕵️',label:'Sign up with a spare email and fake birthday',sub:'Minimum required info',cls:'cntr',safe:true},
+    ],
+    badCons:['Stores sell loyalty data to brokers within days of collection','Name + address + birthday = enough to link across platforms','Spending patterns reveal income level, health conditions, and family status'],
+    goodCons:['No data broker can add this source to Pixel\'s profile','The discount routinely costs more in privacy value than it saves in money','If you do use loyalty cards, use a separate email and give minimum info'],
+  },
+  {
+    idx:2,icon:'📺',title:'The Billboard That Knows You',
+    desc:'As Pixel passes a billboard, it lights up: "Based on your browsing history, we think you\'d love GameZone Premium, Elm Street Pizza, and grade-school supplies." Pixel never interacted with this billboard before.',
+    ted:'This is <strong>behavioral advertising</strong>. The billboard company bought a data profile from apps, websites, and brokers. It combined dozens of small data points to infer Pixel\'s age, location, and interests — without ever speaking to Pixel.',
+    choices:[
+      {icon:'👍',label:'Personalized ads are helpful — that\'s fine',sub:'I\'m OK with being tracked',cls:'cbad',safe:false},
+      {icon:'🔍',label:'This is creepy — how do I limit it?',sub:'I want to understand and push back',cls:'cgood',safe:true},
+    ],
+    badCons:['Behavioral ad companies track you across apps, sites, and physical locations','Your profile includes age range, interests, income level, and health indicators','Ads designed to feel helpful are more effective at influencing your decisions'],
+    goodCons:['Turn off "Personalized Ads" in phone Privacy Settings','Use a browser with tracking protection like Firefox or Brave','Limit app location access to "Only While Using App" instead of "Always"'],
+  },
+  {
+    idx:3,icon:'📷',title:'The Photo Prize Booth',
+    desc:'A bright kiosk invites Pixel to snap a photo to win prizes! In tiny print: "By submitting, you consent to facial recognition processing and storage of biometric data for up to 10 years."',
+    ted:'<strong>Facial recognition creates a biometric profile</strong> — a mathematical fingerprint of your face. Unlike a password, you can never change your face. If this data is breached or misused, the consequences last a lifetime.',
+    choices:[
+      {icon:'🤳',label:'Take a photo — a prize sounds fun!',sub:'Agree to biometric data storage',cls:'cbad',safe:false},
+      {icon:'🚫',label:'Skip it — no prize is worth my face data',sub:'Biometric data is too sensitive',cls:'cgood',safe:true},
+    ],
+    badCons:['Facial recognition data is permanent — you can\'t change your face like a password','Once stored, you can be matched in other photos, at other locations, on cameras you don\'t know exist','Most US states have no protection for biometric data — once it\'s gone, it\'s gone'],
+    goodCons:['No database now contains a model of Pixel\'s face','Always read small print before contests, especially for words like "biometric" or "store your data"','Saying no to facial recognition requests is always a valid choice'],
+  },
+];
+let m4State={step:0,choices:[],penalties:[]};
+
+function renderM4(step){
+  m4State.step=step;
+  const sc=m4Scenarios[step];
+  const dotHTML=m4Scenarios.map((_,i)=>`<div class="m4-dot ${i<step?'done':i===step?'active':''}"></div>`).join('');
+  const card=document.getElementById('mission-card');
+  card.innerHTML=`
+    <span class="mc-icon">${sc.icon}</span>
+    <div class="mc-tag"><span class="tag" style="background:#FFF8F0;color:#C05A00;">🏙️ Mission 4 · Data Town · Scenario ${step+1} of 4</span></div>
+    <div class="m4-progress">${dotHTML}</div>
+    <div class="m4-scenario-title">${sc.title}</div>
+    <div class="m4-scene-desc">${sc.desc}</div>
+    <div class="mc-ted mc-ted-orange">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#C05A00">🐶 Ted</div>
+      <div class="mc-ted-msg">${sc.ted}</div>
+    </div></div>
+    ${sc.choices.map((c,i)=>`
+      <button class="choice-btn ${c.cls}" onclick="m4Choose(${step},${i},${c.safe})">
+        <span class="ch-ico">${c.icon}</span>
+        <div><div class="ch-lbl">${c.label}</div>${c.sub?`<div class="ch-sub">${c.sub}</div>`:''}
+        </div></button>`).join('')}
+    <div class="popup-btns"><button class="btn btn-ghost" onclick="closeMission()">← Back to Town</button></div>`;
+}
+
+function m4Choose(step,choiceIdx,safe){
+  m4State.choices[step]=safe;
+  if(!safe) m4State.penalties[step]=18;
+  const sc=m4Scenarios[step];
+  const card=document.getElementById('mission-card');
+  const data=safe?{title:'✅ Good Thinking!',items:sc.goodCons,cls:'con-good'}:{title:'⚠️ Watch Out!',items:sc.badCons,cls:'con-bad'};
+  const dotHTML=m4Scenarios.map((_,i)=>`<div class="m4-dot ${i<=step?'done':''}"></div>`).join('');
+  const isLast=step===3;
+  card.innerHTML=`
+    <span class="mc-icon">${safe?'🛡️':'⚠️'}</span>
+    <div class="mc-tag"><span class="tag" style="background:#FFF8F0;color:#C05A00;">🏙️ Scenario ${step+1} of 4 — ${sc.title}</span></div>
+    <div class="m4-progress">${dotHTML}</div>
+    <div class="con-box ${data.cls}">
+      <div class="con-title">${data.title}</div>
+      ${data.items.map(it=>`<div class="con-item"><span>•</span><span>${it}</span></div>`).join('')}
+    </div>
+    <div class="mc-ted mc-ted-orange">${tedSVGSmall()}<div>
+      <div class="mc-ted-name" style="color:#C05A00">🐶 Ted</div>
+      <div class="mc-ted-msg">${safe?'Remember this pattern when you encounter it in the real world!':'Don\'t worry — now you know what to watch for next time. These traps are everywhere once you see them!'}</div>
+    </div></div>
+    <div class="popup-btns">
+      ${isLast
+        ?`<button class="btn-continue" onclick="m4Done()">See Data Town Summary →</button>`
+        :`<button class="btn-continue" onclick="renderM4(${step+1})">Next Scenario →</button>`
+      }
+    </div>`;
+}
+
+function m4Done(){
+  const allSafe=m4State.choices.every(Boolean);
+  const safeCount=m4State.choices.filter(Boolean).length;
+  const totalPenalty=m4State.penalties.reduce((a,b)=>a+(b||0),0);
+  const card=document.getElementById('mission-card');
+  card.innerHTML=`
+    <span class="mc-icon">${allSafe?'🏆':safeCount>=3?'🛡️':'📚'}</span>
+    <div class="mc-title">Data Town Tour Complete!</div>
+    <div class="mc-desc">You encountered 4 real surveillance and data collection systems. Here's how you did:</div>
+    <div class="end-results" style="margin-bottom:14px">
+      ${m4Scenarios.map((s,i)=>`<div class="end-row">
+        <span class="er-icon">${s.icon}</span>
+        <span>${s.title}</span>
+        <span class="er-badge ${m4State.choices[i]?'bs':'bu'}">${m4State.choices[i]?'✅ Safe':'⚠️ Exposed'}</span>
+      </div>`).join('')}
+    </div>
+    <div class="end-takeaway">
+      <div class="et-title">🔍 The Big Insight</div>
+      <div class="et-body">In real life, privacy threats don't announce themselves. They look like <strong>free WiFi, discounts, helpful ads, and fun prizes</strong>. 
+      Every scenario in Data Town is based on real systems operating right now. 
+      The more you recognize the pattern, the more control you have.</div>
+    </div>
+    <div class="popup-btns">
+      <button class="btn-continue" onclick="m4Close(${totalPenalty})">🗺 Back to Town →</button>
+    </div>`;
+  completeMission('m4',allSafe,totalPenalty);
+}
+function m4Close(){ closeMission(); }
+
+// ============================================================
+// END SCREEN
+// ============================================================
+function showEnd(){
+  const s=privScore;
+  let icon,title,sub;
+  if(s>=80){icon='🏆';title='Privacy Champion!';sub='Pixel made excellent choices throughout Data Town. These real-world skills will help protect you online every day!';}
+  else if(s>=55){icon='🛡️';title='Privacy Defender!';sub='Good work! You protected Pixel in most situations. Some tricky spots — try again to see if you can improve your score.';}
+  else{icon='📚';title='Keep Learning!';sub='Data Town had some tough choices! The good news: now you know what to watch for. Try again and see how much better you do.';}
+
+  const scoreColor=s>=80?'#2E7B47':s>=55?'#C07800':'#CC3333';
+
+  const missionMap={m1:'Sign-Up Alley 📋',m2:'App Market 📱',m3:'Social Square 👤',m4:'Data Town 🏙️'};
+  const rowsHTML=Object.entries(missionChoices).map(([id,safe])=>`
+    <div class="end-row">
+      <span class="er-icon">${id==='m1'?'📋':id==='m2'?'📱':id==='m3'?'👤':'🏙️'}</span>
+      <span>${missionMap[id]}</span>
+      <span class="er-badge ${safe?'bs':'bu'}">${safe?'✅ Safe Choices':'⚠️ Data Exposed'}</span>
+    </div>`).join('');
+
+  const skippedHTML=MISSIONS.filter(m=>missionChoices[m.id]===undefined).map(m=>`
+    <div class="end-row">
+      <span class="er-icon">${m.icon}</span><span>${m.name}</span>
+      <span class="er-badge bn">⬜ Not Visited</span>
+    </div>`).join('');
+
+  document.getElementById('end-card').innerHTML=`
+    <span class="end-icon">${icon}</span>
+    <div class="end-title">${title}</div>
+    <div class="mc-desc" style="text-align:center;margin-bottom:16px;">${sub}</div>
+    <div class="score-big" style="color:${scoreColor}">${s}</div>
+    <div class="score-sub">Final Privacy Score / 100</div>
+    <div class="end-results">${rowsHTML}${skippedHTML}</div>
+    <div class="end-takeaway">
+      <div class="et-title">🔍 What You Learned in Data Town</div>
+      <div class="et-body">
+        📋 <strong>Sign-Up Forms:</strong> Skip optional fields, uncheck pre-ticked boxes, use anonymous usernames.<br><br>
+        📱 <strong>App Permissions:</strong> Only grant what the app actually needs. Anything extra is data collection.<br><br>
+        👤 <strong>Social Profiles:</strong> Public means the entire internet. The Mosaic Effect makes harmless info dangerous when combined.<br><br>
+        🏙️ <strong>Everyday Surveillance:</strong> Free WiFi, loyalty cards, smart ads, and biometric contests are all data collection systems in disguise.
+      </div>
+    </div>
+    <div class="popup-btns">
+      <button class="btn-continue" onclick="replayGame()">🔄 Play Again</button>
+      <button class="btn btn-ghost" onclick="location.reload()">🏠 Title Screen</button>
+    </div>`;
+  document.getElementById('screen-end').classList.add('show');
+}
+
+function replayGame(){
+  document.getElementById('screen-end').classList.remove('show');
+  MISSIONS.forEach(m=>m.done=false);
+  privScore=100;
+  Object.keys(missionChoices).forEach(k=>delete missionChoices[k]);
+  document.getElementById('hud-score').textContent=100;
+  [0,1,2,3].forEach(i=>document.getElementById('hd'+i).classList.remove('done'));
+  beacons.forEach(b=>{
+    b.beamM.color.setHex(b.m.col);b.orbM.color.setHex(b.m.col);b.ringM.color.setHex(b.m.col);
+  });
+  playerGroup.position.set(0,0,6);playerGroup.rotation.y=0;
+  m4State={step:0,choices:[],penalties:[]};
+  setTedMsg(0);
+}
+
+// ============================================================
+// MINIMAP
+// ============================================================
+const mmCanvas=document.getElementById('minimap2');
+const mmCtx=mmCanvas.getContext('2d');
+function drawMinimap(){
+  const W=120,SC=W/42;
+  mmCtx.clearRect(0,0,W,W);
+  mmCtx.fillStyle='#7BC47A';mmCtx.fillRect(0,0,W,W);
+  // Zone patches
+  [{x:0,z:-24,c:'rgba(58,174,216,.35)'},{x:24,z:0,c:'rgba(124,111,205,.35)'},
+   {x:0,z:24,c:'rgba(255,107,157,.35)'},{x:-24,z:0,c:'rgba(255,159,67,.35)'}].forEach(z=>{
+    mmCtx.fillStyle=z.c;
+    mmCtx.fillRect((z.x-13+21)*SC,(z.z-13+21)*SC,26*SC,26*SC);
+  });
+  // Roads
+  mmCtx.fillStyle='#C0B8A8';
+  mmCtx.fillRect(W/2-3.5,0,7,W);mmCtx.fillRect(0,W/2-3.5,W,7);
+  // Center hub
+  mmCtx.fillStyle='#E8E0D0';mmCtx.fillRect(W/2-8.5,W/2-8.5,17,17);
+  // Missions
+  MISSIONS.forEach(m=>{
+    const mx=(m.pos.x+21)*SC,my=(m.pos.z+21)*SC;
+    mmCtx.fillStyle=m.done?'#4CAF71':'#'+m.col.toString(16).padStart(6,'0');
+    mmCtx.beginPath();mmCtx.arc(mx,my,5,0,Math.PI*2);mmCtx.fill();
+    if(m.done){mmCtx.fillStyle='white';mmCtx.font='bold 7px sans-serif';mmCtx.textAlign='center';mmCtx.fillText('✓',mx,my+2.5);}
+  });
+  // Player
+  const px=(playerGroup.position.x+21)*SC,py=(playerGroup.position.z+21)*SC;
+  mmCtx.fillStyle='#FFD166';mmCtx.strokeStyle='#C9991A';mmCtx.lineWidth=1.5;
+  mmCtx.beginPath();mmCtx.arc(px,py,4,0,Math.PI*2);mmCtx.fill();mmCtx.stroke();
+  // Direction
+  const a=playerGroup.rotation.y;
+  mmCtx.strokeStyle='#1A1A2E';mmCtx.lineWidth=1.5;mmCtx.beginPath();
+  mmCtx.moveTo(px,py);mmCtx.lineTo(px+Math.sin(a)*6,py+Math.cos(a)*6);mmCtx.stroke();
+  // Border
+  mmCtx.strokeStyle='rgba(255,255,255,.25)';mmCtx.lineWidth=1;
+  mmCtx.strokeRect(.5,.5,W-1,W-1);
+}
+
+// ============================================================
+// ZONE LABELS (3D→2D projection)
+// ============================================================
+const _v3=new THREE.Vector3();
+function updateZoneLabels(){
+  ZONE_LABELS.forEach((l,i)=>{
+    _v3.set(l.world.x,l.world.y,l.world.z);
+    _v3.project(camera);
+    const el=document.getElementById(l.id);
+    if(!el) return;
+    if(_v3.z<1){
+      el.style.left=(_v3.x*.5+.5)*innerWidth+'px';
+      el.style.top=((-_v3.y*.5+.5)*innerHeight)+'px';
+      el.style.display='block';
+      if(MISSIONS[i].done) el.classList.add('done'); else el.classList.remove('done');
+    } else { el.style.display='none'; }
+  });
+}
+
+// Ted bubble projection
+const _tedPos=new THREE.Vector3();
+function updateTedBubble(){
+  tedGroup.getWorldPosition(_tedPos);
+  _tedPos.y+=2.8;_tedPos.project(camera);
+  const bub=document.getElementById('ted-bubble');
+  if(_tedPos.z<1){
+    const sx=(_tedPos.x*.5+.5)*innerWidth;
+    const sy=((-_tedPos.y*.5+.5)*innerHeight);
+    bub.style.left=sx+'px';bub.style.top=sy+'px';bub.style.display='block';
+  } else { bub.style.display='none'; }
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+const clock=new THREE.Clock();
+const vel={x:0,z:0};
+const SPEED=0.1,FRIC=0.76;
+
+function updatePlayer(dt){
+  const mv=keys.w||keys.s||keys.a||keys.d;
+  if(keys.w) vel.z-=SPEED;if(keys.s) vel.z+=SPEED;
+  if(keys.a) vel.x-=SPEED;if(keys.d) vel.x+=SPEED;
+  vel.x*=FRIC;vel.z*=FRIC;
+  const spd=Math.sqrt(vel.x*vel.x+vel.z*vel.z);
+  if(spd>.24){vel.x*=.24/spd;vel.z*=.24/spd;}
+  const nx=playerGroup.position.x+vel.x;
+  const nz=playerGroup.position.z+vel.z;
+  if(canMove(nx,playerGroup.position.z)) playerGroup.position.x=nx;else vel.x*=-.2;
+  if(canMove(playerGroup.position.x,nz)) playerGroup.position.z=nz;else vel.z*=-.2;
+  if(Math.abs(vel.x)>.01||Math.abs(vel.z)>.01) playerGroup.rotation.y=Math.atan2(vel.x,vel.z);
+  if(mv) playerGroup.position.y=Math.abs(Math.sin(clock.getElapsedTime()*10))*.07;
+  else playerGroup.position.y*=.82;
+}
+
+function checkNearMission(){
+  if(paused) return;
+  let near=null,minD=Infinity;
+  MISSIONS.forEach(m=>{
+    if(m.done) return;
+    const dx=playerGroup.position.x-m.pos.x;
+    const dz=playerGroup.position.z-m.pos.z;
+    const d=Math.sqrt(dx*dx+dz*dz);
+    if(d<m.radius&&d<minD){minD=d;near=m;}
+  });
+  nearMission=near;
+  const prompt=document.getElementById('interact-prompt');
+  if(near){
+    prompt.style.display='block';
+    document.getElementById('int-text').textContent=near.name+' — Press E';
+  } else { prompt.style.display='none'; }
+}
+
+function doInteract(){
+  if(!playing||paused) return;
+  if(nearMission&&!nearMission.done) openMission(nearMission);
+}
+
+function updateCamera(){
+  const tx=playerGroup.position.x,tz=playerGroup.position.z+15;
+  cam.x+=(tx-cam.x)*.09;cam.z+=(tz-cam.z)*.09;
+  camera.position.set(cam.x,17,cam.z);
+  camera.lookAt(playerGroup.position.x,1.2,playerGroup.position.z);
+}
+
+function updateBeacons(t){
+  beacons.forEach(b=>{
+    const done=b.m.done;
+    b.orbM.opacity=.75+Math.sin(t*2.4)*.2;
+    b.beamM.opacity=done?.25:.45+Math.sin(t*1.5)*.1;
+    b.ringM.opacity=.3+Math.sin(t*2)*.2;
+    if(!done){b.orb.position.y=14.2+Math.sin(t*2)*.35;b.ring.rotation.z=t*.9;}
+    b.ring.scale.setScalar(.92+Math.sin(t*2)*.1);
+  });
+}
+
+function updateParticles(t){
+  dataPts.forEach(p=>{
+    p.position.y+=p._vy;
+    if(p.position.y>p._maxY){p.position.y=Math.random()*.5;p.position.x=-20+Math.random()*10-5;}
+    p.children[0].material.opacity=.5+Math.sin(t*3+p.position.x)*.3;
+  });
+  heartPts.forEach(p=>{
+    p.position.y+=p._vy;
+    if(p.position.y>p._maxY){p.position.y=20+Math.random()*3;p.position.x=Math.random()*18-9;}
+    p.material.opacity=.6+Math.sin(t*4+p.position.z)*.35;
+  });
+}
+
+function updateZoneName(){
+  const px=playerGroup.position.x,pz=playerGroup.position.z;
+  let zone='Data Town';
+  if(pz<-9&&Math.abs(px)<14) zone='📋 Sign-Up Alley';
+  else if(px>9&&Math.abs(pz)<14) zone='📱 App Market';
+  else if(pz>9&&Math.abs(px)<14) zone='👤 Social Square';
+  else if(px<-9&&Math.abs(pz)<14) zone='🏙️ Data Town';
+  else zone='🏘️ Town Center';
+  document.getElementById('hud-zone').textContent=zone;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  if(playing&&!paused){
+    updatePlayer();
+    checkNearMission();
+    updateZoneName();
+  }
+  updateCamera();
+  updateBeacons(t);
+  updateParticles(t);
+  waterMesh.position.y=.52+Math.sin(t*1.4)*.03;
+  // Ted bob
+  tedGroup.position.y=Math.abs(Math.sin(t*.8))*.15;
+  // App icons rotate
+  appIcons.forEach((ico,i)=>{ico.rotation.y=t*.5+i*2.1;ico.position.y=8.5+Math.sin(t*.8+i)*.4;});
+  // Phone kiosk glow
+  [screen1].forEach(s=>{if(s&&s.material&&s.material.emissiveIntensity!==undefined) s.material.emissiveIntensity=.3+Math.sin(t*2.5)*.1;});
+  if(playing){updateZoneLabels();updateTedBubble();drawMinimap();}
+  renderer.render(scene,camera);
+}
+animate();
+
+// ============================================================
+// START GAME
+// ============================================================
+function startGame(){
+  document.getElementById('screen-learn').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  playing=true;
+  if('ontouchstart' in window||navigator.maxTouchPoints>0){
+    document.getElementById('dpad').style.display='block';
+    document.getElementById('ctrl-hint').style.display='none';
+  }
+  // Title particles
+  document.querySelectorAll('.tp').forEach(p=>p.remove());
+}
+
+// Title screen particles
+(function(){
+  const cont=document.getElementById('tp-container');
+  for(let i=0;i<28;i++){
+    const p=document.createElement('div');
+    const size=4+Math.random()*10;
+    const colors=['#5EC8F0','#FFD166','#7C6FCD','#FF6B9D','#4CAF71','#FF9F43'];
+    p.className='tp';
+    p.style.cssText=`width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};
+      opacity:${.3+Math.random()*.5};left:${Math.random()*100}%;top:${Math.random()*100}%;
+      animation-duration:${4+Math.random()*8}s;animation-delay:${-Math.random()*8}s;`;
+    cont.appendChild(p);
+  }
+})();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>

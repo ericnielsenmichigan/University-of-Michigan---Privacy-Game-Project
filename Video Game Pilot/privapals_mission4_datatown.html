@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Privapals — Mission 4: Data Town</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { overflow: hidden; background: #000; font-family: 'Nunito', sans-serif; touch-action: none; }
+#gameCanvas { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* ---- HUD TOP ---- */
+#hud-top {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, rgba(10,5,25,0.75) 0%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  pointer-events: none;
+}
+.hud-brand { display: flex; align-items: center; gap: 10px; }
+.hud-title { font-family: 'Fredoka One', cursive; font-size: 20px; color: white; text-shadow: 2px 3px 0 rgba(0,0,0,0.5); }
+.hud-subtitle { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 700; }
+.hud-score-pill {
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.18); border-radius: 22px;
+  padding: 7px 16px; display: flex; align-items: center; gap: 10px;
+}
+.hud-score-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 1px; }
+.hud-score-num { font-family: 'Fredoka One', cursive; font-size: 26px; color: #FFD166; }
+.hud-dots-pill {
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.18); border-radius: 22px;
+  padding: 7px 16px; display: flex; align-items: center; gap: 8px;
+}
+.hud-dot-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+.h-dot { width: 13px; height: 13px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.4); transition: background 0.5s, border-color 0.5s; }
+.h-dot.done { background: #4CAF71; border-color: #2E8B47; }
+
+/* ---- INTERACT PROMPT ---- */
+#interact-prompt {
+  position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+  z-index: 15; display: none; pointer-events: none;
+  animation: promptFloat 1.2s ease-in-out infinite;
+}
+@keyframes promptFloat { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
+.interact-inner {
+  background: rgba(255,255,255,0.96); border-radius: 22px;
+  padding: 10px 22px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 2.5px solid #FFD166;
+}
+.int-key {
+  background: #FFD166; color: #1A1A2E; font-family: 'Fredoka One', cursive;
+  font-size: 15px; min-width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 0 #C9991A; padding: 0 8px;
+}
+.int-text { font-size: 14px; font-weight: 800; color: #1A1A2E; }
+
+/* ---- STATION LABELS (HTML over 3D) ---- */
+.slabel {
+  position: fixed; z-index: 8; pointer-events: none;
+  transform: translateX(-50%) translateY(-50%); text-align: center;
+  transition: opacity 0.4s;
+}
+.slabel-inner {
+  background: rgba(10,5,30,0.72); backdrop-filter: blur(6px); color: white;
+  padding: 5px 13px; border-radius: 20px; font-size: 13px; font-weight: 800;
+  border: 1.5px solid rgba(255,255,255,0.22); white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.slabel.done .slabel-inner { background: rgba(30,100,50,0.85); border-color: #4CAF71; }
+
+/* ---- CONTROLS HINT ---- */
+#controls-hint {
+  position: fixed; bottom: 18px; left: 18px; z-index: 10; pointer-events: none;
+}
+.ctrl-inner {
+  background: rgba(0,0,0,0.52); backdrop-filter: blur(6px); border-radius: 12px;
+  padding: 10px 14px; color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.15); line-height: 2;
+}
+
+/* ---- MINIMAP ---- */
+#minimap { position: fixed; bottom: 18px; right: 18px; z-index: 10; pointer-events: none; }
+#minimapCanvas {
+  border-radius: 12px; border: 2px solid rgba(255,255,255,0.28);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45); display: block;
+}
+
+/* ---- MOBILE DPAD ---- */
+#mobile-controls {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  z-index: 20; display: none;
+}
+.dpad { display: grid; grid-template-columns: 52px 52px 52px; grid-template-rows: 52px 52px 52px; gap: 5px; }
+.dp {
+  background: rgba(255,255,255,0.18); backdrop-filter: blur(6px);
+  border: 2px solid rgba(255,255,255,0.35); border-radius: 14px;
+  color: white; font-size: 20px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  active: { background: rgba(255,255,255,0.38); }
+}
+.dp:active { background: rgba(255,255,255,0.38); }
+.dp-center { background: rgba(255,209,102,0.75); color: #1A1A2E; font-size: 12px; font-weight: 800; border-color: rgba(255,209,102,0.6); }
+
+/* ---- INTRO SCREEN ---- */
+#screen-intro {
+  position: fixed; inset: 0; z-index: 100;
+  background: linear-gradient(160deg, #1A0830 0%, #2E0E50 40%, #0E2050 100%);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.intro-card {
+  background: white; border-radius: 28px; padding: 36px;
+  max-width: 520px; width: 100%; text-align: center;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  animation: popIn 0.55s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0.55);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.intro-mascot { font-size: 64px; display: block; margin-bottom: 10px; animation: bob 2s ease-in-out infinite; }
+.intro-title { font-family: 'Fredoka One', cursive; font-size: 30px; color: #5A4FA0; margin-bottom: 6px; }
+.intro-sub { font-size: 15px; color: #5A5A7A; margin-bottom: 22px; line-height: 1.6; }
+.intro-stations {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; text-align: left;
+}
+.istation {
+  background: #F8F5FF; border: 2px solid #DDD8FF; border-radius: 14px;
+  padding: 12px; display: flex; align-items: center; gap: 10px;
+}
+.ist-icon { font-size: 24px; flex-shrink: 0; }
+.ist-text { font-size: 13px; font-weight: 700; color: #3A2A7A; line-height: 1.3; }
+.ist-text small { display: block; color: #7A6A9A; font-weight: 600; font-size: 11px; }
+.controls-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
+.ctrl-pill {
+  background: #F0EEFF; border: 2px solid #C8BFEE; border-radius: 12px;
+  padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 800; color: #4A3880;
+}
+.ctrl-key {
+  background: #7C6FCD; color: white; font-family: 'Fredoka One', cursive;
+  padding: 3px 9px; border-radius: 7px; font-size: 13px; box-shadow: 0 3px 0 #4A3880;
+}
+.btn-explore {
+  font-family: 'Fredoka One', cursive; font-size: 22px;
+  background: linear-gradient(135deg, #7C6FCD, #5A4FA0);
+  color: white; border: none; border-radius: 50px;
+  padding: 14px 52px; cursor: pointer;
+  box-shadow: 0 6px 0 #3A2F80, 0 8px 22px rgba(0,0,0,0.25);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-explore:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #3A2F80, 0 10px 26px rgba(0,0,0,0.3); }
+.btn-explore:active { transform: translateY(3px); box-shadow: 0 3px 0 #3A2F80; }
+
+/* ---- STATION POPUP ---- */
+#station-popup {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(5,2,20,0.78); display: none;
+  align-items: center; justify-content: center; backdrop-filter: blur(7px);
+  padding: 16px;
+}
+#station-popup.show { display: flex; }
+.popup-card {
+  background: white; border-radius: 28px; padding: 28px 28px 24px;
+  max-width: 500px; width: 100%; text-align: center;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  max-height: 90vh; overflow-y: auto;
+}
+.popup-icon { font-size: 56px; margin-bottom: 8px; animation: bob 2s ease-in-out infinite; display: block; }
+.popup-tag {
+  display: inline-block; font-size: 11px; font-weight: 800;
+  padding: 4px 13px; border-radius: 20px; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 12px;
+}
+.popup-title { font-family: 'Fredoka One', cursive; font-size: 24px; color: #1A1A2E; margin-bottom: 8px; }
+.popup-desc { font-size: 14px; color: #5A5A7A; line-height: 1.65; margin-bottom: 18px; }
+
+/* Ted row */
+.ted-row {
+  display: flex; align-items: flex-start; gap: 11px;
+  background: #F5F2FF; border: 2px solid #C8BFEE; border-radius: 14px;
+  padding: 12px; margin-bottom: 18px; text-align: left;
+}
+.ted-row-msg { font-size: 13px; font-weight: 700; color: #1A1A2E; line-height: 1.55; }
+.ted-row-msg strong { color: #5A4FA0; }
+.ted-row-name { font-size: 11px; font-weight: 800; color: #7C6FCD; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+/* Choices */
+.choice-btn {
+  width: 100%; border: 2.5px solid; border-radius: 14px;
+  padding: 13px 16px; margin-bottom: 9px; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  text-align: left; display: flex; align-items: center; gap: 12px;
+  transition: transform 0.15s, box-shadow 0.15s; background: white;
+}
+.choice-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.13); }
+.choice-btn:last-child { margin-bottom: 0; }
+.choice-danger { border-color: #FFB0B0; background: #FFF5F5; color: #8B0000; }
+.choice-safe { border-color: #A8D8B8; background: #F0FFF6; color: #1B4D2E; }
+.choice-neutral { border-color: #C0BAFF; background: #F5F3FF; color: #3A2A7A; }
+.choice-icon { font-size: 22px; flex-shrink: 0; }
+.choice-body { flex: 1; line-height: 1.4; }
+.choice-label { font-size: 14px; font-weight: 800; }
+.choice-sub { font-size: 12px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
+
+/* Consequence */
+.consequence-box {
+  border-radius: 16px; padding: 16px; margin-bottom: 16px; text-align: left;
+}
+.con-bad { background: #FFF0F0; border: 2px solid #FFB8B8; }
+.con-good { background: #F0FFF6; border: 2px solid #A8D8B8; }
+.con-title { font-family: 'Fredoka One', cursive; font-size: 18px; margin-bottom: 10px; }
+.con-bad .con-title { color: #CC3333; }
+.con-good .con-title { color: #2E7B47; }
+.con-item {
+  display: flex; gap: 9px; font-size: 13px; font-weight: 700; color: #1A1A2E;
+  padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.07); line-height: 1.45;
+}
+.con-item:last-child { border-bottom: none; }
+
+.btn-continue-popup {
+  background: linear-gradient(135deg, #7C6FCD, #5A4FA0); color: white;
+  border: none; border-radius: 14px; padding: 13px 34px;
+  font-family: 'Fredoka One', cursive; font-size: 18px; cursor: pointer;
+  box-shadow: 0 4px 0 #3A2F80; transition: transform 0.1s; margin-top: 4px;
+}
+.btn-continue-popup:hover { transform: translateY(-2px); }
+
+/* ---- END SCREEN ---- */
+#screen-end {
+  position: fixed; inset: 0; z-index: 80;
+  background: linear-gradient(160deg, #0E0520 0%, #1A0A35 50%, #050F28 100%);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+#screen-end.show { display: flex; }
+.end-card {
+  background: white; border-radius: 28px; padding: 36px;
+  max-width: 540px; width: 100%; text-align: center;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  max-height: 92vh; overflow-y: auto;
+}
+.end-icon { font-size: 68px; display: block; animation: bob 2s ease-in-out infinite; margin-bottom: 8px; }
+.end-title { font-family: 'Fredoka One', cursive; font-size: 30px; margin-bottom: 6px; }
+.end-sub { font-size: 15px; color: #5A5A7A; margin-bottom: 20px; line-height: 1.55; }
+.score-big { font-family: 'Fredoka One', cursive; font-size: 72px; line-height: 1; margin-bottom: 4px; }
+.score-big-lbl { font-size: 12px; font-weight: 800; color: #5A5A7A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+.end-results { text-align: left; background: #F8F8FF; border-radius: 16px; padding: 16px; margin-bottom: 22px; }
+.end-result-item {
+  display: flex; align-items: center; gap: 12px; padding: 9px 0;
+  border-bottom: 1px solid #EEEEFF; font-size: 14px; font-weight: 700;
+}
+.end-result-item:last-child { border-bottom: none; }
+.eri-icon { font-size: 22px; }
+.eri-name { flex: 1; }
+.eri-badge {
+  font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
+}
+.b-safe { background: #E8F5E9; color: #1B6B2E; }
+.b-unsafe { background: #FFEBEE; color: #B00020; }
+.b-neutral { background: #FFF3E0; color: #8B5000; }
+
+.end-takeaway {
+  background: #F0EEFF; border: 2px solid #C8BFEE; border-radius: 14px;
+  padding: 14px; margin-bottom: 20px; text-align: left;
+  font-size: 13px; font-weight: 700; color: #3A2A7A; line-height: 1.6;
+}
+.end-takeway-title { font-family: 'Fredoka One', cursive; font-size: 15px; color: #5A4FA0; margin-bottom: 6px; }
+
+.btn-replay-end {
+  background: linear-gradient(135deg, #7C6FCD, #5A4FA0); color: white;
+  border: none; border-radius: 14px; padding: 13px 30px;
+  font-family: 'Fredoka One', cursive; font-size: 18px; cursor: pointer;
+  box-shadow: 0 4px 0 #3A2F80; margin: 5px; transition: transform 0.1s;
+}
+.btn-replay-end:hover { transform: translateY(-2px); }
+.btn-hub-end {
+  background: #F0F0F4; color: #1A1A2E; border: none; border-radius: 14px;
+  padding: 13px 30px; font-family: 'Fredoka One', cursive; font-size: 18px;
+  cursor: pointer; box-shadow: 0 4px 0 #C0C0CC; margin: 5px; transition: transform 0.1s;
+}
+.btn-hub-end:hover { transform: translateY(-2px); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD -->
+<div id="hud-top">
+  <div class="hud-brand">
+    <svg width="36" height="36" viewBox="0 0 100 100">
+      <circle cx="50" cy="55" r="34" fill="#5EC8F0"/>
+      <circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+      <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+      <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+      <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+      <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+      <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="hud-title">Privapals</div>
+      <div class="hud-subtitle">Mission 4: Data Town</div>
+    </div>
+  </div>
+  <div class="hud-score-pill">
+    <span class="hud-score-label">🛡 Privacy</span>
+    <span class="hud-score-num" id="hud-score">100</span>
+    <span style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.6)">/100</span>
+  </div>
+  <div class="hud-dots-pill">
+    <span class="hud-dot-label">Stations</span>
+    <div class="h-dot" id="hd0"></div>
+    <div class="h-dot" id="hd1"></div>
+    <div class="h-dot" id="hd2"></div>
+    <div class="h-dot" id="hd3"></div>
+  </div>
+</div>
+
+<!-- Station HTML labels (positioned via JS) -->
+<div class="slabel" id="lbl-wifi"><div class="slabel-inner">☕ Free WiFi Café</div></div>
+<div class="slabel" id="lbl-loyalty"><div class="slabel-inner">🏷️ GameStop Rewards</div></div>
+<div class="slabel" id="lbl-billboard"><div class="slabel-inner">📺 Smart Billboard</div></div>
+<div class="slabel" id="lbl-photo"><div class="slabel-inner">📷 PhotoSnap Booth</div></div>
+
+<!-- Interact prompt -->
+<div id="interact-prompt">
+  <div class="interact-inner">
+    <div class="int-key" id="int-key-label">E</div>
+    <div class="int-text" id="interact-text">Approach station</div>
+  </div>
+</div>
+
+<!-- Controls hint -->
+<div id="controls-hint">
+  <div class="ctrl-inner">
+    WASD / Arrow Keys — Move<br>
+    E — Interact with station<br>
+    🗺 Visit all 4 stations
+  </div>
+</div>
+
+<!-- Minimap -->
+<div id="minimap"><canvas id="minimapCanvas" width="130" height="130"></canvas></div>
+
+<!-- Mobile D-pad -->
+<div id="mobile-controls">
+  <div style="position:relative;">
+    <div class="dpad">
+      <div></div>
+      <div class="dp" id="dp-up" ontouchstart="mobileKey('w',true)" ontouchend="mobileKey('w',false)">▲</div>
+      <div></div>
+      <div class="dp" id="dp-left" ontouchstart="mobileKey('a',true)" ontouchend="mobileKey('a',false)">◀</div>
+      <div class="dp dp-center" id="dp-e" ontouchstart="mobileInteract()">E</div>
+      <div class="dp" id="dp-right" ontouchstart="mobileKey('d',true)" ontouchend="mobileKey('d',false)">▶</div>
+      <div></div>
+      <div class="dp" id="dp-down" ontouchstart="mobileKey('s',true)" ontouchend="mobileKey('s',false)">▼</div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Intro Screen -->
+<div id="screen-intro">
+  <div class="intro-card">
+    <span class="intro-mascot">🏙️</span>
+    <div class="intro-title">Welcome to Data Town!</div>
+    <div class="intro-sub">Pixel is exploring a digital town full of apps, shops, and screens — all trying to collect data. Walk around and visit 4 stations to uncover hidden privacy traps!</div>
+    <div class="intro-stations">
+      <div class="istation"><span class="ist-icon">☕</span><div class="ist-text">Free WiFi Café<small>Unsecured networks</small></div></div>
+      <div class="istation"><span class="ist-icon">🏷️</span><div class="ist-text">GameStop Rewards<small>Data-for-discount</small></div></div>
+      <div class="istation"><span class="ist-icon">📺</span><div class="ist-text">Smart Billboard<small>Behavioral tracking</small></div></div>
+      <div class="istation"><span class="ist-icon">📷</span><div class="ist-text">PhotoSnap Booth<small>Facial recognition</small></div></div>
+    </div>
+    <div class="controls-row">
+      <div class="ctrl-pill"><span class="ctrl-key">WASD</span> Move</div>
+      <div class="ctrl-pill"><span class="ctrl-key">E</span> Interact</div>
+    </div>
+    <button class="btn-explore" onclick="startGame()">🗺 Explore Data Town!</button>
+  </div>
+</div>
+
+<!-- Station Popup -->
+<div id="station-popup">
+  <div class="popup-card" id="popup-card-content"></div>
+</div>
+
+<!-- End Screen -->
+<div id="screen-end">
+  <div class="end-card" id="end-card-content"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ====================================================
+// STATION DATA
+// ====================================================
+const STATIONS = [
+  {
+    id: 'wifi', index: 0, name: 'Free WiFi Café', icon: '☕', labelId: 'lbl-wifi',
+    pos: { x: -13, z: -13 }, radius: 4.5, completed: false, choiceSafe: null,
+    color3d: 0x3AAED8, beaconColor: 0x5EC8F0, tagBg: '#EBF8FF', tagColor: '#3AAED8',
+    scene: {
+      icon: '📶', title: 'The Free WiFi Trap',
+      tag: '☕ Free WiFi Café',
+      desc: 'CaféZone has open WiFi — no password needed! Pixel\'s phone is already asking to connect. It\'s slower to use mobile data, and the café internet is right there...',
+      ted: 'Watch out! <strong>No password means no encryption.</strong> Anyone nearby with the right software can potentially see what websites you visit on that network. Is saving some data worth the risk?',
+      choices: [
+        { icon:'📶', label:'Connect to FreeZone_Café WiFi!', sub:"It's free and fast", cls:'choice-danger', safe: false },
+        { icon:'📵', label:'Stick with my own mobile data', sub:'Privacy over convenience', cls:'choice-safe', safe: true }
+      ]
+    },
+    bad: {
+      title: '⚠️ Unencrypted Connection!',
+      items: ['Anyone on the same network can see which websites you visit', 'Login pages without HTTPS expose your usernames as you type them', 'Hackers create fake "free WiFi" hotspots just to capture your data — called a honey trap'],
+      ted: 'This is how most public WiFi attacks work. Even just browsing habits — which sites, for how long — reveal a lot about who you are. Always use HTTPS sites on public networks.'
+    },
+    good: {
+      title: '✅ Smart Privacy Call!',
+      items: ['Your mobile data goes through your carrier\'s encrypted network', 'No one nearby can spy on your browsing', 'If you must use public WiFi, look for networks requiring a password, and avoid logging into accounts'],
+      ted: 'Free usually means you\'re the product. If you do use public WiFi, a VPN encrypts your traffic so others can\'t read it.'
+    }
+  },
+  {
+    id: 'loyalty', index: 1, name: 'GameStop Rewards', icon: '🏷️', labelId: 'lbl-loyalty',
+    pos: { x: 13, z: -13 }, radius: 4.5, completed: false, choiceSafe: null,
+    color3d: 0xF4A229, beaconColor: 0xFFD166, tagBg: '#FFF8E8', tagColor: '#C07800',
+    scene: {
+      icon: '🏷️', title: 'The 10% Off Deal',
+      tag: '🛒 GameStop Rewards Kiosk',
+      desc: 'A rewards kiosk offers Pixel <strong>10% off every purchase</strong> — forever! To sign up it wants: full name, home address, birthday, email, and phone number.',
+      ted: 'Before Pixel signs up, let\'s think. <strong>Is a 10% discount worth all that personal info?</strong> Companies sell loyalty card data to data brokers — businesses that build detailed profiles on millions of people. That data is worth far more than 10%.',
+      choices: [
+        { icon:'📋', label:'Sign up — 10% off sounds great!', sub:'Enter name, address, birthday, phone, email', cls:'choice-danger', safe: false },
+        { icon:'🚫', label:'No thanks, I\'ll pay full price', sub:'My privacy is worth more', cls:'choice-safe', safe: true },
+        { icon:'🕵️', label:'Sign up with a spare email + fake birthday', sub:'Minimum required info only', cls:'choice-neutral', safe: true }
+      ]
+    },
+    bad: {
+      title: '⚠️ Your Data Was Just Sold',
+      items: ['Stores sell loyalty card info to data brokers within days of collection', 'Your name + address + birthday = enough to link to your social media accounts', 'Your spending patterns let companies predict your income, health, and family situation'],
+      ted: 'Data brokers combine your loyalty card info with public records, app data, and social profiles. The result is a detailed dossier on you — worth far more than that 10% discount ever was.'
+    },
+    good: {
+      title: '✅ Privacy Preserved!',
+      items: ['Your name, address, birthday, phone, and email stayed private', 'No data broker can add this source to your profile', 'The "discount" routinely costs more in privacy value than it saves in money'],
+      ted: 'Smart! Loyalty programs are primarily data collection systems. The discount is the bait. If you do join rewards programs, try using a separate email and minimum info.'
+    }
+  },
+  {
+    id: 'billboard', index: 2, name: 'Smart Billboard', icon: '📺', labelId: 'lbl-billboard',
+    pos: { x: 13, z: 13 }, radius: 5.5, completed: false, choiceSafe: null,
+    color3d: 0xFF9F43, beaconColor: 0xFF9F43, tagBg: '#FFF3E0', tagColor: '#C05A00',
+    scene: {
+      icon: '👁️', title: 'The Billboard Knows You',
+      tag: '📺 DataVision Smart Billboard',
+      desc: 'As Pixel approaches, the billboard flickers on: <em>"Hey! Based on your browsing history, we think you\'d love these products... GameZone Premium, Elm Street Pizza, and grade-school supplies."</em> Pixel never interacted with this billboard before.',
+      ted: 'This is <strong>behavioral advertising</strong>. The billboard company bought a data profile on Pixel from apps, websites, and data brokers. It combined dozens of small data points — without ever talking to Pixel — to infer age, location, and interests.',
+      choices: [
+        { icon:'👍', label:'Personalized ads are actually helpful!', sub:'Seeing relevant ads is fine with me', cls:'choice-danger', safe: false },
+        { icon:'🔍', label:'This is creepy — how does it work?', sub:'I want to understand and limit this', cls:'choice-safe', safe: true }
+      ]
+    },
+    bad: {
+      title: '⚠️ You\'re Being Profiled',
+      items: ['Behavioral ad companies track you across apps, sites, and even physical locations', 'Your profile includes age range, interests, income level, family situation, and health indicators', 'Personalized ads are designed to feel helpful — but that\'s what makes them more effective at influencing you'],
+      ted: 'Feeling like "ads just know me" is the system working as designed. Every click, search, and location ping feeds a model that predicts — and shapes — your future behavior.'
+    },
+    good: {
+      title: '✅ How to Limit Behavioral Tracking',
+      items: ['Turn off "Personalized Ads" in your phone\'s privacy settings (iOS: Settings→Privacy→Apple Advertising, Android: Settings→Privacy→Ads)', 'Use a browser with tracking protection (Firefox, Brave) or ad blocker (uBlock Origin)', 'Limit app location access to "Only While Using App" instead of "Always"'],
+      ted: 'Now you know how it works — and how to push back! You can\'t eliminate tracking entirely, but reducing it limits how detailed your profile can become.'
+    }
+  },
+  {
+    id: 'photo', index: 3, name: 'PhotoSnap Booth', icon: '📷', labelId: 'lbl-photo',
+    pos: { x: -12, z: 12 }, radius: 4.5, completed: false, choiceSafe: null,
+    color3d: 0xFF6B9D, beaconColor: 0xFF6B9D, tagBg: '#FFF0F5', tagColor: '#880040',
+    scene: {
+      icon: '🤳', title: 'Win Prizes with Your Photo!',
+      tag: '📷 PhotoSnap Prize Booth',
+      desc: 'A bright kiosk invites Pixel to snap a photo and enter a prize draw! In small print at the bottom: <em>"By submitting, you consent to facial recognition processing and storage of biometric data for up to 10 years."</em>',
+      ted: 'Did you notice the small print? <strong>Facial recognition creates a biometric profile</strong> — a mathematical fingerprint of your face. Unlike a password, you can never change your face if this data is misused or breached.',
+      choices: [
+        { icon:'🤳', label:'Take a photo — a prize sounds great!', sub:'Agree to biometric data storage', cls:'choice-danger', safe: false },
+        { icon:'🚫', label:'Skip it — no prize is worth my face data', sub:'Biometric data is too sensitive', cls:'choice-safe', safe: true }
+      ]
+    },
+    bad: {
+      title: '⚠️ Your Face Is in a Database',
+      items: ['Facial recognition data is permanent — you can\'t change your face like a password', 'Once stored, this data can match you in photos you never posted, in places you visit, on cameras you don\'t know exist', 'Illinois BIPA gives residents rights against this — most states have no protections at all'],
+      ted: 'Biometric data is in a category of its own. A leaked password costs you an hour. A leaked facial profile could follow you for life. Always say no to unexpected facial recognition requests.'
+    },
+    good: {
+      title: '✅ Biometric Data Stays Private!',
+      items: ['No database now contains a model of Pixel\'s face', 'Facial recognition systems can\'t match Pixel from other locations or cameras', 'Reading small print before contests, apps, or photo submissions is a key privacy habit'],
+      ted: 'Great small-print reading! Always look for words like "biometric", "facial recognition", "store your data", or "share with partners" before agreeing. The small print is where companies hide the real cost.'
+    }
+  }
+];
+
+// ====================================================
+// THREE.JS SETUP
+// ====================================================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87CEEB);
+scene.fog = new THREE.Fog(0xB8E0F0, 35, 68);
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 16, 14);
+
+// Lighting
+const ambient = new THREE.AmbientLight(0xfff5e8, 0.55);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xffeecc, 1.1);
+sun.position.set(18, 28, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 100;
+sun.shadow.camera.left = -30; sun.shadow.camera.right = 30;
+sun.shadow.camera.top = 30; sun.shadow.camera.bottom = -30;
+scene.add(sun);
+const fillLight = new THREE.DirectionalLight(0xaadcff, 0.3);
+fillLight.position.set(-10, 10, -8);
+scene.add(fillLight);
+
+// ====================================================
+// WORLD GEOMETRY HELPERS
+// ====================================================
+function box(w, h, d, color, x=0, y=0, z=0, shadow=true) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({color}));
+  m.position.set(x, y + h/2, z);
+  if(shadow) { m.castShadow = true; m.receiveShadow = true; }
+  scene.add(m); return m;
+}
+function cyl(rTop, rBot, h, segs, color, x=0, y=0, z=0, shadow=true) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rTop,rBot,h,segs), new THREE.MeshLambertMaterial({color}));
+  m.position.set(x, y + h/2, z);
+  if(shadow) { m.castShadow = true; m.receiveShadow = true; }
+  scene.add(m); return m;
+}
+function sph(r, color, x, y, z, shadow=true) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r,12,8), new THREE.MeshLambertMaterial({color}));
+  m.position.set(x, y, z);
+  if(shadow) { m.castShadow = true; m.receiveShadow = true; }
+  scene.add(m); return m;
+}
+
+// ====================================================
+// GROUND & ROADS
+// ====================================================
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(70,70), new THREE.MeshLambertMaterial({color:0x7BC47A}));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+// Sidewalk/pavement town center
+const center_pave = new THREE.Mesh(new THREE.PlaneGeometry(10,10), new THREE.MeshLambertMaterial({color:0xD8D0C0}));
+center_pave.rotation.x = -Math.PI/2; center_pave.position.set(0,0.01,0); center_pave.receiveShadow = true; scene.add(center_pave);
+
+function road(w, d, x, z) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w,d), new THREE.MeshLambertMaterial({color:0xB8B0A0}));
+  m.rotation.x = -Math.PI/2; m.position.set(x,0.01,z); m.receiveShadow = true; scene.add(m);
+}
+road(3.5, 44, 0, 0);  // N-S road
+road(44, 3.5, 0, 0);  // E-W road
+// Corner patches
+road(3.5,3.5,-13,-13); road(3.5,3.5,13,-13); road(3.5,3.5,13,13); road(3.5,3.5,-13,12);
+// Road markings (dashed center lines)
+for(let i=-10; i<=10; i+=3) {
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.3,1.5), new THREE.MeshLambertMaterial({color:0xF0E8D0}));
+  mark.rotation.x = -Math.PI/2; mark.position.set(0,0.03,i); scene.add(mark);
+  const mark2 = new THREE.Mesh(new THREE.PlaneGeometry(1.5,0.3), new THREE.MeshLambertMaterial({color:0xF0E8D0}));
+  mark2.rotation.x = -Math.PI/2; mark2.position.set(i,0.03,0); scene.add(mark2);
+}
+
+// ====================================================
+// STATION BUILDINGS
+// ====================================================
+// Café (NW, blue)
+box(7,4.5,7, 0x3AAED8, -13,0,-13);      // walls
+box(7.6,0.4,7.6, 0x2888A8, -13,4.5,-13); // roof overhang
+box(5.8,0.5,5.8, 0xFFFFFF, -13,4.9,-13); // roof top
+box(2.2,2,0.3, 0x5EC8F0, -13,0.8,-9.35); // door
+box(6,0.6,0.3, 0xFFD166, -13,4.5,-9.3);  // sign ledge
+cyl(0.1,0.1,4.5,6, 0x225577, -16.5,0,-16.5); // corner pillar
+cyl(0.1,0.1,4.5,6, 0x225577, -9.5,0,-16.5);
+cyl(0.1,0.1,4.5,6, 0x225577, -16.5,0,-9.5);
+
+// Shopping Mall (NE, yellow-orange)
+box(7,5,7, 0xF4A229, 13,0,-13);
+box(7.8,0.5,7.8, 0xC07800, 13,5,-13);
+box(6,0.8,0.3, 0xFF6B35, 13,4.8,-9.3);  // sign
+box(2.2,2.2,0.3, 0xFFD166, 13,0.9,-9.35);
+box(0.8,0.8,0.8, 0xFF6B35, 11,5.5,-13); // rooftop deco
+box(0.8,0.8,0.8, 0xFF6B35, 15,5.5,-13);
+
+// Photo Booth (SW, pink)
+box(6,4,6, 0xFF6B9D, -12,0,12);
+box(6.5,0.4,6.5, 0xD4407A, -12,4,12);
+box(5.5,1, 5.5, 0xFF99BB, -12,4.4,12);  // upper
+box(2,2.2,0.3, 0xFFAACC, -12,0.8,9.05);
+cyl(0.8,0.8,0.3,12, 0xFF99BB, -12,5.4,12); // dome top
+cyl(0.6,0.6,0.3,12, 0xFFD166, -12,5.7,12);
+
+// Billboard structure (SE)
+cyl(0.25,0.3,8,8, 0x888888, 13,0,13);   // main pole
+cyl(0.25,0.3,8,8, 0x888888, 7,0,13);    // second pole
+box(7.5,4,0.35, 0xFF8C00, 10,7,13);     // board
+box(7.1,3.4,0.2, 0xFFAA22, 10,7,13.19);// board face
+box(5.5,0.7,0.25, 0xFF4444, 10,8.1,13.3); // ad line 1
+box(4,0.5,0.25, 0xFFFFFF, 10,7.4,13.3);   // ad line 2
+box(3,0.4,0.25, 0x333333, 10,6.8,13.3);   // ad line 3
+
+// ====================================================
+// FOUNTAIN (center)
+// ====================================================
+cyl(2.2,2.4,0.45,16, 0xE8E0D0, 0,0,0);
+const water = new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,0.2,16), new THREE.MeshLambertMaterial({color:0x5EC8F0}));
+water.position.set(0,0.5,0); scene.add(water);
+cyl(0.22,0.26,1.8,8, 0xE8E0D0, 0,0.45,0);
+cyl(0.7,0.5,0.3,12, 0xE8E0D0, 0,2.3,0);
+// water jets (thin cylinders)
+for(let a=0;a<6;a++) {
+  const angle = (a/6)*Math.PI*2;
+  const wj = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.8,6), new THREE.MeshBasicMaterial({color:0x88CCEE, transparent:true, opacity:0.7}));
+  wj.position.set(Math.cos(angle)*0.6, 2.65, Math.sin(angle)*0.6);
+  wj.rotation.z = 0.4; wj.rotation.y = angle;
+  scene.add(wj);
+}
+
+// ====================================================
+// TREES
+// ====================================================
+const treePosArr = [
+  [-6,-6],[6,-6],[-6,6],[6,6],
+  [-4,-16],[4,-16],[4,16],[-4,16],
+  [-16,-4],[-16,4],[16,-4],[16,4],
+  [-10,0],[10,0],[0,-10],[0,10],
+  [-18,-10],[-18,10],[18,-10],[18,10],
+  [-10,-18],[10,-18],[-10,18],[10,18],
+  [0,-19],[0,19],[19,0],[-19,0],
+  [-7,-10],[7,-10],[7,10],[-7,10],
+];
+treePosArr.forEach(([tx,tz]) => {
+  const s = 0.75 + Math.random()*0.5;
+  const trunkH = 1.5*s, canH = 1.2*s;
+  const tk = cyl(0.2*s,0.25*s,trunkH,7, 0x7A4B1E, tx,0,tz);
+  const cn = sph(canH,0x4CAF71,tx,trunkH+canH*0.7,tz);
+  // small random tilt
+  cn.rotation.z = (Math.random()-0.5)*0.2;
+});
+
+// Lamposts along roads
+[[4,-8],[8,-4],[4,8],[-4,8],[-4,-8],[-8,-4],[8,4],[-8,4]].forEach(([lx,lz]) => {
+  cyl(0.08,0.1,4,6, 0x555555, lx,0,lz, false);
+  const lampSph = new THREE.Mesh(new THREE.SphereGeometry(0.22,8,6), new THREE.MeshBasicMaterial({color:0xFFF5AA}));
+  lampSph.position.set(lx,4.3,lz); scene.add(lampSph);
+  const arm = box(0.8,0.08,0.08, 0x555555, lx+0.4,4.0,lz, false);
+});
+
+// Benches around fountain
+[0,90,180,270].forEach(a => {
+  const rad = (a*Math.PI/180);
+  const bx = Math.cos(rad)*3.5, bz = Math.sin(rad)*3.5;
+  const bench = box(1.5,0.2,0.5, 0xA0784A, bx,0.4,bz, false);
+  bench.rotation.y = rad;
+  const leg1 = box(0.1,0.4,0.45, 0x7A5830, bx+Math.cos(rad)*0.55,0,bz+Math.sin(rad)*0.55, false);
+  const leg2 = box(0.1,0.4,0.45, 0x7A5830, bx-Math.cos(rad)*0.55,0,bz-Math.sin(rad)*0.55, false);
+  leg1.rotation.y = rad; leg2.rotation.y = rad;
+});
+
+// World border hedges
+for(let i=-18;i<=18;i+=2.5) {
+  box(2,1.8,2, 0x2E7B33, i,0,-19.5);
+  box(2,1.8,2, 0x2E7B33, i,0,19.5);
+  box(2,1.8,2, 0x2E7B33, -19.5,0,i);
+  box(2,1.8,2, 0x2E7B33, 19.5,0,i);
+}
+
+// ====================================================
+// BEACONS (glowing markers above stations)
+// ====================================================
+const beacons = [];
+STATIONS.forEach(s => {
+  const grp = new THREE.Group();
+  // Beam
+  const beamGeo = new THREE.CylinderGeometry(0.12, 0.22, 9, 6);
+  const beamMat = new THREE.MeshBasicMaterial({ color: s.beaconColor, transparent: true, opacity: 0.55 });
+  const beam = new THREE.Mesh(beamGeo, beamMat);
+  beam.position.y = 8.5; grp.add(beam);
+  // Orb
+  const orbGeo = new THREE.SphereGeometry(0.38, 10, 8);
+  const orbMat = new THREE.MeshBasicMaterial({ color: s.beaconColor, transparent: true, opacity: 0.9 });
+  const orb = new THREE.Mesh(orbGeo, orbMat);
+  orb.position.y = 13.2; grp.add(orb);
+  // Ring
+  const ringGeo = new THREE.TorusGeometry(2.8, 0.12, 8, 32);
+  const ringMat = new THREE.MeshBasicMaterial({ color: s.beaconColor, transparent: true, opacity: 0.4 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = -Math.PI/2; ring.position.y = 0.06; grp.add(ring);
+
+  grp.position.set(s.pos.x, 0, s.pos.z);
+  scene.add(grp);
+  beacons.push({ grp, beam, beamMat, orb, orbMat, ring, ringMat, station: s });
+});
+
+// ====================================================
+// PLAYER
+// ====================================================
+const player = new THREE.Group();
+// Body
+const pbody = new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.48,1.1,12), new THREE.MeshLambertMaterial({color:0x5EC8F0}));
+pbody.position.y = 0.55; pbody.castShadow = true; player.add(pbody);
+// Head
+const phead = new THREE.Mesh(new THREE.SphereGeometry(0.44,14,10), new THREE.MeshLambertMaterial({color:0x87DEFF}));
+phead.position.y = 1.38; phead.castShadow = true; player.add(phead);
+// Eyes
+const eyeGeo = new THREE.SphereGeometry(0.085,6,6);
+const eyeMat = new THREE.MeshBasicMaterial({color:0x1A1A2E});
+const lEye = new THREE.Mesh(eyeGeo, eyeMat); lEye.position.set(-0.16,1.44,0.37); player.add(lEye);
+const rEye = new THREE.Mesh(eyeGeo, eyeMat); rEye.position.set(0.16,1.44,0.37); player.add(rEye);
+// Shield
+const shield = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.34,0.1), new THREE.MeshBasicMaterial({color:0xFFD166}));
+shield.position.set(0,0.72,0.45); player.add(shield);
+const shieldCheck = new THREE.Mesh(new THREE.BoxGeometry(0.14,0.08,0.06), new THREE.MeshBasicMaterial({color:0x1A1A2E}));
+shieldCheck.position.set(0,0.72,0.52); player.add(shieldCheck);
+// Drop shadow
+const dropShadow = new THREE.Mesh(new THREE.CircleGeometry(0.52,14), new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.18}));
+dropShadow.rotation.x = -Math.PI/2; dropShadow.position.y = 0.02; player.add(dropShadow);
+
+player.position.set(0, 0, 5);
+scene.add(player);
+
+// ====================================================
+// COLLISION BOXES (XZ axis-aligned)
+// ====================================================
+const colliders = [
+  {minX:-16.6, maxX:-9.4, minZ:-16.6, maxZ:-9.4},  // Café
+  {minX:9.4, maxX:16.6, minZ:-16.6, maxZ:-9.4},     // Mall
+  {minX:-15.6, maxX:-8.4, minZ:8.9, maxZ:15.1},     // Photo Booth
+  {minX:-2.4, maxX:2.4, minZ:-2.4, maxZ:2.4},       // Fountain
+  {minX:5.5, maxX:14.5, minZ:9, maxZ:17},            // Billboard poles area
+];
+const WORLD_BOUND = 19.2;
+const PLAYER_R = 0.6;
+
+function checkCollision(nx, nz) {
+  if(Math.abs(nx) > WORLD_BOUND || Math.abs(nz) > WORLD_BOUND) return true;
+  for(const c of colliders) {
+    if(nx - PLAYER_R < c.maxX && nx + PLAYER_R > c.minX &&
+       nz - PLAYER_R < c.maxZ && nz + PLAYER_R > c.minZ) return true;
+  }
+  return false;
+}
+
+// ====================================================
+// INPUT
+// ====================================================
+const keys = {w:false,a:false,s:false,d:false,e:false};
+let eWasDown = false;
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(k==='w'||k==='arrowup') keys.w=true;
+  if(k==='s'||k==='arrowdown') keys.s=true;
+  if(k==='a'||k==='arrowleft') keys.a=true;
+  if(k==='d'||k==='arrowright') keys.d=true;
+  if(k==='e') keys.e=true;
+});
+document.addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  if(k==='w'||k==='arrowup') keys.w=false;
+  if(k==='s'||k==='arrowdown') keys.s=false;
+  if(k==='a'||k==='arrowleft') keys.a=false;
+  if(k==='d'||k==='arrowright') keys.d=false;
+  if(k==='e') { keys.e=false; eWasDown=false; }
+});
+function mobileKey(k,down) { keys[k]=down; }
+function mobileInteract() { handleInteract(); }
+
+// ====================================================
+// GAME STATE
+// ====================================================
+let privacyScore = 100;
+let gamePaused = false;
+let popupOpen = false;
+let currentStation = null;
+let gameStarted = false;
+let popupPhase = 0; // 0=choices, 1=consequence
+
+const vel = { x: 0, z: 0 };
+const SPEED = 0.092;
+const FRICTION = 0.78;
+const camSmooth = { x: 0, y: 16, z: 14 };
+
+// ====================================================
+// MINIMAP
+// ====================================================
+const mmCanvas = document.getElementById('minimapCanvas');
+const mmCtx = mmCanvas.getContext('2d');
+const MM_SIZE = 130, MM_SCALE = MM_SIZE / 40;
+
+function drawMinimap() {
+  mmCtx.clearRect(0,0,MM_SIZE,MM_SIZE);
+  // BG
+  mmCtx.fillStyle = '#7BC47A'; mmCtx.fillRect(0,0,MM_SIZE,MM_SIZE);
+  // Roads
+  mmCtx.fillStyle = '#B8B0A0';
+  mmCtx.fillRect(MM_SIZE/2-4, 0, 8, MM_SIZE);
+  mmCtx.fillRect(0, MM_SIZE/2-4, MM_SIZE, 8);
+  // Center square
+  mmCtx.fillStyle = '#D8D0C0';
+  mmCtx.fillRect(MM_SIZE/2-13, MM_SIZE/2-13, 26, 26);
+  // Stations
+  STATIONS.forEach(s => {
+    const mx = (s.pos.x + 20) * MM_SCALE;
+    const my = (s.pos.z + 20) * MM_SCALE;
+    const colHex = '#' + s.color3d.toString(16).padStart(6,'0');
+    mmCtx.fillStyle = s.completed ? '#4CAF71' : colHex;
+    mmCtx.beginPath(); mmCtx.arc(mx, my, 5.5, 0, Math.PI*2); mmCtx.fill();
+    if(s.completed) {
+      mmCtx.fillStyle='white'; mmCtx.font='bold 9px sans-serif'; mmCtx.textAlign='center';
+      mmCtx.fillText('✓', mx, my+3);
+    }
+  });
+  // Player
+  const px = (player.position.x + 20) * MM_SCALE;
+  const pz = (player.position.z + 20) * MM_SCALE;
+  mmCtx.fillStyle='#FFD166'; mmCtx.strokeStyle='#C9991A'; mmCtx.lineWidth=1.5;
+  mmCtx.beginPath(); mmCtx.arc(px,pz,4.5,0,Math.PI*2); mmCtx.fill(); mmCtx.stroke();
+  // Direction arrow
+  const angle = player.rotation.y;
+  mmCtx.strokeStyle='#1A1A2E'; mmCtx.lineWidth=1.5;
+  mmCtx.beginPath();
+  mmCtx.moveTo(px,pz);
+  mmCtx.lineTo(px+Math.sin(angle)*7, pz+Math.cos(angle)*7);
+  mmCtx.stroke();
+  // Border
+  mmCtx.strokeStyle='rgba(255,255,255,0.3)'; mmCtx.lineWidth=1;
+  mmCtx.strokeRect(0.5,0.5,MM_SIZE-1,MM_SIZE-1);
+}
+
+// ====================================================
+// STATION LABELS (3D → 2D projection)
+// ====================================================
+const labelData = [
+  { id:'lbl-wifi', world: new THREE.Vector3(-13, 7, -13) },
+  { id:'lbl-loyalty', world: new THREE.Vector3(13, 7.5, -13) },
+  { id:'lbl-billboard', world: new THREE.Vector3(10, 13.5, 13) },
+  { id:'lbl-photo', world: new THREE.Vector3(-12, 7, 12) },
+];
+const _labelVec = new THREE.Vector3();
+
+function updateLabels() {
+  labelData.forEach((ld, i) => {
+    const el = document.getElementById(ld.id);
+    if(!el) return;
+    _labelVec.copy(ld.world);
+    _labelVec.project(camera);
+    const sx = (_labelVec.x * 0.5 + 0.5) * window.innerWidth;
+    const sy = (-_labelVec.y * 0.5 + 0.5) * window.innerHeight;
+    if(_labelVec.z < 1) {
+      el.style.left = sx + 'px';
+      el.style.top = sy + 'px';
+      el.style.display = 'block';
+      const s = STATIONS[i];
+      if(s.completed) el.classList.add('done');
+      else el.classList.remove('done');
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+
+// ====================================================
+// POPUP SYSTEM
+// ====================================================
+function openStationPopup(station) {
+  popupOpen = true;
+  gamePaused = true;
+  popupPhase = 0;
+  currentStation = station;
+  const sc = station.scene;
+  
+  const tedSVG = `<svg width="42" height="42" viewBox="0 0 100 100">
+    <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+    <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+    <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+    <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+    <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+    <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+    <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+    <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+    <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+    <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <rect x="32" y="22" width="36" height="6" rx="3" fill="#7C6FCD"/>
+    <rect x="36" y="14" width="28" height="12" rx="4" fill="#7C6FCD"/>
+    <path d="M 46 17 L 50 19 L 54 17" stroke="#4A3880" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+  
+  let choicesHTML = sc.choices.map((c,i) => `
+    <button class="choice-btn ${c.cls}" onclick="makeChoice('${station.id}', ${c.safe}, ${i})">
+      <span class="choice-icon">${c.icon}</span>
+      <div class="choice-body">
+        <div class="choice-label">${c.label}</div>
+        ${c.sub ? `<div class="choice-sub">${c.sub}</div>` : ''}
+      </div>
+    </button>`).join('');
+
+  document.getElementById('popup-card-content').innerHTML = `
+    <span class="popup-icon">${sc.icon}</span>
+    <div class="popup-tag" style="background:${station.tagBg};color:${station.tagColor};">${sc.tag}</div>
+    <div class="popup-title">${sc.title}</div>
+    <div class="popup-desc">${sc.desc}</div>
+    <div class="ted-row">
+      ${tedSVG}
+      <div>
+        <div class="ted-row-name">🐶 Ted the Safety Dog</div>
+        <div class="ted-row-msg">${sc.ted}</div>
+      </div>
+    </div>
+    ${choicesHTML}`;
+  
+  document.getElementById('station-popup').classList.add('show');
+}
+
+function makeChoice(stationId, safe, choiceIdx) {
+  const station = STATIONS.find(s => s.id === stationId);
+  station.completed = true;
+  station.choiceSafe = safe;
+  popupPhase = 1;
+  
+  if(!safe) {
+    privacyScore -= 22;
+    privacyScore = Math.max(0, privacyScore);
+  }
+  document.getElementById('hud-score').textContent = privacyScore;
+  
+  // Update beacon to green
+  const beacon = beacons.find(b => b.station.id === stationId);
+  if(beacon) {
+    beacon.beamMat.color.setHex(0x4CAF71);
+    beacon.orbMat.color.setHex(0x4CAF71);
+    beacon.ringMat.color.setHex(0x4CAF71);
+  }
+  
+  // HUD dot
+  document.getElementById('hd' + station.index).classList.add('done');
+  
+  const data = safe ? station.good : station.bad;
+  const conClass = safe ? 'con-good' : 'con-bad';
+  
+  const itemsHTML = data.items.map(it => `<div class="con-item"><span>•</span><span>${it}</span></div>`).join('');
+  const tedSVG = `<svg width="42" height="42" viewBox="0 0 100 100">
+    <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+    <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+    <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+    <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+    <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+    <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+    <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+    <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+    <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+    <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <rect x="32" y="22" width="36" height="6" rx="3" fill="#7C6FCD"/>
+    <rect x="36" y="14" width="28" height="12" rx="4" fill="#7C6FCD"/>
+    <path d="M 46 17 L 50 19 L 54 17" stroke="#4A3880" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+  
+  document.getElementById('popup-card-content').innerHTML = `
+    <span class="popup-icon">${safe ? '🛡️' : '⚠️'}</span>
+    <div class="consequence-box ${conClass}">
+      <div class="con-title">${data.title}</div>
+      ${itemsHTML}
+    </div>
+    <div class="ted-row">
+      ${tedSVG}
+      <div>
+        <div class="ted-row-name">🐶 Ted the Safety Dog</div>
+        <div class="ted-row-msg">${data.ted}</div>
+      </div>
+    </div>
+    <button class="btn-continue-popup" onclick="closePopup()">Keep Exploring →</button>`;
+}
+
+function closePopup() {
+  document.getElementById('station-popup').classList.remove('show');
+  popupOpen = false;
+  gamePaused = false;
+  currentStation = null;
+  
+  const allDone = STATIONS.every(s => s.completed);
+  if(allDone) setTimeout(showEndScreen, 600);
+}
+
+// ====================================================
+// INTERACTION CHECK
+// ====================================================
+function handleInteract() {
+  if(!gameStarted || popupOpen || gamePaused) return;
+  if(currentStation && !currentStation.completed) {
+    openStationPopup(currentStation);
+  }
+}
+
+function checkNearStation() {
+  let nearest = null, minDist = Infinity;
+  STATIONS.forEach(s => {
+    if(s.completed) return;
+    const dx = player.position.x - s.pos.x;
+    const dz = player.position.z - s.pos.z;
+    const dist = Math.sqrt(dx*dx + dz*dz);
+    if(dist < s.radius && dist < minDist) { minDist = dist; nearest = s; }
+  });
+  
+  const prompt = document.getElementById('interact-prompt');
+  if(nearest) {
+    prompt.style.display = 'block';
+    document.getElementById('interact-text').textContent = nearest.name + ' — Press E to Interact';
+    currentStation = nearest;
+  } else {
+    prompt.style.display = 'none';
+    currentStation = null;
+  }
+}
+
+// ====================================================
+// END SCREEN
+// ====================================================
+function showEndScreen() {
+  const score = privacyScore;
+  let icon, title, sub;
+  if(score >= 88) { icon='🏆'; title='Privacy Champion!'; sub='Pixel made excellent choices in Data Town. These skills will help in real-life digital situations every day!'; }
+  else if(score >= 55) { icon='🛡️'; title='Pretty Safe!'; sub='Pixel made some smart calls, but there\'s room to improve. Try again to see if you can protect more of Pixel\'s privacy!'; }
+  else { icon='📚'; title='Lots to Learn!'; sub='Pixel shared quite a bit of data — but that\'s what learning is for! Try again and think carefully about each decision.'; }
+
+  const scoreColor = score >= 80 ? '#2E7B47' : score >= 55 ? '#C07800' : '#CC3333';
+  
+  const resultsHTML = STATIONS.map(s => {
+    const badgeClass = s.choiceSafe === null ? 'b-neutral' : s.choiceSafe ? 'b-safe' : 'b-unsafe';
+    const badgeText = s.choiceSafe === null ? '⬜ Skipped' : s.choiceSafe ? '✅ Safe' : '⚠️ Exposed';
+    return `<div class="end-result-item">
+      <span class="eri-icon">${s.icon}</span>
+      <span class="eri-name">${s.name}</span>
+      <span class="eri-badge ${badgeClass}">${badgeText}</span>
+    </div>`;
+  }).join('');
+  
+  document.getElementById('end-card-content').innerHTML = `
+    <span class="end-icon">${icon}</span>
+    <div class="end-title">${title}</div>
+    <div class="end-sub">${sub}</div>
+    <div class="score-big" style="color:${scoreColor}">${score}</div>
+    <div class="score-big-lbl">Final Privacy Score / 100</div>
+    <div class="end-results">${resultsHTML}</div>
+    <div class="end-takeaway">
+      <div class="end-takeway-title">🔍 The Big Idea</div>
+      In the real world, privacy threats don't announce themselves. They look like free things, discounts, prizes, and helpful ads. Every station in Data Town mirrors a real system operating right now. The more you recognize them, the more control you have.
+    </div>
+    <button class="btn-replay-end" onclick="replayGame()">🔄 Play Again</button>
+    <button class="btn-hub-end" onclick="window.location.href='privapals_scenarios_2_3.html'">🗺 All Missions</button>`;
+  
+  document.getElementById('screen-end').classList.add('show');
+}
+
+function replayGame() {
+  STATIONS.forEach(s => { s.completed = false; s.choiceSafe = null; });
+  privacyScore = 100;
+  document.getElementById('hud-score').textContent = 100;
+  for(let i=0;i<4;i++) document.getElementById('hd'+i).classList.remove('done');
+  beacons.forEach((b,i) => {
+    const col = STATIONS[i].beaconColor;
+    b.beamMat.color.setHex(col); b.orbMat.color.setHex(col); b.ringMat.color.setHex(col);
+  });
+  player.position.set(0,0,5);
+  player.rotation.y = 0;
+  document.getElementById('screen-end').classList.remove('show');
+  popupOpen = false; gamePaused = false; currentStation = null;
+}
+
+// ====================================================
+// MAIN GAME LOOP
+// ====================================================
+const clock = new THREE.Clock();
+
+function updatePlayer(dt) {
+  const moving = keys.w || keys.s || keys.a || keys.d;
+  if(keys.w) vel.z -= SPEED;
+  if(keys.s) vel.z += SPEED;
+  if(keys.a) vel.x -= SPEED;
+  if(keys.d) vel.x += SPEED;
+  
+  vel.x *= FRICTION; vel.z *= FRICTION;
+  
+  const speed = Math.sqrt(vel.x*vel.x + vel.z*vel.z);
+  const maxSpeed = 0.22;
+  if(speed > maxSpeed) { vel.x *= maxSpeed/speed; vel.z *= maxSpeed/speed; }
+  
+  const nx = player.position.x + vel.x;
+  const nz = player.position.z + vel.z;
+  if(!checkCollision(nx, player.position.z)) player.position.x = nx;
+  else vel.x *= -0.3;
+  if(!checkCollision(player.position.x, nz)) player.position.z = nz;
+  else vel.z *= -0.3;
+  
+  if(Math.abs(vel.x) > 0.01 || Math.abs(vel.z) > 0.01) {
+    player.rotation.y = Math.atan2(vel.x, vel.z);
+  }
+  
+  // Slight bob animation while moving
+  if(moving) {
+    const t = clock.getElapsedTime();
+    player.position.y = Math.abs(Math.sin(t*10)) * 0.08;
+  } else {
+    player.position.y *= 0.8;
+  }
+  
+  // E key interaction
+  if(keys.e && !eWasDown) {
+    eWasDown = true;
+    handleInteract();
+  }
+}
+
+function updateCamera() {
+  const tx = player.position.x;
+  const tz = player.position.z + 14;
+  camSmooth.x += (tx - camSmooth.x) * 0.09;
+  camSmooth.z += (tz - camSmooth.z) * 0.09;
+  camera.position.set(camSmooth.x, camSmooth.y, camSmooth.z);
+  camera.lookAt(player.position.x, 1.2, player.position.z);
+}
+
+function updateBeacons(t) {
+  beacons.forEach((b, i) => {
+    if(STATIONS[i].completed) {
+      b.orbMat.opacity = 0.85 + Math.sin(t*2)*0.1;
+      b.beamMat.opacity = 0.3;
+      b.ringMat.opacity = 0.3 + Math.sin(t*2)*0.15;
+      b.ring.rotation.z = t * 0.5;
+    } else {
+      b.orbMat.opacity = 0.75 + Math.sin(t*2.5)*0.2;
+      b.beamMat.opacity = 0.4 + Math.sin(t*1.5)*0.15;
+      b.ringMat.opacity = 0.3 + Math.sin(t*2)*0.2;
+      b.orb.position.y = 13.2 + Math.sin(t*2)*0.3;
+      b.ring.rotation.z = t * 0.8;
+      b.ring.scale.setScalar(0.95 + Math.sin(t*2)*0.08);
+    }
+  });
+  // Water animation
+  water.position.y = 0.5 + Math.sin(t*1.5)*0.03;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  if(gameStarted && !gamePaused) {
+    updatePlayer(clock.getDelta());
+    checkNearStation();
+  }
+  updateCamera();
+  updateBeacons(t);
+  updateLabels();
+  drawMinimap();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// ====================================================
+// START
+// ====================================================
+function startGame() {
+  document.getElementById('screen-intro').style.display = 'none';
+  gameStarted = true;
+  // Show mobile controls on touch devices
+  if('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.getElementById('mobile-controls').style.display = 'block';
+    document.getElementById('controls-hint').style.display = 'none';
+    document.getElementById('interact-prompt').style.bottom = '200px';
+  }
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

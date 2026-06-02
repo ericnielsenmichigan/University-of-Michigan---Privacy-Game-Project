@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privapals — Scenarios 2 & 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #5EC8F0;
+    --sky-dark: #3AAED8;
+    --sun: #FFD166;
+    --grass: #4CAF71;
+    --grass-dark: #3A9A5A;
+    --white: #FFFFFF;
+    --text: #1A1A2E;
+    --text-light: #5A5A7A;
+    --red: #FF6B6B;
+    --green: #4CAF71;
+    --orange: #FF9F43;
+    --purple: #7C6FCD;
+    --purple-dark: #5A4FA0;
+    --coral: #FF6B9D;
+    --teal: #26C6DA;
+    --shadow: rgba(0,0,0,0.12);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #E8F7FF;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ============ HUB / SCENARIO SELECT ============ */
+  #screen-hub {
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E8F8 40%, #C8EFC0 70%, #4CAF71 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cloud { position: absolute; background: white; border-radius: 50px; opacity: 0.8; animation: drift linear infinite; }
+  .cloud::before, .cloud::after { content: ''; position: absolute; background: white; border-radius: 50%; }
+  .c1 { width: 120px; height: 38px; top: 8%; left: -140px; animation-duration: 24s; }
+  .c1::before { width: 55px; height: 55px; top: -28px; left: 18px; }
+  .c1::after { width: 42px; height: 42px; top: -20px; left: 56px; }
+  .c2 { width: 90px; height: 28px; top: 20%; left: -110px; animation-duration: 32s; animation-delay: -8s; }
+  .c2::before { width: 42px; height: 42px; top: -22px; left: 12px; }
+  .c2::after { width: 34px; height: 34px; top: -16px; left: 40px; }
+  @keyframes drift { to { left: 110vw; } }
+
+  .hub-content { text-align: center; z-index: 10; max-width: 860px; width: 100%; }
+
+  .hub-logo { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 6px; }
+  .hub-title { font-family: 'Fredoka One', cursive; font-size: 52px; color: white; text-shadow: 3px 5px 0 #3A9A5A; }
+  .hub-sub { font-size: 17px; font-weight: 700; color: rgba(255,255,255,0.92); margin-bottom: 36px; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+  .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 20px; }
+
+  .mission-card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px 18px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+  }
+  .mission-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+  .mission-card.locked { opacity: 0.6; cursor: not-allowed; }
+  .mission-card.locked:hover { transform: none; }
+
+  .mission-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .mission-icon { font-size: 44px; margin-bottom: 10px; display: block; }
+  .mission-title { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--text); margin-bottom: 6px; }
+  .mission-desc { font-size: 13px; color: var(--text-light); line-height: 1.5; font-weight: 600; }
+
+  .mission-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card-m1 { border-top: 5px solid var(--sky); }
+  .card-m1 .mission-num { color: var(--sky-dark); }
+  .card-m1 .mission-tag { background: #EBF8FF; color: var(--sky-dark); }
+
+  .card-m2 { border-top: 5px solid var(--purple); }
+  .card-m2 .mission-num { color: var(--purple); }
+  .card-m2 .mission-tag { background: #F0EEFF; color: var(--purple); }
+
+  .card-m3 { border-top: 5px solid var(--coral); }
+  .card-m3 .mission-num { color: var(--coral); }
+  .card-m3 .mission-tag { background: #FFF0F5; color: var(--coral); }
+
+  .grass-strip {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
+    background: var(--grass); border-radius: 50% 50% 0 0 / 28px 28px 0 0;
+  }
+
+  /* ============ SHARED GAME SHELL ============ */
+  .topbar {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-title { font-family: 'Fredoka One', cursive; font-size: 22px; color: white; text-shadow: 1px 2px 0 rgba(0,0,0,0.2); }
+  .topbar-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600; }
+
+  .topbar-m2 { background: linear-gradient(135deg, #7C6FCD, #5A4FA0); }
+  .topbar-m3 { background: linear-gradient(135deg, #FF6B9D, #D4407A); }
+
+  .privacy-meter-wrap { display: flex; align-items: center; gap: 10px; }
+  .privacy-label { font-size: 12px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 1px; }
+  .privacy-bar-bg { width: 130px; height: 16px; background: rgba(255,255,255,0.3); border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.4); }
+  .privacy-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #FF6B6B, #FF9F43, #4CAF71); background-size: 300% 100%; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); background-position: 100% 0; }
+
+  .back-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: white;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+  .game-area { flex: 1; display: flex; gap: 0; overflow: hidden; }
+  .main-panel { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+  .side-panel { width: 230px; background: white; border-left: 3px solid #E0EEF8; padding: 18px 14px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+
+  .scenario-header { background: white; border-radius: var(--radius); padding: 18px 20px; border: 2px solid #D4EDFF; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .scenario-tag { display: inline-block; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; border: 1.5px solid; }
+  .scenario-tag-purple { background: #F0EEFF; color: var(--purple); border-color: #C8BFEE; }
+  .scenario-tag-coral { background: #FFF0F5; color: var(--coral); border-color: #FFB8D4; }
+  .scenario-title { font-family: 'Fredoka One', cursive; font-size: 24px; color: var(--text); margin-bottom: 8px; }
+  .scenario-desc { font-size: 14px; color: var(--text-light); line-height: 1.6; }
+
+  @keyframes slideIn { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  @keyframes starPop { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0deg); } }
+
+  /* ---- TED NPC ---- */
+  .ted-bubble { display: flex; align-items: flex-start; gap: 12px; background: white; border: 2px solid; border-radius: 18px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.07); animation: slideIn 0.4s ease 0.15s both; }
+  .ted-bubble-purple { border-color: #D4CAFF; }
+  .ted-bubble-coral { border-color: #FFD0E4; }
+  .ted-avatar { width: 52px; height: 52px; flex-shrink: 0; animation: bob 2.5s ease-in-out infinite; }
+  .ted-text-wrap { flex: 1; }
+  .ted-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .ted-name-purple { color: var(--purple); }
+  .ted-name-coral { color: var(--coral); }
+  .ted-msg { font-size: 14px; color: var(--text); line-height: 1.6; transition: opacity 0.3s; }
+  .ted-msg strong { color: var(--purple-dark); }
+
+  /* ---- SIDE PANEL ---- */
+  .side-title { font-family: 'Fredoka One', cursive; font-size: 15px; color: var(--text); margin-bottom: 8px; }
+  .objective-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; padding: 6px 0; color: var(--text-light); border-bottom: 1px solid #F0F0F0; }
+  .obj-icon { font-size: 15px; }
+  .objective-item.done { color: var(--green); }
+  .privacy-score-box { border-radius: 14px; padding: 13px; text-align: center; }
+  .privacy-score-box-purple { background: linear-gradient(135deg, #EDE8FF, #D8CFFF); border: 2px solid #BEB3EE; }
+  .privacy-score-box-coral { background: linear-gradient(135deg, #FFF0F5, #FFD8E8); border: 2px solid #FFAAC8; }
+  .ps-number { font-family: 'Fredoka One', cursive; font-size: 38px; line-height: 1; }
+  .ps-number-purple { color: var(--purple); }
+  .ps-number-coral { color: var(--coral); }
+  .ps-label-text { font-size: 11px; font-weight: 800; color: var(--text-light); text-transform: uppercase; }
+  .tip-box { border-radius: 14px; padding: 12px; font-size: 13px; font-weight: 600; line-height: 1.5; }
+  .tip-box-title { font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .tip-purple { background: linear-gradient(135deg, #F5F2FF, #EDE8FF); border: 2px solid #C8BFEE; color: #4A3880; }
+  .tip-purple .tip-box-title { color: var(--purple); }
+  .tip-coral { background: linear-gradient(135deg, #FFF5F8, #FFE8EF); border: 2px solid #FFB8CF; color: #880040; }
+  .tip-coral .tip-box-title { color: var(--coral); }
+
+  /* ---- RESULT / WIN OVERLAYS ---- */
+  .overlay-container { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.72); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+  .overlay-container.show { display: flex; }
+  .overlay-card { background: white; border-radius: 28px; padding: 30px; max-width: 500px; width: 92%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: popIn 0.45s cubic-bezier(0.34,1.56,0.64,1); position: relative; overflow: hidden; }
+  .overlay-card-title { font-family: 'Fredoka One', cursive; font-size: 26px; margin-bottom: 8px; }
+  .overlay-card-sub { font-size: 14px; color: var(--text-light); margin-bottom: 18px; line-height: 1.5; }
+  .reveal-list { border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: left; }
+  .reveal-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid; font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .reveal-item:last-child { border-bottom: none; }
+  .reveal-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+
+  .btn-retry { background: var(--sun); color: var(--text); border: none; border-radius: 12px; padding: 11px 26px; font-family: 'Fredoka One', cursive; font-size: 17px; cursor: pointer; box-shadow: 0 4px 0 #C9991A; transition: transform 0.1s; margin: 4px; }
+  .btn-retry:hover { transform: translateY(-2px); }
+  .btn-next { color: white; border: none; border-radius: 12px; padding: 11px 26px; font-family: 'Fredoka One', cursive; font-size: 17px; cursor: pointer; transition: transform 0.1s; margin: 4px; }
+  .btn-next:hover { transform: translateY(-2px); }
+  .btn-next-purple { background: var(--purple); box-shadow: 0 4px 0 var(--purple-dark); }
+  .btn-next-coral { background: var(--coral); box-shadow: 0 4px 0 #A82060; }
+  .btn-hub { background: #F0F0F0; color: var(--text); border: none; border-radius: 12px; padding: 11px 26px; font-family: 'Fredoka One', cursive; font-size: 17px; cursor: pointer; box-shadow: 0 4px 0 #C0C0C0; transition: transform 0.1s; margin: 4px; }
+  .btn-hub:hover { transform: translateY(-2px); }
+
+  .stars { display: flex; justify-content: center; gap: 6px; margin: 12px 0; }
+  .star { font-size: 34px; opacity: 0.25; transition: opacity 0.3s; }
+  .star.lit { opacity: 1; animation: starPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+  /* ============ SCENARIO 2 — APP PERMISSIONS ============ */
+  #screen-m2 { background: #F4F0FF; flex-direction: column; }
+
+  /* Phone mockup */
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+    animation: slideIn 0.4s ease 0.1s both;
+  }
+
+  .phone-frame {
+    background: #1A1028;
+    border-radius: 44px;
+    padding: 14px 10px;
+    width: 300px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 0 0 2px #3A2A58, 0 0 0 6px #0E0818;
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 90px; height: 22px;
+    background: #1A1028;
+    border-radius: 0 0 14px 14px;
+    margin: 0 auto 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .phone-screen {
+    background: #F8F6FF;
+    border-radius: 30px;
+    overflow: hidden;
+    min-height: 520px;
+  }
+
+  .phone-statusbar {
+    background: white;
+    padding: 8px 16px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #333;
+    border-bottom: 1px solid #eee;
+  }
+
+  .phone-app-header {
+    background: linear-gradient(135deg, #7C6FCD, #5A4FA0);
+    padding: 20px 20px 16px;
+    text-align: center;
+  }
+  .phone-app-icon {
+    width: 64px; height: 64px;
+    background: white;
+    border-radius: 16px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  }
+  .phone-app-name { font-family: 'Fredoka One', cursive; font-size: 20px; color: white; }
+  .phone-app-tagline { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; margin-top: 2px; }
+
+  .phone-permissions-area { padding: 14px 14px 10px; }
+  .perms-heading { font-size: 12px; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+  .perm-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border-radius: 14px;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    border: 2px solid #E8E4F8;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .perm-row:hover { border-color: #C8BFEE; }
+  .perm-row.granted { border-color: #FF9F43; background: #FFF8F0; }
+  .perm-row.denied { border-color: #C8BFEE; background: #F8F6FF; }
+
+  .perm-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .perm-icon-orange { background: #FFF3E0; }
+  .perm-icon-red { background: #FFEBEE; }
+  .perm-icon-blue { background: #E8F4FD; }
+  .perm-icon-green { background: #E8F5E9; }
+  .perm-icon-purple { background: #F0EEFF; }
+
+  .perm-text { flex: 1; }
+  .perm-name { font-size: 13px; font-weight: 800; color: var(--text); }
+  .perm-reason { font-size: 11px; color: var(--text-light); font-weight: 600; margin-top: 1px; }
+
+  /* Toggle switch */
+  .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: #D0D0D0;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    left: 3px; top: 3px;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle-wrap input:checked + .toggle-slider { background: #FF9F43; }
+  .toggle-wrap input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  .phone-install-btn {
+    margin: 6px 14px 14px;
+    width: calc(100% - 28px);
+    background: linear-gradient(135deg, #7C6FCD, #5A4FA0);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #3A2F80;
+    transition: transform 0.1s;
+  }
+  .phone-install-btn:hover { transform: translateY(-2px); }
+
+  /* Reveal overlay for M2 */
+  .perm-reveal-list { background: #FFF8F0; border: 2px solid #FFD8A8; border-radius: 14px; }
+  .perm-reveal-item-border { border-bottom-color: #FFE8C8; }
+  .perm-reveal-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .badge-high { background: #FFEBEE; color: #B00020; }
+  .badge-med { background: #FFF3E0; color: #C05A00; }
+  .badge-low { background: #E8F5E9; color: #1B6B2E; }
+
+  .safe-result-overlay { background: #F0EEFF; border: 2px solid #C8BFEE; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+
+  /* ============ SCENARIO 3 — SOCIAL PROFILE ============ */
+  #screen-m3 { background: #FFF5F8; flex-direction: column; }
+
+  .social-mock {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    border: 2px solid #FFD0E0;
+    overflow: hidden;
+    animation: slideIn 0.4s ease 0.1s both;
+  }
+
+  .social-topbar {
+    background: linear-gradient(135deg, #FF6B9D, #D4407A);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .social-logo { font-family: 'Fredoka One', cursive; font-size: 20px; color: white; }
+  .social-nav-pills { display: flex; gap: 6px; margin-left: auto; }
+  .social-pill { background: rgba(255,255,255,0.2); color: white; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+  .social-pill.active { background: white; color: var(--coral); }
+
+  .social-banner {
+    height: 90px;
+    background: linear-gradient(135deg, #FFB3CC, #FF8AB8, #FFD166);
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 18px;
+  }
+  .avatar-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background: linear-gradient(135deg, #FF6B9D, #FFD166);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    transform: translateY(36px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+
+  .profile-body { padding: 44px 18px 18px; }
+
+  .profile-field-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #FAFAFA;
+    border-radius: 12px;
+    border: 2px solid #F0E0E8;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .profile-field-row:focus-within { border-color: var(--coral); }
+
+  .profile-field-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-light);
+    padding: 10px 12px;
+    min-width: 100px;
+    background: #F5EEF1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    border-right: 2px solid #F0E0E8;
+  }
+
+  .profile-field-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'Nunito', sans-serif;
+    background: transparent;
+    color: var(--text);
+  }
+
+  .visibility-select {
+    border: none;
+    outline: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 8px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-left: 2px solid #F0E0E8;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  .vis-public { color: #C05A00; background-color: #FFF3E0; }
+  .vis-friends { color: #0070A0; background-color: #E0F4FF; }
+  .vis-private { color: #1B6B2E; background-color: #E8F5E9; }
+
+  .vis-hint { font-size: 11px; font-weight: 700; padding: 2px 8px; display: none; }
+  .vis-hint.show { display: inline-block; }
+  .vis-hint.warn-vis { color: #C05A00; background: #FFF3E0; border-radius: 6px; }
+  .vis-hint.danger-vis { color: #B00020; background: #FFEBEE; border-radius: 6px; }
+  .vis-hint.safe-vis { color: #1B6B2E; background: #E8F5E9; border-radius: 6px; }
+
+  .profile-section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 8px;
+    margin-top: 14px;
+  }
+
+  .btn-preview {
+    width: 100%;
+    background: linear-gradient(135deg, #FF6B9D, #D4407A);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #A82060;
+    transition: transform 0.1s;
+    margin-top: 14px;
+  }
+  .btn-preview:hover { transform: translateY(-2px); }
+
+  /* Stranger view overlay */
+  .stranger-view {
+    background: #1A0820;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .stranger-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .stranger-avatar-mini {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6B9D, #FFD166);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .stranger-name-area { flex: 1; }
+  .stranger-display-name { font-family: 'Fredoka One', cursive; font-size: 16px; color: white; }
+  .stranger-handle { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 600; }
+
+  .exposed-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+  }
+  .exposed-field:last-child { border-bottom: none; }
+  .ef-label { color: rgba(255,255,255,0.5); font-weight: 700; min-width: 70px; font-size: 11px; text-transform: uppercase; }
+  .ef-value { color: white; font-weight: 700; }
+  .ef-badge { margin-left: auto; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+
+  .m3-overlay-reveal { background: #2A0F28; border: 2px solid #FF6B9D; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+  .m3-reveal-title { font-family: 'Fredoka One', cursive; color: var(--coral); font-size: 18px; margin-bottom: 6px; }
+  .m3-reveal-item { display: flex; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.85); padding: 5px 0; font-weight: 600; }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ======================== HUB SCREEN ======================== -->
+<div id="screen-hub" class="screen active">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+
+  <div class="hub-content">
+    <div class="hub-logo">
+      <svg width="60" height="60" viewBox="0 0 100 100">
+        <circle cx="50" cy="55" r="34" fill="#5EC8F0"/>
+        <circle cx="50" cy="55" r="28" fill="#87DEFF"/>
+        <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+        <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="22" cy="40" r="8" fill="#5EC8F0"/>
+        <circle cx="78" cy="40" r="8" fill="#5EC8F0"/>
+      </svg>
+      <div class="hub-title">Privapals</div>
+    </div>
+    <div class="hub-sub">🔐 Choose a Mission to Start Learning!</div>
+
+    <div class="mission-grid">
+      <!-- Mission 1 — reference only -->
+      <div class="mission-card card-m1" onclick="alert('Mission 1 is in the original mockup file!')">
+        <div class="mission-num">Mission 1</div>
+        <span class="mission-icon">📋</span>
+        <div class="mission-title">Account Signup & Data Safety</div>
+        <div class="mission-desc">Help Pixel sign up for GameZone. Decide what info to share — and what to keep private.</div>
+        <div class="mission-tag">✅ Playable</div>
+      </div>
+      <!-- Mission 2 -->
+      <div class="mission-card card-m2" onclick="startM2()">
+        <div class="mission-num">Mission 2</div>
+        <span class="mission-icon">📱</span>
+        <div class="mission-title">The App That Wanted Too Much</div>
+        <div class="mission-desc">A free flashlight app is asking for your camera, location, microphone, and contacts. Why would it need all that?</div>
+        <div class="mission-tag">🆕 Play Now</div>
+      </div>
+      <!-- Mission 3 -->
+      <div class="mission-card card-m3" onclick="startM3()">
+        <div class="mission-num">Mission 3</div>
+        <span class="mission-icon">👤</span>
+        <div class="mission-title">Building Your ZoneBook Profile</div>
+        <div class="mission-desc">Set up your social media profile. Choose what's Public, Friends Only, or Private — then see what a stranger actually sees.</div>
+        <div class="mission-tag">🆕 Play Now</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grass-strip"></div>
+</div>
+
+
+<!-- ======================== MISSION 2 — APP PERMISSIONS ======================== -->
+<div id="screen-m2" class="screen">
+  <div class="topbar topbar-m2">
+    <div class="topbar-left">
+      <svg width="34" height="34" viewBox="0 0 100 100">
+        <circle cx="50" cy="55" r="34" fill="#7C6FCD"/>
+        <circle cx="50" cy="55" r="28" fill="#A89EEE"/>
+        <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+        <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="topbar-title">Privapals</div>
+        <div class="topbar-subtitle">Mission 2: The App That Wanted Too Much</div>
+      </div>
+    </div>
+    <div class="privacy-meter-wrap">
+      <span class="privacy-label">🛡 Privacy</span>
+      <div class="privacy-bar-bg"><div class="privacy-bar-fill" id="m2-privacyBar" style="width:90%"></div></div>
+    </div>
+    <button class="back-btn" onclick="goHub()">← Missions</button>
+  </div>
+
+  <div class="game-area">
+    <div class="main-panel">
+
+      <div class="scenario-header" style="border-color:#D4CAFF;">
+        <div class="scenario-tag scenario-tag-purple">📱 Mission 2 · App Permissions</div>
+        <div class="scenario-title">Pixel Downloaded a Free Flashlight App 🔦</div>
+        <div class="scenario-desc">Pixel just found <strong>LumiLight</strong> — a free flashlight app. Before it installs, it's asking for a bunch of permissions. 
+        Help Pixel decide which ones to allow. Think carefully — a flashlight doesn't need everything it's asking for!</div>
+      </div>
+
+      <!-- Ted NPC -->
+      <div class="ted-bubble ted-bubble-purple">
+        <svg class="ted-avatar" viewBox="0 0 100 100">
+          <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+          <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+          <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+          <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+          <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+          <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+          <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+          <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+          <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+          <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="32" y="22" width="36" height="6" rx="3" fill="#7C6FCD"/>
+          <rect x="36" y="14" width="28" height="12" rx="4" fill="#7C6FCD"/>
+          <path d="M 46 17 L 50 19 L 54 17" stroke="#4A3880" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="ted-text-wrap">
+          <div class="ted-name ted-name-purple">🐶 Ted the Safety Dog</div>
+          <div class="ted-msg" id="m2-tedMsg">Before you install anything, always check what permissions it's asking for! Each permission gives an app access to a different part of Pixel's phone. <strong>A flashlight only needs to turn on the light</strong> — so why is it asking for so much more? Toggle each permission to decide. 🔍</div>
+        </div>
+      </div>
+
+      <!-- Phone mockup -->
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-statusbar">
+              <span>9:41</span>
+              <span>📶 🔋</span>
+            </div>
+            <div class="phone-app-header">
+              <div class="phone-app-icon">🔦</div>
+              <div class="phone-app-name">LumiLight</div>
+              <div class="phone-app-tagline">Free Flashlight — 50M+ Downloads ⭐⭐⭐⭐⭐</div>
+            </div>
+            <div class="phone-permissions-area">
+              <div class="perms-heading">This app wants permission to access:</div>
+
+              <!-- Camera -->
+              <div class="perm-row" id="prow-camera" onclick="togglePerm('camera')">
+                <div class="perm-icon-wrap perm-icon-purple">📷</div>
+                <div class="perm-text">
+                  <div class="perm-name">Camera</div>
+                  <div class="perm-reason">"To power the flashlight feature"</div>
+                </div>
+                <label class="toggle-wrap" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="perm-camera" onchange="updatePerm('camera')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Location -->
+              <div class="perm-row" id="prow-location" onclick="togglePerm('location')">
+                <div class="perm-icon-wrap perm-icon-orange">📍</div>
+                <div class="perm-text">
+                  <div class="perm-name">Location (Always On)</div>
+                  <div class="perm-reason">"To find nearby light settings"</div>
+                </div>
+                <label class="toggle-wrap" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="perm-location" onchange="updatePerm('location')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Microphone -->
+              <div class="perm-row" id="prow-microphone" onclick="togglePerm('microphone')">
+                <div class="perm-icon-wrap perm-icon-red">🎙️</div>
+                <div class="perm-text">
+                  <div class="perm-name">Microphone</div>
+                  <div class="perm-reason">"For voice-activated flashlight"</div>
+                </div>
+                <label class="toggle-wrap" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="perm-microphone" onchange="updatePerm('microphone')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Contacts -->
+              <div class="perm-row" id="prow-contacts" onclick="togglePerm('contacts')">
+                <div class="perm-icon-wrap perm-icon-blue">👥</div>
+                <div class="perm-text">
+                  <div class="perm-name">Contacts</div>
+                  <div class="perm-reason">"To share the app with friends"</div>
+                </div>
+                <label class="toggle-wrap" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="perm-contacts" onchange="updatePerm('contacts')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Storage -->
+              <div class="perm-row" id="prow-storage" onclick="togglePerm('storage')">
+                <div class="perm-icon-wrap perm-icon-green">💾</div>
+                <div class="perm-text">
+                  <div class="perm-name">Photos & Storage</div>
+                  <div class="perm-reason">"To save your settings"</div>
+                </div>
+                <label class="toggle-wrap" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="perm-storage" onchange="updatePerm('storage')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+            </div>
+            <button class="phone-install-btn" onclick="submitM2()">Install LumiLight →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+      <div>
+        <div class="side-title">🎯 Objectives</div>
+        <div class="objective-item" id="m2-obj1"><span class="obj-icon">📷</span><span>Review camera permission</span><span style="margin-left:auto" id="m2-chk1">⬜</span></div>
+        <div class="objective-item" id="m2-obj2"><span class="obj-icon">📍</span><span>Question location access</span><span style="margin-left:auto" id="m2-chk2">⬜</span></div>
+        <div class="objective-item" id="m2-obj3"><span class="obj-icon">🎙️</span><span>Decide on microphone</span><span style="margin-left:auto" id="m2-chk3">⬜</span></div>
+        <div class="objective-item" id="m2-obj4"><span class="obj-icon">👥</span><span>Protect your contacts</span><span style="margin-left:auto" id="m2-chk4">⬜</span></div>
+        <div class="objective-item" id="m2-obj5"><span class="obj-icon">💾</span><span>Check storage access</span><span style="margin-left:auto" id="m2-chk5">⬜</span></div>
+      </div>
+
+      <div class="privacy-score-box privacy-score-box-purple">
+        <div class="ps-label-text">Privacy Score</div>
+        <div class="ps-number ps-number-purple" id="m2-scoreDisplay">90</div>
+        <div class="ps-label-text">/ 100</div>
+      </div>
+
+      <div class="tip-box tip-purple">
+        <div class="tip-box-title">💡 The Rule of Minimum Access</div>
+        Every app should only get the permissions it actually needs to work. Anything extra is a red flag — they may be collecting data to sell to advertisers.
+      </div>
+
+      <div class="tip-box tip-purple" style="margin-top:4px;">
+        <div class="tip-box-title">🔍 Real-World Fact</div>
+        In 2014, a popular flashlight app was caught secretly transmitting users' location data to advertisers — without telling anyone.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M2 Result Overlay -->
+<div class="overlay-container" id="m2-overlay">
+  <div class="overlay-card">
+    <div id="m2-overlay-icon" style="font-size:60px; margin-bottom:8px; animation: bob 2s ease-in-out infinite;">⚠️</div>
+    <div class="overlay-card-title" id="m2-overlay-title" style="color:#FF6B6B;">LumiLight Got In!</div>
+    <div class="overlay-card-sub" id="m2-overlay-sub">Here's what the app can now do with each permission you granted...</div>
+
+    <div id="m2-reveal-content"></div>
+
+    <div>
+      <button class="btn-retry" onclick="retryM2()">🔄 Try Again</button>
+      <button class="btn-next btn-next-purple" onclick="goHub()">🗺 Back to Missions</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======================== MISSION 3 — SOCIAL PROFILE ======================== -->
+<div id="screen-m3" class="screen">
+  <div class="topbar topbar-m3">
+    <div class="topbar-left">
+      <svg width="34" height="34" viewBox="0 0 100 100">
+        <circle cx="50" cy="55" r="34" fill="#FF6B9D"/>
+        <circle cx="50" cy="55" r="28" fill="#FFA0C0"/>
+        <circle cx="40" cy="50" r="7" fill="white"/><circle cx="60" cy="50" r="7" fill="white"/>
+        <circle cx="42" cy="51" r="4" fill="#1A1A2E"/><circle cx="62" cy="51" r="4" fill="#1A1A2E"/>
+        <circle cx="43" cy="50" r="1.5" fill="white"/><circle cx="63" cy="50" r="1.5" fill="white"/>
+        <path d="M 40 62 Q 50 70 60 62" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 44 30 L 44 20 L 56 20 L 56 30 Q 56 36 50 38 Q 44 36 44 30 Z" fill="#FFD166" stroke="#C9991A" stroke-width="1.5"/>
+        <path d="M 48 25 L 50 27 L 53 23" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="topbar-title">Privapals</div>
+        <div class="topbar-subtitle">Mission 3: Building Your ZoneBook Profile</div>
+      </div>
+    </div>
+    <div class="privacy-meter-wrap">
+      <span class="privacy-label">🛡 Privacy</span>
+      <div class="privacy-bar-bg"><div class="privacy-bar-fill" id="m3-privacyBar" style="width:80%"></div></div>
+    </div>
+    <button class="back-btn" style="background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.4);" onclick="goHub()">← Missions</button>
+  </div>
+
+  <div class="game-area">
+    <div class="main-panel">
+
+      <div class="scenario-header" style="border-color:#FFD0E0;">
+        <div class="scenario-tag scenario-tag-coral">👤 Mission 3 · Social Media Profiles</div>
+        <div class="scenario-title">Pixel is Setting Up ZoneBook 📱</div>
+        <div class="scenario-desc">ZoneBook is a new social platform everyone at school is joining. 
+        Help Pixel fill out their profile — but use the <strong>visibility settings</strong> carefully! 
+        You can control who sees each piece of information. When you're done, hit <strong>"Preview as Stranger"</strong> to see what someone you don't know can find out about Pixel.</div>
+      </div>
+
+      <!-- Ted NPC -->
+      <div class="ted-bubble ted-bubble-coral">
+        <svg class="ted-avatar" viewBox="0 0 100 100">
+          <circle cx="50" cy="52" r="30" fill="#C8A06A"/>
+          <ellipse cx="28" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(-15 28 40)"/>
+          <ellipse cx="72" cy="40" rx="14" ry="18" fill="#A0784A" transform="rotate(15 72 40)"/>
+          <ellipse cx="28" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(-15 28 42)"/>
+          <ellipse cx="72" cy="42" rx="9" ry="13" fill="#D4906A" transform="rotate(15 72 42)"/>
+          <circle cx="42" cy="48" r="5" fill="white"/><circle cx="58" cy="48" r="5" fill="white"/>
+          <circle cx="43" cy="49" r="3" fill="#1A1A2E"/><circle cx="59" cy="49" r="3" fill="#1A1A2E"/>
+          <circle cx="44" cy="48" r="1" fill="white"/><circle cx="60" cy="48" r="1" fill="white"/>
+          <ellipse cx="50" cy="58" rx="6" ry="4" fill="#3A2010"/>
+          <path d="M 44 63 Q 50 68 56 63" stroke="#3A2010" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="32" y="22" width="36" height="6" rx="3" fill="#FF6B9D"/>
+          <rect x="36" y="14" width="28" height="12" rx="4" fill="#FF6B9D"/>
+          <path d="M 46 17 L 50 19 L 54 17" stroke="#A82060" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="ted-text-wrap">
+          <div class="ted-name ted-name-coral">🐶 Ted the Safety Dog</div>
+          <div class="ted-msg" id="m3-tedMsg">Social media profiles can look harmless — but watch out! <strong>Information you set to "Public" can be seen by anyone on the internet</strong>, including strangers. Use the dropdown next to each field to control who can see what. Think before you share! 🔐</div>
+        </div>
+      </div>
+
+      <!-- Social mock UI -->
+      <div class="social-mock">
+        <div class="social-topbar">
+          <div class="social-logo">📘 ZoneBook</div>
+          <div class="social-nav-pills">
+            <div class="social-pill active">Edit Profile</div>
+            <div class="social-pill">Friends</div>
+            <div class="social-pill">Feed</div>
+          </div>
+        </div>
+
+        <div class="social-banner">
+          <div class="avatar-ring" id="m3-avatar">🐱</div>
+        </div>
+
+        <div class="profile-body">
+
+          <!-- Avatar picker -->
+          <div class="profile-section-title">Choose Your Avatar</div>
+          <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🐱')">🐱</span>
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🦊')">🦊</span>
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🐸')">🐸</span>
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🦁')">🦁</span>
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🐼')">🐼</span>
+            <span style="font-size:28px; cursor:pointer; padding:6px; border-radius:10px; border:2px solid transparent; transition:border-color 0.2s;" class="avatar-opt" onclick="pickAvatar(this,'🐧')">🐧</span>
+          </div>
+
+          <!-- Profile fields -->
+          <div class="profile-section-title">Your Profile Information</div>
+
+          <div class="profile-field-row" id="pfrow-display">
+            <div class="profile-field-label">Display Name</div>
+            <input class="profile-field-input" id="pf-display" placeholder="e.g. CoolPixel99 (not your real name!)" oninput="checkProfileField('display')">
+            <select class="visibility-select vis-public" id="vis-display" onchange="visChange('display', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <div class="profile-field-row" id="pfrow-realname">
+            <div class="profile-field-label">Real Name</div>
+            <input class="profile-field-input" id="pf-realname" placeholder="Your actual first & last name" oninput="checkProfileField('realname')">
+            <select class="visibility-select vis-public" id="vis-realname" onchange="visChange('realname', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <div class="profile-field-row" id="pfrow-school">
+            <div class="profile-field-label">School</div>
+            <input class="profile-field-input" id="pf-school" placeholder="Your school name" oninput="checkProfileField('school')">
+            <select class="visibility-select vis-public" id="vis-school" onchange="visChange('school', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <div class="profile-field-row" id="pfrow-age">
+            <div class="profile-field-label">Age / Grade</div>
+            <input class="profile-field-input" id="pf-age" placeholder="e.g. 11, or 6th grade" oninput="checkProfileField('age')">
+            <select class="visibility-select vis-public" id="vis-age" onchange="visChange('age', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <div class="profile-field-row" id="pfrow-city">
+            <div class="profile-field-label">City / Town</div>
+            <input class="profile-field-input" id="pf-city" placeholder="Where do you live?" oninput="checkProfileField('city')">
+            <select class="visibility-select vis-public" id="vis-city" onchange="visChange('city', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <div class="profile-field-row" id="pfrow-bio">
+            <div class="profile-field-label">Bio</div>
+            <input class="profile-field-input" id="pf-bio" placeholder="Tell people about yourself!" oninput="checkProfileField('bio')">
+            <select class="visibility-select vis-public" id="vis-bio" onchange="visChange('bio', this)">
+              <option value="public">🌍 Public</option>
+              <option value="friends">👥 Friends</option>
+              <option value="private">🔒 Private</option>
+            </select>
+          </div>
+
+          <button class="btn-preview" onclick="submitM3()">👁 Preview as a Stranger →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+      <div>
+        <div class="side-title">🎯 Objectives</div>
+        <div class="objective-item" id="m3-obj1"><span class="obj-icon">🏷️</span><span>Use a safe display name</span><span style="margin-left:auto" id="m3-chk1">⬜</span></div>
+        <div class="objective-item" id="m3-obj2"><span class="obj-icon">🔒</span><span>Hide your real name</span><span style="margin-left:auto" id="m3-chk2">⬜</span></div>
+        <div class="objective-item" id="m3-obj3"><span class="obj-icon">🏫</span><span>Limit school visibility</span><span style="margin-left:auto" id="m3-chk3">⬜</span></div>
+        <div class="objective-item" id="m3-obj4"><span class="obj-icon">🎂</span><span>Keep age private</span><span style="margin-left:auto" id="m3-chk4">⬜</span></div>
+        <div class="objective-item" id="m3-obj5"><span class="obj-icon">📍</span><span>Don't expose your city</span><span style="margin-left:auto" id="m3-chk5">⬜</span></div>
+      </div>
+
+      <div class="privacy-score-box privacy-score-box-coral">
+        <div class="ps-label-text">Privacy Score</div>
+        <div class="ps-number ps-number-coral" id="m3-scoreDisplay">80</div>
+        <div class="ps-label-text">/ 100</div>
+      </div>
+
+      <div class="tip-box tip-coral">
+        <div class="tip-box-title">💡 Who Can See "Public"?</div>
+        Anything set to Public isn't just for friends — it's for <strong>every person on the internet</strong>. Strangers, advertisers, and even people who don't have an account can see it.
+      </div>
+
+      <div class="tip-box tip-coral" style="margin-top:4px;">
+        <div class="tip-box-title">🔍 Mosaic Effect</div>
+        Even harmless details can add up. Knowing your <em>name + school + city + age</em> tells a stranger exactly who you are and where to find you.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M3 Result Overlay -->
+<div class="overlay-container" id="m3-overlay">
+  <div class="overlay-card" style="max-width:520px;">
+    <div id="m3-overlay-icon" style="font-size:56px; margin-bottom:8px; animation: bob 2s ease-in-out infinite;">👁️</div>
+    <div class="overlay-card-title" id="m3-overlay-title" style="color: var(--coral);">This Is What a Stranger Sees</div>
+    <div class="overlay-card-sub">Pixel set some fields to Public. Here's the profile a random stranger would find when they search ZoneBook:</div>
+
+    <div id="m3-reveal-content"></div>
+
+    <div class="stars" id="m3-stars" style="display:none;">
+      <div class="star" id="m3-s1">⭐</div>
+      <div class="star" id="m3-s2">⭐</div>
+      <div class="star" id="m3-s3">⭐</div>
+    </div>
+
+    <div>
+      <button class="btn-retry" onclick="retryM3()">🔄 Try Again</button>
+      <button class="btn-next btn-next-coral" onclick="goHub()">🗺 Back to Missions</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======================== JAVASCRIPT ======================== -->
+<script>
+  // ---- NAVIGATION ----
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function goHub() {
+    document.getElementById('m2-overlay').classList.remove('show');
+    document.getElementById('m3-overlay').classList.remove('show');
+    showScreen('screen-hub');
+  }
+  function startM2() { showScreen('screen-m2'); }
+  function startM3() { showScreen('screen-m3'); }
+
+  // ====================
+  // MISSION 2 LOGIC
+  // ====================
+  let m2Score = 90;
+  let m2ScoreChanges = {};
+  let m2PermInteracted = { camera: false, location: false, microphone: false, contacts: false, storage: false };
+
+  const permInfo = {
+    camera: {
+      needed: true,
+      grantedRisk: 'low',
+      grantedMsg: '✅ Camera is actually needed for the flashlight — this one is fine to allow.',
+      deniedMsg: '🚫 Denied. Note: camera IS needed for the flashlight, so the app may not fully work without it.',
+      revealGranted: { icon: '📷', label: 'Camera', detail: 'The app can turn on your flashlight. This permission is actually needed! ✅', badge: 'badge-low', badgeLabel: 'OK' },
+      revealDenied: null,
+      scoreGrant: 0, scoreDeny: 0,
+      obj: 1
+    },
+    location: {
+      needed: false,
+      grantedRisk: 'high',
+      grantedMsg: '⚠️ Location "always on"? A flashlight has NO reason to know where you are 24/7! This data gets sold to advertisers.',
+      deniedMsg: '✅ Smart! A flashlight never needs to know your location. You just blocked a data harvesting attempt.',
+      revealGranted: { icon: '📍', label: 'Location (Always On)', detail: 'LumiLight can now track everywhere Pixel goes, even when the app is closed. This location data is often sold to data brokers.', badge: 'badge-high', badgeLabel: '🚨 High Risk' },
+      revealDenied: null,
+      scoreGrant: -20, scoreDeny: 8,
+      obj: 2
+    },
+    microphone: {
+      needed: false,
+      grantedRisk: 'high',
+      grantedMsg: '🎙️ Microphone access lets an app listen through the phone\'s mic. A flashlight doesn\'t need this — this is a major red flag!',
+      deniedMsg: '✅ Good call! There is zero reason a flashlight needs microphone access. Always deny suspicious permissions like this.',
+      revealGranted: { icon: '🎙️', label: 'Microphone', detail: 'Apps with mic access can theoretically record audio at any time. Even "voice activation" is rarely necessary for a simple utility app.', badge: 'badge-high', badgeLabel: '🚨 High Risk' },
+      revealDenied: null,
+      scoreGrant: -20, scoreDeny: 8,
+      obj: 3
+    },
+    contacts: {
+      needed: false,
+      grantedRisk: 'high',
+      grantedMsg: '👥 This gives LumiLight access to everyone in Pixel\'s contacts. That information belongs to other people too — not just Pixel!',
+      deniedMsg: '✅ Excellent! Contacts contain other people\'s private info. An app should never need this just to share itself.',
+      revealGranted: { icon: '👥', label: 'Contacts', detail: 'LumiLight now has the phone numbers and names of everyone in Pixel\'s contacts. This data can be sold or used for spam.', badge: 'badge-high', badgeLabel: '🚨 High Risk' },
+      revealDenied: null,
+      scoreGrant: -18, scoreDeny: 8,
+      obj: 4
+    },
+    storage: {
+      needed: false,
+      grantedRisk: 'med',
+      grantedMsg: '💾 Storage access lets an app read and write files on the phone — including photos! A flashlight doesn\'t need this.',
+      deniedMsg: '✅ Right choice! A flashlight has no reason to browse your photos or files.',
+      revealGranted: { icon: '💾', label: 'Photos & Storage', detail: 'The app can read files and photos stored on Pixel\'s phone. Combined with other data, this builds a detailed profile.', badge: 'badge-med', badgeLabel: '⚠️ Medium Risk' },
+      revealDenied: null,
+      scoreGrant: -10, scoreDeny: 4,
+      obj: 5
+    }
+  };
+
+  function togglePerm(perm) {
+    const checkbox = document.getElementById('perm-' + perm);
+    checkbox.checked = !checkbox.checked;
+    updatePerm(perm);
+  }
+
+  function updatePerm(perm) {
+    const checkbox = document.getElementById('perm-' + perm);
+    const row = document.getElementById('prow-' + perm);
+    const info = permInfo[perm];
+    const granted = checkbox.checked;
+
+    m2PermInteracted[perm] = true;
+
+    // Visual row state
+    row.className = 'perm-row ' + (granted ? 'granted' : 'denied');
+
+    // Ted message
+    const msg = granted ? info.grantedMsg : info.deniedMsg;
+    updateTedMsg('m2-tedMsg', msg);
+
+    // Score
+    const delta = granted ? info.scoreGrant : info.scoreDeny;
+    if (m2ScoreChanges[perm] !== undefined) m2Score -= m2ScoreChanges[perm];
+    m2ScoreChanges[perm] = delta;
+    m2Score += delta;
+    m2Score = Math.max(0, Math.min(100, m2Score));
+    document.getElementById('m2-scoreDisplay').textContent = m2Score;
+    const bar = document.getElementById('m2-privacyBar');
+    bar.style.width = m2Score + '%';
+    bar.style.backgroundPosition = (100 - m2Score) + '% 0';
+
+    // Objective (deny the bad ones, allow camera)
+    const objDone = perm === 'camera' ? true : !granted;
+    setObj('m2', info.obj, objDone, 'm2-chk' + info.obj);
+  }
+
+  function setObj(mission, num, done, chkId) {
+    const el = document.getElementById(mission + '-obj' + num);
+    const chk = document.getElementById(chkId);
+    if (done) { el.classList.add('done'); chk.textContent = '✅'; }
+    else { el.classList.remove('done'); chk.textContent = '⬜'; }
+  }
+
+  function submitM2() {
+    const overlay = document.getElementById('m2-overlay');
+    const content = document.getElementById('m2-reveal-content');
+    const title = document.getElementById('m2-overlay-title');
+    const sub = document.getElementById('m2-overlay-sub');
+    const icon = document.getElementById('m2-overlay-icon');
+
+    const grantedPerms = Object.keys(permInfo).filter(p => document.getElementById('perm-' + p).checked);
+    const dangerousGranted = grantedPerms.filter(p => !permInfo[p].needed);
+
+    if (dangerousGranted.length === 0) {
+      // All safe!
+      icon.textContent = '🛡️';
+      title.style.color = 'var(--green)';
+      title.textContent = 'Pixel Stayed Safe!';
+      sub.textContent = 'You only allowed the camera permission that the flashlight actually needs. Everything else was denied — great detective work!';
+      content.innerHTML = `
+        <div class="safe-result-overlay">
+          <div style="font-family:'Fredoka One',cursive; font-size:18px; color:var(--purple); margin-bottom:10px;">✅ What You Got Right</div>
+          <div style="font-size:14px; font-weight:600; color:var(--text); line-height:1.7;">
+            🔦 Camera: Allowed — needed for the flashlight<br>
+            📍 Location: Denied — flashlight doesn't need your GPS<br>
+            🎙️ Microphone: Denied — no legitimate reason for this<br>
+            👥 Contacts: Denied — protects everyone in Pixel's contacts<br>
+            💾 Storage: Denied — no reason to access photos
+          </div>
+        </div>
+        <div class="stars" style="display:flex; justify-content:center; gap:6px; margin-bottom:14px;">
+          <span style="font-size:34px; animation:starPop 0.4s 0.1s both ease-out; animation-fill-mode:forwards;">⭐</span>
+          <span style="font-size:34px; animation:starPop 0.4s 0.4s both ease-out; animation-fill-mode:forwards;">⭐</span>
+          <span style="font-size:34px; animation:starPop 0.4s 0.7s both ease-out; animation-fill-mode:forwards;">⭐</span>
+        </div>`;
+    } else {
+      icon.textContent = '⚠️';
+      title.style.color = '#FF6B6B';
+      title.textContent = 'LumiLight Got Too Much Access!';
+      sub.textContent = 'You granted some permissions that LumiLight didn\'t actually need. Here\'s what the app can now do:';
+
+      let html = '<div class="reveal-list perm-reveal-list">';
+      grantedPerms.forEach(p => {
+        const r = permInfo[p].revealGranted;
+        html += `<div class="reveal-item" style="border-bottom-color:#FFE8C8;">
+          <span class="reveal-icon">${r.icon}</span>
+          <span><strong>${r.label}:</strong> ${r.detail}</span>
+          <span class="perm-reveal-badge ${r.badge}">${r.badgeLabel}</span>
+        </div>`;
+      });
+      html += '</div>';
+      html += `<div style="font-size:13px; color:var(--text-light); margin-bottom:14px; line-height:1.5; text-align:left;">
+        💡 <strong>The real issue?</strong> LumiLight is free because it makes money selling your data. Every permission you grant is worth money to them — and costs you your privacy.
+      </div>`;
+      content.innerHTML = html;
+    }
+
+    overlay.classList.add('show');
+  }
+
+  function retryM2() {
+    document.getElementById('m2-overlay').classList.remove('show');
+    m2Score = 90;
+    m2ScoreChanges = {};
+    m2PermInteracted = { camera: false, location: false, microphone: false, contacts: false, storage: false };
+
+    Object.keys(permInfo).forEach(p => {
+      document.getElementById('perm-' + p).checked = false;
+      document.getElementById('prow-' + p).className = 'perm-row';
+      setObj('m2', permInfo[p].obj, false, 'm2-chk' + permInfo[p].obj);
+    });
+
+    document.getElementById('m2-scoreDisplay').textContent = 90;
+    document.getElementById('m2-privacyBar').style.width = '90%';
+    updateTedMsg('m2-tedMsg', "Let's try again! Remember: only allow permissions the app actually needs to work. A flashlight only needs one thing — can you figure out which? 🔦");
+  }
+
+  // ====================
+  // MISSION 3 LOGIC
+  // ====================
+  let m3Score = 80;
+  let m3ScoreChanges = {};
+  let m3CurrentAvatar = '🐱';
+
+  const profileFieldConfig = {
+    display: { safeCheck: v => v.length > 0 && !/^[A-Z][a-z]+ [A-Z][a-z]+$/.test(v), obj: 1, safeTed: "Nice username! As long as it doesn't include your real name, a fun display name is totally fine. 😎", warnTed: "That looks like it could be a real name. Try something more anonymous for your display name!" },
+    realname: { safeVis: ['private', 'friends'], obj: 2, safeTed: "✅ Smart! Real names should be kept private or for friends only. Strangers don't need to know Pixel's real name.", warnTed: "⚠️ Your real name set to Public means any stranger can see it. Combined with other info, this is risky!" },
+    school: { safeVis: ['private', 'friends'], obj: 3, safeTed: "✅ School info kept private — good thinking. Your school name tells a stranger exactly where to find you.", warnTed: "⚠️ School set to Public! Anyone can now find out where Pixel goes to school. Change this to Private." },
+    age: { safeVis: ['private', 'friends'], obj: 4, safeTed: "✅ Age kept private. Age info combined with a name and school could help someone identify Pixel in real life.", warnTed: "⚠️ Age is Public. Strangers knowing a child's age is a safety concern — consider setting it to Private." },
+    city: { safeVis: ['private', 'friends'], obj: 5, safeTed: "✅ City hidden from public — excellent! This prevents strangers from knowing where Pixel lives.", warnTed: "⚠️ City is Public! This tells strangers where Pixel lives. That's a big privacy risk — set it to Private." },
+    bio: { safeVis: ['public', 'friends', 'private'], obj: null, safeTed: "Bios can be fun and public — just make sure they don't accidentally include your location, school, or real name!", warnTed: "" }
+  };
+
+  function pickAvatar(el, emoji) {
+    document.querySelectorAll('.avatar-opt').forEach(a => a.style.borderColor = 'transparent');
+    el.style.borderColor = 'var(--coral)';
+    m3CurrentAvatar = emoji;
+    document.getElementById('m3-avatar').textContent = emoji;
+  }
+
+  function checkProfileField(field) { /* just triggers updates */ }
+
+  function visChange(field, select) {
+    const vis = select.value;
+    const classes = { public: 'vis-public', friends: 'vis-friends', private: 'vis-private' };
+    select.className = 'visibility-select ' + classes[vis];
+
+    const config = profileFieldConfig[field];
+    if (!config) return;
+
+    let isSafe = true;
+    if (config.safeVis) isSafe = config.safeVis.includes(vis);
+
+    if (config.obj) setObj('m3', config.obj, isSafe, 'm3-chk' + config.obj);
+
+    // Score delta
+    const delta = isSafe ? 8 : -12;
+    if (m3ScoreChanges[field] !== undefined) m3Score -= m3ScoreChanges[field];
+    m3ScoreChanges[field] = delta;
+    m3Score += delta;
+    m3Score = Math.max(0, Math.min(100, m3Score));
+    document.getElementById('m3-scoreDisplay').textContent = m3Score;
+    const bar = document.getElementById('m3-privacyBar');
+    bar.style.width = m3Score + '%';
+    bar.style.backgroundPosition = (100 - m3Score) + '% 0';
+
+    const tedMsg = isSafe ? config.safeTed : config.warnTed;
+    if (tedMsg) updateTedMsg('m3-tedMsg', tedMsg);
+  }
+
+  function submitM3() {
+    const fields = ['display', 'realname', 'school', 'age', 'city', 'bio'];
+    const overlay = document.getElementById('m3-overlay');
+    const content = document.getElementById('m3-reveal-content');
+    const titleEl = document.getElementById('m3-overlay-title');
+    const icon = document.getElementById('m3-overlay-icon');
+    const starsDiv = document.getElementById('m3-stars');
+
+    // Gather what's public
+    const publicFields = [];
+    const fieldMeta = {
+      display: { label: 'Display Name', inputId: 'pf-display', riskLevel: 'low' },
+      realname: { label: 'Real Name', inputId: 'pf-realname', riskLevel: 'high' },
+      school: { label: 'School', inputId: 'pf-school', riskLevel: 'high' },
+      age: { label: 'Age / Grade', inputId: 'pf-age', riskLevel: 'high' },
+      city: { label: 'City / Town', inputId: 'pf-city', riskLevel: 'high' },
+      bio: { label: 'Bio', inputId: 'pf-bio', riskLevel: 'low' }
+    };
+
+    fields.forEach(f => {
+      const vis = document.getElementById('vis-' + f).value;
+      const val = document.getElementById('pf-' + f).value;
+      if (vis === 'public' && val.trim()) {
+        publicFields.push({ field: f, value: val, ...fieldMeta[f] });
+      }
+    });
+
+    const highRiskPublic = publicFields.filter(f => f.riskLevel === 'high');
+    const displayName = document.getElementById('pf-display').value || 'PrivaPal_User';
+
+    // Build stranger view
+    let strangerHTML = `
+      <div class="stranger-view">
+        <div class="stranger-header">
+          <div class="stranger-avatar-mini">${m3CurrentAvatar}</div>
+          <div class="stranger-name-area">
+            <div class="stranger-display-name">${displayName || 'Unknown User'}</div>
+            <div class="stranger-handle">@zonebook.example · 👁 Public Profile</div>
+          </div>
+        </div>`;
+
+    if (publicFields.length === 0) {
+      strangerHTML += `<div style="text-align:center; padding:14px; color:rgba(255,255,255,0.6); font-weight:600; font-size:14px;">🔒 Nothing exposed! This profile shows nothing useful to a stranger.</div>`;
+    } else {
+      publicFields.forEach(f => {
+        const badgeClass = f.riskLevel === 'high' ? 'badge-high' : 'badge-low';
+        const badgeLabel = f.riskLevel === 'high' ? '⚠️ Risk' : 'OK';
+        strangerHTML += `
+          <div class="exposed-field">
+            <span class="ef-label">${f.label}</span>
+            <span class="ef-value">${f.value}</span>
+            <span class="ef-badge ${badgeClass}">${badgeLabel}</span>
+          </div>`;
+      });
+    }
+    strangerHTML += '</div>';
+
+    let explanationHTML = '';
+    if (highRiskPublic.length > 0) {
+      const combined = highRiskPublic.map(f => f.label.toLowerCase()).join(', ');
+      explanationHTML = `
+        <div class="m3-overlay-reveal">
+          <div class="m3-reveal-title">🔍 The Mosaic Effect</div>
+          <div class="m3-reveal-item"><span>⚠️</span><span>A stranger can now see Pixel's <strong>${combined}</strong>. Together, these pieces paint a very clear picture of who Pixel is and where to find them.</span></div>
+          <div class="m3-reveal-item"><span>🌐</span><span>Public info doesn't disappear — it can be screenshotted, searched, and used by anyone, forever.</span></div>
+        </div>`;
+    } else if (publicFields.length === 0) {
+      starsDiv.style.display = 'flex';
+      setTimeout(() => ['m3-s1','m3-s2','m3-s3'].forEach((id,i) => setTimeout(() => document.getElementById(id).classList.add('lit'), i*300)), 200);
+      icon.textContent = '🛡️';
+      titleEl.style.color = 'var(--green)';
+      titleEl.textContent = 'Pixel Is Almost Invisible!';
+      explanationHTML = `
+        <div style="background:#0F2810; border:2px solid #2E8B47; border-radius:14px; padding:14px; margin-bottom:14px;">
+          <div style="font-family:'Fredoka One',cursive; color:#4CAF71; font-size:18px; margin-bottom:8px;">✅ Excellent Privacy Choices!</div>
+          <div style="font-size:13px; color:rgba(255,255,255,0.85); font-weight:600; line-height:1.7;">
+            A stranger visiting this profile can see almost nothing sensitive. Pixel's real identity, location, school, and age are all protected. This is great practice for real social media accounts!
+          </div>
+        </div>`;
+    }
+
+    content.innerHTML = strangerHTML + explanationHTML;
+    overlay.classList.add('show');
+  }
+
+  function retryM3() {
+    document.getElementById('m3-overlay').classList.remove('show');
+    m3Score = 80;
+    m3ScoreChanges = {};
+
+    ['display','realname','school','age','city','bio'].forEach(f => {
+      document.getElementById('pf-' + f).value = '';
+      const sel = document.getElementById('vis-' + f);
+      sel.value = 'public';
+      sel.className = 'visibility-select vis-public';
+      if (profileFieldConfig[f]?.obj) setObj('m3', profileFieldConfig[f].obj, false, 'm3-chk' + profileFieldConfig[f].obj);
+    });
+
+    document.getElementById('m3-scoreDisplay').textContent = 80;
+    document.getElementById('m3-privacyBar').style.width = '80%';
+
+    // Reset stars
+    ['m3-s1','m3-s2','m3-s3'].forEach(id => document.getElementById(id).classList.remove('lit'));
+    document.getElementById('m3-stars').style.display = 'none';
+    document.getElementById('m3-overlay-icon').textContent = '👁️';
+    document.getElementById('m3-overlay-title').style.color = 'var(--coral)';
+    document.getElementById('m3-overlay-title').textContent = 'This Is What a Stranger Sees';
+
+    updateTedMsg('m3-tedMsg', "Let's try again! Use the dropdowns to set sensitive info to Private or Friends Only. Then hit Preview to see what a stranger would actually find. 🔐");
+  }
+
+  // ---- SHARED ----
+  function updateTedMsg(id, msg) {
+    const el = document.getElementById(id);
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.innerHTML = msg;
+      el.style.opacity = '1';
+      el.style.transition = 'opacity 0.3s';
+    }, 150);
+  }
+</script>
+</body>
+</html>
